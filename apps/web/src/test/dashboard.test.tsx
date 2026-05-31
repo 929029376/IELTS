@@ -9,5 +9,6 @@ describe("dashboard shell", () => {
     expect(screen.getByRole("heading", { name: "IELTS Local Practice" })).toBeInTheDocument();
     expect(screen.getByText("Mock Exam Center")).toBeInTheDocument();
     expect(screen.getByText("Intensive Practice Center")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Intensive practice preview" })).toBeInTheDocument();
   });
 });

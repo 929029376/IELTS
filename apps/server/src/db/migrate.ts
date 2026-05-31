@@ -90,6 +90,15 @@ export function migrate(target?: string | DatabaseHandle): void {
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS dictation_attempts (
+        id TEXT PRIMARY KEY,
+        cue_id TEXT NOT NULL REFERENCES listening_cues(id) ON DELETE CASCADE,
+        user_text TEXT NOT NULL,
+        normalized_text TEXT NOT NULL,
+        is_correct INTEGER,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
       CREATE TABLE IF NOT EXISTS frequency_entries (
         id TEXT PRIMARY KEY,
         source_month TEXT NOT NULL,

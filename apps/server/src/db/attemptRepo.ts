@@ -113,6 +113,21 @@ export function createAttemptRepo(db: DatabaseHandle) {
       return { id: record.id, label: record.label };
     },
 
+    listMistakeLabels(attemptAnswerId: string): string[] {
+      const rows = db
+        .prepare(
+          `
+          SELECT label
+          FROM mistake_labels
+          WHERE attempt_answer_id = ?
+          ORDER BY created_at ASC
+        `
+        )
+        .all(attemptAnswerId) as Array<{ label: string }>;
+
+      return rows.map((row) => row.label);
+    },
+
     getAttemptWithAnswers(attemptId: string): AttemptWithAnswers | null {
       const attempt = db
         .prepare(

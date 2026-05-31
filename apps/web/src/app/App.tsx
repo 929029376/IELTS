@@ -1,5 +1,6 @@
 import { Activity, BookOpenCheck, Database, Headphones, LineChart, Timer } from "lucide-react";
 import { ExamPreview } from "../features/exam/ExamPreview";
+import { IntensivePracticePreview } from "../features/intensive/IntensivePracticePreview";
 import "./app.css";
 
 const cards = [
@@ -60,7 +61,7 @@ export function App() {
           </div>
           <div className="status-pill">
             <Activity size={16} aria-hidden="true" />
-            Phase 0 bootstrap
+            Phase 6 intensive study
           </div>
         </header>
 
@@ -77,6 +78,7 @@ export function App() {
         </section>
 
         <ExamPreview />
+        <IntensivePracticePreview />
       </section>
     </main>
   );

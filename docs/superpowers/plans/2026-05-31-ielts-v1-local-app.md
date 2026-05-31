@@ -308,34 +308,34 @@ Answer normalization:
 
 ### Listening Intensive Mode
 
-- [ ] Build audio player with practice-only controls:
+- [x] Build audio player with practice-only controls:
   - play/pause,
   - seek,
   - speed,
   - A-B loop,
   - segment repeat,
   - dictation input.
-- [ ] Implement `listening_cues` editor:
+- [x] Implement `listening_cues` editor:
   - create segment,
   - adjust start/end time,
   - name segment,
   - attach transcript sentence.
-- [ ] If cues exist, enable single-sentence repeat.
-- [ ] If cues do not exist, enable A-B repeat and show a cue creation prompt inside the player.
-- [ ] Store dictation attempts and compare against transcript when available.
+- [x] If cues exist, enable single-sentence repeat.
+- [x] If cues do not exist, enable A-B repeat and show a cue creation prompt inside the player.
+- [x] Store dictation attempts and compare against transcript when available.
 
 ### Reading Intensive Mode
 
-- [ ] Build close-reading view:
+- [x] Build close-reading view:
   - passage pane,
   - question pane,
   - answer sentence highlight,
   - keyword highlight,
   - synonym notes,
   - explanation drawer.
-- [ ] Store answer sentence references in `answer_keys`.
-- [ ] Support manual answer-sentence selection when imported PDFs do not provide structured answer locations.
-- [ ] Add mistake label selection after each wrong answer.
+- [x] Store answer sentence references in `answer_keys`.
+- [x] Support manual answer-sentence selection when imported PDFs do not provide structured answer locations.
+- [x] Add mistake label selection after each wrong answer.
 
 **Acceptance:** Listening supports repeatable segments once cues are available, reading supports answer-sentence highlight and explanation review, and mistake labels are saved.
 
