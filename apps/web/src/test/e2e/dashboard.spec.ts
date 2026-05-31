@@ -16,7 +16,8 @@ test("renders the local IELTS dashboard and exam preview across desktop widths",
     await expect(page.getByText("60:00")).toBeVisible();
     await page.getByRole("button", { name: "Submit test" }).click();
     await page.getByRole("button", { name: "Submit anyway" }).click();
-    await expect(page.getByRole("region", { name: "Score report" })).toBeVisible();
-    await expect(page.getByText("1/40")).toBeVisible();
+    const scoreReport = page.getByRole("region", { name: "Score report" });
+    await expect(scoreReport).toBeVisible();
+    await expect(scoreReport.getByText("1/40", { exact: true })).toBeVisible();
   }
 });

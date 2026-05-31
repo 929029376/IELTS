@@ -343,7 +343,7 @@ Answer normalization:
 
 **Outcome:** The app gives useful feedback for near-term exam preparation.
 
-- [ ] Build history page:
+- [x] Build history page:
   - attempt list,
   - subject,
   - mode,
@@ -351,21 +351,21 @@ Answer normalization:
   - raw score,
   - estimated band,
   - duration.
-- [ ] Build analytics page:
+- [x] Build analytics page:
   - listening P1-P4 accuracy,
   - reading P1-P3 accuracy,
   - question type accuracy,
   - frequency class accuracy,
   - mistake label distribution.
-- [ ] Implement prediction service:
+- [x] Implement prediction service:
   - use recent mock exams with higher weight,
   - use practice records as secondary signal,
   - output estimated band range and confidence label.
-- [ ] Export reports:
+- [x] Export reports:
   - `data/exports/mock-report-<date>.json`,
   - `data/exports/mock-report-<date>.csv`,
   - `data/exports/mistakes-<date>.csv`.
-- [ ] Add dashboard cards:
+- [x] Add dashboard cards:
   - latest mock score,
   - predicted listening score,
   - predicted reading score,

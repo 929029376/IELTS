@@ -1,0 +1,80 @@
+# Phase 7 History, Accuracy, Prediction, and Reports Summary
+
+**Date:** 2026-05-31
+
+**Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
+
+## Completed Scope
+
+- Added `apps/server/src/services/analyticsService.ts`.
+- Implemented submitted-attempt history listing with:
+  - subject,
+  - mode,
+  - submitted date,
+  - raw score,
+  - estimated band,
+  - duration.
+- Implemented accuracy analytics for:
+  - listening and reading parts,
+  - question types,
+  - frequency classes,
+  - mistake-label distribution.
+- Implemented score prediction by subject:
+  - recent mock exams receive higher weight,
+  - practice records are used as a secondary signal,
+  - output includes predicted band, band range, confidence label, and basis count.
+- Implemented report export:
+  - `mock-report-<date>.json`,
+  - `mock-report-<date>.csv`,
+  - `mistakes-<date>.csv`.
+- Added reports API routes:
+  - `GET /api/reports/history`,
+  - `GET /api/reports/analytics`,
+  - `GET /api/reports/dashboard`,
+  - `POST /api/reports/export`.
+- Added dashboard/report UI preview with:
+  - latest mock score,
+  - predicted listening score,
+  - predicted reading score,
+  - weakest question type,
+  - recommended next practice,
+  - history table,
+  - accuracy rows,
+  - mistake-label chips,
+  - report export actions.
+
+## Verification Evidence
+
+- Red test evidence:
+  - Initial analytics service test failed because `apps/server/src/services/analyticsService.ts` did not exist.
+  - Initial reports component test failed because `apps/web/src/features/reports/HistoryReportsPreview.tsx` did not exist.
+  - Initial reports route test returned `404` because `/api/reports/*` routes were not registered.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/analyticsService.test.ts`
+  - 4 analytics service tests passed.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx src/test/dashboard.test.tsx`
+  - History/reports component and dashboard tests passed.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/reportsRoutes.test.ts src/test/analyticsService.test.ts`
+  - Reports routes and analytics service tests passed.
+- Final verification:
+  - `npx pnpm@9.15.4 test`
+    - Shared: 3 tests passed.
+    - Server: 26 tests passed.
+    - Web: 16 tests passed.
+  - `npx pnpm@9.15.4 build`
+    - Shared TypeScript build passed.
+    - Server TypeScript build passed.
+    - Web TypeScript and Vite production build passed.
+  - `npx pnpm@9.15.4 db:migrate`
+    - Migration command completed with `Database migrations applied.`
+  - `npx pnpm@9.15.4 test:e2e`
+    - Playwright Chromium dashboard and exam preview test passed.
+
+## Notes
+
+- Prediction is deliberately labeled as an estimate and exposes a range rather than a single official claim.
+- Report export writes to the configured export directory; production defaults to `data/exports`.
+- Dashboard report data is available from the API and represented in the current local dashboard preview.
+
+## Next Phase
+
+Phase 8 should implement Baidu Cloud JSONL sync and backup: sync folder configuration, JSONL creation, append-after-write events, import/dedupe, conflict-aware answer merging, and manual backup import/export.
