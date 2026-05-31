@@ -1,0 +1,81 @@
+# Phase 8 Baidu Cloud Sync and Backup Summary
+
+**Date:** 2026-06-01
+
+**Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
+
+## Completed Scope
+
+- Consolidated development onto `master`; old `phase-*` branches were removed from GitHub after `master` became the default branch.
+- Added sync folder configuration with:
+  - Mac default path: `/Users/musheng/Desktop/同步空间/IELTS-Sync`,
+  - Windows selected-folder support.
+- Added sync folder initialization for:
+  - `attempts.jsonl`,
+  - `answers.jsonl`,
+  - `mistakes.jsonl`,
+  - `stats.jsonl`,
+  - `frequency.jsonl`,
+  - `imports.jsonl`,
+  - `devices.json`.
+- Added append-only JSONL sync events for practice writes:
+  - attempt creation,
+  - answer saving,
+  - attempt submission.
+- Added remote JSONL import:
+  - on server startup when sync is configured,
+  - through `POST /api/sync/import`.
+- Added event dedupe through `sync_events.event_id`.
+- Added merge behavior for attempts and answers.
+- Added conflict preservation for submitted local attempts:
+  - remote conflicting answers are stored in `attempt_answer_conflicts`,
+  - local submitted answers are not overwritten,
+  - conflicts are returned in practice review.
+- Added sync API:
+  - `GET /api/sync/config`,
+  - `POST /api/sync/import`.
+- Added manual backup service and API:
+  - `POST /api/backups/export`,
+  - `POST /api/backups/import`.
+- Backup export writes restore-ready JSON into `data/backups` by default and includes question-bank skeleton, attempts, answers, mistake labels, conflicts, sync events, stats, frequency, and devices.
+
+## Verification Evidence
+
+- Red test evidence:
+  - Initial sync service test failed because `apps/server/src/sync/syncService.ts` did not exist.
+  - Initial sync route test returned `404` because `/api/sync/*` routes were not registered.
+  - Initial backup service test failed because `apps/server/src/sync/backupService.ts` did not exist.
+  - Initial backup route test returned `404` because `/api/backups/*` routes were not registered.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+  - Sync folder, append, import, dedupe, merge, and conflict tests passed.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+  - Manual sync API and startup import tests passed.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupService.test.ts`
+  - Manual backup export/import service test passed.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupRoutes.test.ts`
+  - Manual backup API test passed.
+- Final verification:
+  - `npx pnpm@9.15.4 test`
+    - Shared: 3 tests passed.
+    - Server: 34 tests passed.
+    - Web: 16 tests passed.
+  - `npx pnpm@9.15.4 build`
+    - Shared TypeScript build passed.
+    - Server TypeScript build passed.
+    - Web TypeScript and Vite production build passed.
+  - `npx pnpm@9.15.4 db:migrate`
+    - Migration command completed with `Database migrations applied.`
+  - `npx pnpm@9.15.4 test:e2e`
+    - Playwright Chromium dashboard and exam preview test passed.
+  - `git diff --check`
+    - No whitespace errors reported.
+
+## Notes
+
+- SQLite remains outside the Baidu Cloud folder. Only JSONL event logs and device metadata are placed in the sync folder.
+- Local submitted answers are treated as immutable for conflict handling; remote conflicting answers are preserved for review rather than applied destructively.
+- Existing historical branch commits are still reachable through `master`; the GitHub branch list is now clean.
+
+## Next Phase
+
+Phase 9 should verify Mac and Windows local web mode, confirm production build behavior, and start desktop packaging only after web mode is stable.

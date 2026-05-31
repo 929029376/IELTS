@@ -378,10 +378,10 @@ Answer normalization:
 
 **Outcome:** Mac and Windows devices can share history without putting SQLite in the sync folder.
 
-- [ ] Implement sync folder config:
+- [x] Implement sync folder config:
   - Mac default: `/Users/musheng/Desktop/同步空间/IELTS-Sync`.
   - Windows: user-selected Baidu Cloud sync path.
-- [ ] Create sync files when missing:
+- [x] Create sync files when missing:
   - `attempts.jsonl`,
   - `answers.jsonl`,
   - `mistakes.jsonl`,
@@ -389,12 +389,12 @@ Answer normalization:
   - `frequency.jsonl`,
   - `imports.jsonl`,
   - `devices.json`.
-- [ ] Append events after local database writes.
-- [ ] Import remote events on startup and on manual sync.
-- [ ] Dedupe by `eventId`.
-- [ ] Merge attempts and answers by `attemptId`, `questionId`, `deviceId`, and `createdAt`.
-- [ ] Never overwrite a local answer with a remote answer for the same submitted attempt; store both and mark conflict in review.
-- [ ] Add manual backup export and import from `data/backups`.
+- [x] Append events after local database writes.
+- [x] Import remote events on startup and on manual sync.
+- [x] Dedupe by `eventId`.
+- [x] Merge attempts and answers by `attemptId`, `questionId`, `deviceId`, and `createdAt`.
+- [x] Never overwrite a local answer with a remote answer for the same submitted attempt; store both and mark conflict in review.
+- [x] Add manual backup export and import from `data/backups`.
 
 **Acceptance:** A record created on one device can appear on another after Baidu Cloud sync completes, without copying `ielts.db`.
 

@@ -25,6 +25,21 @@ export interface AttemptAnswerRecord {
 
 export interface AttemptWithAnswers extends AttemptRecord {
   answers: AttemptAnswerRecord[];
+  conflicts: AttemptAnswerConflictRecord[];
+}
+
+export interface AttemptAnswerConflictRecord {
+  id: string;
+  attemptId: string;
+  questionId: string;
+  localAnswerId: string;
+  remoteAnswerId: string;
+  remoteDeviceId: string;
+  remoteCreatedAt: string;
+  remoteRawAnswer: string;
+  remoteNormalizedAnswer: string;
+  remoteIsCorrect: boolean;
+  status: "conflict" | "resolved";
 }
 
 export function createAttemptRepo(db: DatabaseHandle) {
@@ -171,6 +186,27 @@ export function createAttemptRepo(db: DatabaseHandle) {
         isCorrect: number;
         markedForReview: number;
       }>;
+      const conflicts = db
+        .prepare(
+          `
+          SELECT
+            id,
+            attempt_id AS attemptId,
+            question_id AS questionId,
+            local_answer_id AS localAnswerId,
+            remote_answer_id AS remoteAnswerId,
+            remote_device_id AS remoteDeviceId,
+            remote_created_at AS remoteCreatedAt,
+            remote_raw_answer AS remoteRawAnswer,
+            remote_normalized_answer AS remoteNormalizedAnswer,
+            remote_is_correct AS remoteIsCorrect,
+            status
+          FROM attempt_answer_conflicts
+          WHERE attempt_id = ?
+          ORDER BY created_at ASC
+        `
+        )
+        .all(attemptId) as Array<Omit<AttemptAnswerConflictRecord, "remoteIsCorrect"> & { remoteIsCorrect: number }>;
 
       return {
         ...attempt,
@@ -178,6 +214,10 @@ export function createAttemptRepo(db: DatabaseHandle) {
           ...answer,
           isCorrect: answer.isCorrect === 1,
           markedForReview: answer.markedForReview === 1
+        })),
+        conflicts: conflicts.map((conflict) => ({
+          ...conflict,
+          remoteIsCorrect: conflict.remoteIsCorrect === 1
         }))
       };
     }

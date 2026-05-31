@@ -144,6 +144,22 @@ export function migrate(target?: string | DatabaseHandle): void {
         UNIQUE (attempt_answer_id, label)
       );
 
+      CREATE TABLE IF NOT EXISTS attempt_answer_conflicts (
+        id TEXT PRIMARY KEY,
+        attempt_id TEXT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,
+        question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+        local_answer_id TEXT NOT NULL REFERENCES attempt_answers(id) ON DELETE CASCADE,
+        remote_answer_id TEXT NOT NULL,
+        remote_device_id TEXT NOT NULL,
+        remote_created_at TEXT NOT NULL,
+        remote_raw_answer TEXT NOT NULL,
+        remote_normalized_answer TEXT NOT NULL,
+        remote_is_correct INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'conflict',
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (attempt_id, question_id, remote_device_id, remote_created_at)
+      );
+
       CREATE TABLE IF NOT EXISTS stats_snapshots (
         id TEXT PRIMARY KEY,
         snapshot_type TEXT NOT NULL,

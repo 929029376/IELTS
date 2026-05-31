@@ -84,11 +84,14 @@ export function createPracticeService(db: DatabaseHandle) {
       });
 
       return {
+        attemptId: answer.attemptId,
+        id: answer.id,
         questionId: answer.questionId,
         rawAnswer: answer.rawAnswer,
         normalizedAnswer: answer.normalizedAnswer,
         isCorrect: answer.isCorrect,
-        markedForReview: answer.markedForReview
+        markedForReview: answer.markedForReview,
+        timeSpentSeconds: answer.timeSpentSeconds
       };
     },
 
