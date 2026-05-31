@@ -97,42 +97,58 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
               </tr>
             </thead>
             <tbody>
-              {history.map((attempt) => (
-                <tr key={attempt.id}>
-                  <td>{attempt.subject}</td>
-                  <td>{attempt.mode}</td>
-                  <td>{attempt.submittedAt.slice(0, 10)}</td>
-                  <td>{attempt.rawScore ?? "-"}</td>
-                  <td>{attempt.estimatedBand ?? "-"}</td>
-                  <td>{formatDuration(attempt.durationSeconds)}</td>
+              {history.length > 0 ? (
+                history.map((attempt) => (
+                  <tr key={attempt.id}>
+                    <td>{attempt.subject}</td>
+                    <td>{attempt.mode}</td>
+                    <td>{attempt.submittedAt.slice(0, 10)}</td>
+                    <td>{attempt.rawScore ?? "-"}</td>
+                    <td>{attempt.estimatedBand ?? "-"}</td>
+                    <td>{formatDuration(attempt.durationSeconds)}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6}>
+                    <p className="empty-state">No completed attempts yet</p>
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </section>
 
         <section className="analytics-list" aria-label="Accuracy analytics">
           <h3>Accuracy</h3>
-          {[...analytics.partRows, ...analytics.questionTypeRows].map((row) => (
-            <div className="accuracy-row" key={row.label}>
-              <span>{row.label}</span>
-              <strong>{formatAccuracy(row.accuracy)}</strong>
-              <small>
-                {row.correct}/{row.total}
-              </small>
-            </div>
-          ))}
+          {[...analytics.partRows, ...analytics.questionTypeRows].length > 0 ? (
+            [...analytics.partRows, ...analytics.questionTypeRows].map((row) => (
+              <div className="accuracy-row" key={row.label}>
+                <span>{row.label}</span>
+                <strong>{formatAccuracy(row.accuracy)}</strong>
+                <small>
+                  {row.correct}/{row.total}
+                </small>
+              </div>
+            ))
+          ) : (
+            <p className="empty-state">Accuracy appears after submitted answers</p>
+          )}
           <h4>Weakest type</h4>
           <p>{dashboard.weakestQuestionType}</p>
           <h4>Mistake labels</h4>
-          <div className="mistake-chip-list">
-            {analytics.mistakeLabels.map((label) => (
-              <span className="mistake-chip" key={label.label}>
-                <span>{label.label}</span>
-                <strong>{label.count}</strong>
-              </span>
-            ))}
-          </div>
+          {analytics.mistakeLabels.length > 0 ? (
+            <div className="mistake-chip-list">
+              {analytics.mistakeLabels.map((label) => (
+                <span className="mistake-chip" key={label.label}>
+                  <span>{label.label}</span>
+                  <strong>{label.count}</strong>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="empty-state">Mistake labels appear after review</p>
+          )}
         </section>
       </div>
     </section>

@@ -21,3 +21,16 @@ test("renders the local IELTS dashboard and exam preview across desktop widths",
     await expect(scoreReport.getByText("1/40", { exact: true })).toBeVisible();
   }
 });
+
+test("covers V1 dashboard, import, practice, history, and sync regression anchors", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  await expect(page.getByRole("heading", { name: "IELTS Local Practice" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Import failure report" })).toContainText("reading/broken.pdf");
+  await expect(page.getByRole("region", { name: "Question-bank completeness" })).toContainText("Airport Enquiry");
+  await expect(page.getByRole("region", { name: "Intensive practice preview" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "IELTS-style exam preview" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "History and reports preview" })).toContainText("Reports");
+  await expect(page.getByRole("region", { name: "Sync settings" })).toContainText("Baidu Cloud JSONL sync");
+});

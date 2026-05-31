@@ -417,17 +417,17 @@ Answer normalization:
 
 **Outcome:** The app is reliable enough for daily exam preparation.
 
-- [ ] Add import failure report page.
-- [ ] Add question-bank completeness page:
+- [x] Add import failure report page.
+- [x] Add question-bank completeness page:
   - missing answer key,
   - missing explanation,
   - missing audio,
   - missing transcript,
   - missing listening cues,
   - missing frequency entry.
-- [ ] Add backup reminder when many attempts exist and no backup has been created recently.
-- [ ] Add UI empty states for no imported data, no history, and incomplete parsing.
-- [ ] Add Playwright regression suite:
+- [x] Add backup reminder when many attempts exist and no backup has been created recently.
+- [x] Add UI empty states for no imported data, no history, and incomplete parsing.
+- [x] Add Playwright regression suite:
   - dashboard,
   - import,
   - practice,
@@ -435,7 +435,7 @@ Answer normalization:
   - review,
   - history,
   - sync settings.
-- [ ] Run final verification:
+- [x] Run final verification:
   - `pnpm test`,
   - `pnpm test:e2e`,
   - `pnpm build`.

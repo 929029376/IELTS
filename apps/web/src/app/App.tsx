@@ -1,7 +1,9 @@
 import { Activity, BookOpenCheck, Database, Headphones, LineChart, Timer } from "lucide-react";
 import { ExamPreview } from "../features/exam/ExamPreview";
+import { HardeningCenter } from "../features/hardening/HardeningCenter";
 import { IntensivePracticePreview } from "../features/intensive/IntensivePracticePreview";
 import { HistoryReportsPreview } from "../features/reports/HistoryReportsPreview";
+import { SyncSettingsPreview } from "../features/sync/SyncSettingsPreview";
 import "./app.css";
 
 const cards = [
@@ -57,6 +59,53 @@ const sampleDashboardReport = {
   weakestQuestionType: "matching"
 };
 
+const sampleHardeningStatus = {
+  backupReminder: {
+    latestBackupAt: null,
+    reason: "You have 12 submitted attempts and no recent backup.",
+    shouldRemind: true,
+    submittedAttemptCount: 12
+  },
+  importFailures: {
+    byStatus: { failed: 1, needs_review: 1 },
+    sources: [
+      {
+        assetCount: 1,
+        createdAt: "2026-06-01T00:00:00.000Z",
+        id: "source-1",
+        importStatus: "failed",
+        originalPath: "reading/broken.pdf",
+        sourceType: "reading_pdf",
+        version: 1
+      }
+    ],
+    totalUnresolved: 2
+  },
+  questionBankCompleteness: {
+    issueCounts: {
+      missingAnswerKey: 1,
+      missingAudio: 1,
+      missingExplanation: 1,
+      missingFrequencyEntry: 1,
+      missingListeningCues: 1,
+      missingTranscript: 1
+    },
+    passages: [
+      {
+        frequencyClass: "unknown",
+        id: "passage-1",
+        issueLabels: ["missing answer key", "missing audio", "missing frequency entry"],
+        part: "P1",
+        questionCount: 2,
+        sourceStatus: "needs_review",
+        subject: "listening",
+        title: "Airport Enquiry"
+      }
+    ],
+    totalPassages: 1
+  }
+};
+
 export function App() {
   return (
     <main className="app-shell">
@@ -80,6 +129,9 @@ export function App() {
           </a>
           <a className="nav-item" href="#reports">
             Reports
+          </a>
+          <a className="nav-item" href="#sync">
+            Sync
           </a>
         </nav>
       </aside>
@@ -114,6 +166,21 @@ export function App() {
           analytics={sampleAnalytics}
           dashboard={sampleDashboardReport}
           history={sampleHistory}
+        />
+        <HardeningCenter status={sampleHardeningStatus} />
+        <SyncSettingsPreview
+          deviceName="Mac local device"
+          lastSyncAt={null}
+          syncFiles={[
+            "attempts.jsonl",
+            "answers.jsonl",
+            "mistakes.jsonl",
+            "stats.jsonl",
+            "frequency.jsonl",
+            "imports.jsonl",
+            "devices.json"
+          ]}
+          syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
         />
       </section>
     </main>

@@ -157,6 +157,16 @@ h1 {
   padding-bottom: 20px;
 }
 
+.hardening-band {
+  margin-top: 28px;
+  padding-bottom: 28px;
+}
+
+.sync-settings-band {
+  margin-top: 28px;
+  padding-bottom: 28px;
+}
+
 .reports-header {
   display: flex;
   align-items: flex-start;
@@ -289,6 +299,215 @@ h1 {
 
 .mistake-chip strong {
   color: #172033;
+}
+
+.empty-state {
+  margin: 0;
+  padding: 12px;
+  border: 1px dashed #cbd6e3;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #5d6c7f;
+  font-size: 14px;
+}
+
+.hardening-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.2fr) minmax(260px, 0.8fr);
+  gap: 16px;
+}
+
+.hardening-panel {
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.hardening-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #20314a;
+}
+
+.hardening-panel-title h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.readiness-number {
+  display: block;
+  color: #172033;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.readiness-caption,
+.backup-message {
+  margin: 6px 0 12px;
+  color: #5d6c7f;
+  font-size: 14px;
+}
+
+.compact-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.compact-table th,
+.compact-table td {
+  padding: 9px 6px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  vertical-align: top;
+}
+
+.compact-table th {
+  color: #66768c;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.issue-meter-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.issue-meter {
+  display: grid;
+  gap: 4px;
+  min-height: 58px;
+  padding: 10px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.issue-meter span {
+  color: #66768c;
+  font-size: 12px;
+}
+
+.issue-meter strong,
+.backup-ok,
+.backup-warning {
+  color: #172033;
+  font-size: 18px;
+}
+
+.backup-warning {
+  color: #a15c00;
+}
+
+.passage-gap-list {
+  display: grid;
+  gap: 8px;
+}
+
+.passage-gap-row {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.passage-gap-row div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.passage-gap-row strong {
+  color: #172033;
+}
+
+.passage-gap-row span,
+.passage-gap-row p {
+  margin: 0;
+  color: #5d6c7f;
+  font-size: 13px;
+}
+
+.icon-command {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  border: 1px solid #bcc9d9;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #20314a;
+}
+
+.sync-settings-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.8fr);
+  gap: 16px;
+}
+
+.sync-path-panel,
+.sync-files-panel {
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.sync-path-panel p {
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+  color: #405169;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+}
+
+.sync-path-panel dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.sync-path-panel dt {
+  color: #66768c;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.sync-path-panel dd {
+  margin: 4px 0 0;
+  color: #172033;
+  font-weight: 700;
+}
+
+.sync-files-panel h3 {
+  margin: 0 0 12px;
+  color: #172033;
+  font-size: 17px;
+}
+
+.sync-file-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sync-file-list span {
+  padding: 6px 8px;
+  border: 1px solid #d6dfeb;
+  border-radius: 6px;
+  background: #f8fafc;
+  color: #405169;
+  font-size: 13px;
 }
 
 .intensive-preview-grid {
@@ -666,7 +885,7 @@ h1 {
   }
 
   .nav-list {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .nav-item {
@@ -686,6 +905,8 @@ h1 {
 
   .intensive-preview-grid,
   .reports-grid,
+  .hardening-grid,
+  .sync-settings-grid,
   .close-reading-view {
     grid-template-columns: 1fr;
   }

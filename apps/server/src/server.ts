@@ -4,6 +4,7 @@ import type { FastifyInstance } from "fastify";
 import { openDatabase } from "./db/database";
 import { migrate } from "./db/migrate";
 import { registerBackupRoutes } from "./routes/backupRoutes";
+import { registerHardeningRoutes } from "./routes/hardeningRoutes";
 import { registerPracticeRoutes } from "./routes/practiceRoutes";
 import { registerReportsRoutes } from "./routes/reportsRoutes";
 import { registerSyncRoutes } from "./routes/syncRoutes";
@@ -11,6 +12,7 @@ import { createSyncService, type SyncServiceOptions } from "./sync/syncService";
 
 export interface BuildServerOptions {
   backupDir?: string;
+  backupReminderAttemptThreshold?: number;
   databasePath?: string;
   exportDir?: string;
   now?: string;
@@ -47,6 +49,11 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
   });
   registerBackupRoutes(server, db, {
     backupDir: options.backupDir,
+    now: options.now
+  });
+  registerHardeningRoutes(server, db, {
+    backupDir: options.backupDir,
+    backupReminderAttemptThreshold: options.backupReminderAttemptThreshold,
     now: options.now
   });
   if (sync && options.sync) {
