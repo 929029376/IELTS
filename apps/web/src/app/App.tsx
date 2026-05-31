@@ -1,4 +1,5 @@
 import { Activity, BookOpenCheck, Database, Headphones, LineChart, Timer } from "lucide-react";
+import { ExamPreview } from "../features/exam/ExamPreview";
 import "./app.css";
 
 const cards = [
@@ -74,6 +75,8 @@ export function App() {
             </article>
           ))}
         </section>
+
+        <ExamPreview />
       </section>
     </main>
   );

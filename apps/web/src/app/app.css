@@ -144,6 +144,292 @@ h1 {
   line-height: 1.55;
 }
 
+.exam-preview-band {
+  margin-top: 28px;
+}
+
+.exam-shell {
+  overflow: hidden;
+  border: 1px solid #cdd7e4;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.exam-topbar,
+.exam-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #f8fafc;
+}
+
+.exam-topbar {
+  border-bottom: 1px solid #d9e1ec;
+}
+
+.exam-bottom-bar {
+  border-top: 1px solid #d9e1ec;
+}
+
+.exam-title-group,
+.exam-controls,
+.exam-timer,
+.strict-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.exam-title-group h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.exam-controls button,
+.exam-bottom-bar button,
+.reading-toolbar button,
+.strict-controls button,
+.section-tabs button,
+.submit-warning button {
+  min-height: 34px;
+  border: 1px solid #bcc9d9;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #20314a;
+  cursor: pointer;
+}
+
+.exam-controls button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+}
+
+.exam-timer {
+  min-width: 84px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.exam-content {
+  min-height: 360px;
+}
+
+.submit-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid #f3c77c;
+  background: #fff8e8;
+  color: #6f4300;
+}
+
+.submit-warning p {
+  margin: 0;
+}
+
+.question-navigator {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.question-nav-item {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #b8c5d6;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.question-nav-item-current {
+  border-color: #20314a;
+  background: #20314a;
+  color: #ffffff;
+}
+
+.question-nav-item-answered,
+.question-nav-item-correct {
+  background: #dff5e6;
+  border-color: #8dcea2;
+}
+
+.question-nav-item-marked {
+  background: #fff1c9;
+  border-color: #d3a932;
+}
+
+.question-nav-item-incorrect {
+  background: #fde2e2;
+  border-color: #e18b8b;
+}
+
+.reading-exam-view {
+  display: grid;
+  gap: 0;
+}
+
+.reading-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.reading-split {
+  display: grid;
+  min-height: 330px;
+}
+
+.reading-passage,
+.reading-questions {
+  overflow: auto;
+  padding: 18px;
+}
+
+.reading-passage {
+  border-right: 1px solid #e2e8f0;
+}
+
+.reading-passage h3 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+.reading-passage p {
+  line-height: 1.7;
+}
+
+.reading-divider {
+  width: 8px;
+  min-height: 100%;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid #d7e0eb;
+  border-right: 1px solid #d7e0eb;
+  border-radius: 0;
+  background: #edf2f7;
+  cursor: col-resize;
+}
+
+.font-small {
+  font-size: 14px;
+}
+
+.font-large {
+  font-size: 18px;
+}
+
+.ielts-highlight {
+  background: #ffe891;
+  color: #172033;
+}
+
+.notes-label {
+  display: grid;
+  gap: 6px;
+  margin-top: 18px;
+  color: #405169;
+  font-weight: 600;
+}
+
+.notes-label textarea,
+.answer-input {
+  width: 100%;
+  border: 1px solid #bcc9d9;
+  border-radius: 6px;
+  padding: 8px;
+  font: inherit;
+}
+
+.listening-exam-view {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.listening-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.player-label {
+  margin: 0;
+  color: #66768c;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.listening-player h3 {
+  margin: 4px 0;
+}
+
+.section-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.section-tabs [aria-selected="true"] {
+  background: #20314a;
+  color: #ffffff;
+}
+
+.section-panel {
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+}
+
+.preview-submit-state {
+  margin: 10px 0 0;
+  color: #405169;
+}
+
+.score-report {
+  margin-top: 10px;
+  padding: 14px;
+  border: 1px solid #cdd7e4;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.score-report h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+
+.score-report dl {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.score-report dt {
+  color: #66768c;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.score-report dd {
+  margin: 4px 0 0;
+  color: #172033;
+  font-weight: 700;
+}
+
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -164,6 +450,13 @@ h1 {
 
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .exam-topbar,
+  .exam-bottom-bar,
+  .listening-player {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 

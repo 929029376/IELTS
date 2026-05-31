@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/main.tsx", "src/app/**/*.tsx"],
+  "include": ["src/main.tsx", "src/app/**/*.tsx", "src/features/**/*.tsx", "src/features/**/*.ts"],
   "exclude": ["src/test", "vitest.config.ts", "playwright.config.ts"]
 }

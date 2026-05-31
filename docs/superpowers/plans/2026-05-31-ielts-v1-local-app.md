@@ -255,30 +255,30 @@ Answer normalization:
 
 **Outcome:** Mock exam mode feels close to the real computer-delivered IELTS experience without copying protected branding.
 
-- [ ] Build exam shell:
+- [x] Build exam shell:
   - top timer,
   - help button,
   - settings button,
   - bottom question navigation,
   - review marker,
   - submit/end test button.
-- [ ] Build reading exam view:
+- [x] Build reading exam view:
   - left passage pane,
   - right question pane,
   - draggable divider,
   - text highlight,
   - notes panel,
   - font size settings.
-- [ ] Build listening exam view:
+- [x] Build listening exam view:
   - section-based question pages,
   - strict audio playback in mock mode,
   - no pause, no seek, no speed change in mock mode,
   - final review time configured by test type.
-- [ ] Add warnings:
+- [x] Add warnings:
   - unanswered questions before submit,
   - marked questions before submit,
   - time expired auto-submit.
-- [ ] Add Playwright tests for desktop widths on Mac/Windows-like viewport sizes.
+- [x] Add Playwright tests for desktop widths on Mac/Windows-like viewport sizes.
 
 **Acceptance:** Listening and reading mock exams can be completed under strict mode, auto-submit on timeout, and produce a score report.
 
