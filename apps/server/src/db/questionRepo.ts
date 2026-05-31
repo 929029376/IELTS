@@ -12,6 +12,16 @@ export interface SourceRecord {
   version: number;
 }
 
+export interface SourceAssetRecord {
+  id: string;
+  sourceId: string;
+  assetKind: "html" | "docx" | "pdf" | "audio" | "other";
+  originalName: string;
+  filePath: string | null;
+  textContent: string | null;
+  checksum: string | null;
+}
+
 export interface PassageRecord {
   id: string;
   sourceId: string;
@@ -106,6 +116,57 @@ export function createQuestionRepo(db: DatabaseHandle) {
       return record;
     },
 
+    findSourceByChecksum(checksum: string): SourceRecord | null {
+      const row = db
+        .prepare(
+          `
+          SELECT
+            id,
+            source_type AS sourceType,
+            original_path AS originalPath,
+            checksum,
+            import_status AS importStatus,
+            version
+          FROM sources
+          WHERE checksum = ?
+        `
+        )
+        .get(checksum) as SourceRecord | undefined;
+
+      return row ?? null;
+    },
+
+    createSourceAsset(input: Omit<SourceAssetRecord, "id">): SourceAssetRecord {
+      const record: SourceAssetRecord = { id: randomUUID(), ...input };
+      db.prepare(`
+        INSERT INTO source_assets (
+          id, source_id, asset_kind, original_name, file_path, text_content, checksum
+        )
+        VALUES (@id, @sourceId, @assetKind, @originalName, @filePath, @textContent, @checksum)
+      `).run(record);
+      return record;
+    },
+
+    listSourceAssets(sourceId: string): SourceAssetRecord[] {
+      return db
+        .prepare(
+          `
+          SELECT
+            id,
+            source_id AS sourceId,
+            asset_kind AS assetKind,
+            original_name AS originalName,
+            file_path AS filePath,
+            text_content AS textContent,
+            checksum
+          FROM source_assets
+          WHERE source_id = ?
+          ORDER BY created_at ASC
+        `
+        )
+        .all(sourceId) as SourceAssetRecord[];
+    },
+
     createPassage(input: Omit<PassageRecord, "id">): PassageRecord {
       const record: PassageRecord = { id: randomUUID(), ...input };
       db.prepare(`
@@ -113,6 +174,24 @@ export function createQuestionRepo(db: DatabaseHandle) {
         VALUES (@id, @sourceId, @subject, @part, @title, @frequencyClass)
       `).run(record);
       return record;
+    },
+
+    listPassages(): PassageRecord[] {
+      return db
+        .prepare(
+          `
+          SELECT
+            id,
+            source_id AS sourceId,
+            subject,
+            part,
+            title,
+            frequency_class AS frequencyClass
+          FROM passages
+          ORDER BY subject ASC, part ASC, title ASC
+        `
+        )
+        .all() as PassageRecord[];
     },
 
     createQuestion(input: Omit<QuestionRecord, "id">): QuestionRecord {
@@ -228,6 +307,28 @@ export function createQuestionRepo(db: DatabaseHandle) {
           }))
         }))
       };
+    },
+
+    getFirstPassageBySource(sourceId: string): PassageRecord | null {
+      const row = db
+        .prepare(
+          `
+          SELECT
+            id,
+            source_id AS sourceId,
+            subject,
+            part,
+            title,
+            frequency_class AS frequencyClass
+          FROM passages
+          WHERE source_id = ?
+          ORDER BY created_at ASC
+          LIMIT 1
+        `
+        )
+        .get(sourceId) as PassageRecord | undefined;
+
+      return row ?? null;
     },
 
     listPracticeQuestions(input: { subject: Subject; limit: number }): PracticeQuestionRecord[] {

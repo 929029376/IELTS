@@ -194,9 +194,9 @@ Answer normalization:
 
 ### Listening ZIP Import
 
-- [ ] Implement `apps/server/src/importers/listeningZipImporter.ts`.
-- [ ] Parse ZIP files from existing paths such as `listening/IELTS Listening 虾滑/P1/高频/*.zip`.
-- [ ] Extract and store:
+- [x] Implement `apps/server/src/importers/listeningZipImporter.ts`.
+- [x] Parse ZIP files from existing paths such as `listening/IELTS Listening 虾滑/P1/高频/*.zip`.
+- [x] Extract and store:
   - original source path,
   - HTML content,
   - DOCX text when present,
@@ -204,24 +204,24 @@ Answer normalization:
   - `audio.mp3`,
   - part number from folder or filename,
   - frequency class from folder name: `高频`, `次高频`, `非高频`.
-- [ ] Use checksums to avoid duplicate imports.
-- [ ] Store unparsed assets in `data/assets/listening/<sourceId>/`.
-- [ ] When automatic question parsing is uncertain, create a passage with import status `needs_review` and keep the source visible in the app.
+- [x] Use checksums to avoid duplicate imports.
+- [x] Store unparsed assets in `data/assets/listening/<sourceId>/`.
+- [x] When automatic question parsing is uncertain, create a passage with import status `needs_review` and keep the source visible in the app.
 
 ### Reading PDF Import
 
-- [ ] Implement `apps/server/src/importers/readingPdfImporter.ts`.
-- [ ] Import PDFs from `reading/ReadingPractice/PDF`.
-- [ ] Extract title, part, English name, Chinese name from filename.
-- [ ] Store PDF asset path and passage metadata.
-- [ ] Mark question structure as `needs_review` unless a structured sidecar file is available.
+- [x] Implement `apps/server/src/importers/readingPdfImporter.ts`.
+- [x] Import PDFs from `reading/ReadingPractice/PDF`.
+- [x] Extract title, part, English name, Chinese name from filename.
+- [x] Store PDF asset path and passage metadata.
+- [x] Mark question structure as `needs_review` unless a structured sidecar file is available.
 
 ### Frequency Table Import
 
-- [ ] Implement `apps/server/src/importers/frequencyImporter.ts`.
-- [ ] Support CSV/XLSX structured frequency tables.
-- [ ] Support manual correction UI for OCR output from images like `reading/5月高频表格.jpg`.
-- [ ] Store entries with `subject`, `part`, `englishTitle`, `chineseTitle`, `frequencyClass`, `difficulty`, `sourceMonth`.
+- [x] Implement `apps/server/src/importers/frequencyImporter.ts`.
+- [x] Support CSV/XLSX structured frequency tables.
+- [x] Support manual correction UI for OCR output from images like `reading/5月高频表格.jpg`.
+- [x] Store entries with `subject`, `part`, `englishTitle`, `chineseTitle`, `frequencyClass`, `difficulty`, `sourceMonth`.
 
 **Acceptance:** Importing current listening and reading folders creates searchable passage records, frequency classes, source versions, and dedupe records.
 

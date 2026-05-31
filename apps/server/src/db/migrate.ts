@@ -29,6 +29,17 @@ export function migrate(target?: string | DatabaseHandle): void {
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS source_assets (
+        id TEXT PRIMARY KEY,
+        source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
+        asset_kind TEXT NOT NULL,
+        original_name TEXT NOT NULL,
+        file_path TEXT,
+        text_content TEXT,
+        checksum TEXT,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+      );
+
       CREATE TABLE IF NOT EXISTS passages (
         id TEXT PRIMARY KEY,
         source_id TEXT NOT NULL REFERENCES sources(id) ON DELETE CASCADE,
