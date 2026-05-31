@@ -36,3 +36,39 @@ export function estimateBand(rawScore: number, table: BandRange[]): number {
   const match = table.find((range) => rawScore >= range.min && rawScore <= range.max);
   return match?.band ?? 0;
 }
+
+export function normalizeAnswer(answer: string): string {
+  return answer
+    .trim()
+    .replace(/[‘’]/g, "'")
+    .replace(/[“”]/g, "\"")
+    .replace(/\s*-\s*/g, "-")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+export function wordCountWithinLimit(answer: string, maxWords?: number): boolean {
+  if (!maxWords) {
+    return true;
+  }
+
+  const normalized = normalizeAnswer(answer);
+  if (normalized.length === 0) {
+    return true;
+  }
+
+  return normalized.split(/\s+/).length <= maxWords;
+}
+
+export function isAnswerCorrect(
+  rawAnswer: string,
+  acceptedAnswers: string[],
+  options: { maxWords?: number } = {}
+): boolean {
+  if (!wordCountWithinLimit(rawAnswer, options.maxWords)) {
+    return false;
+  }
+
+  const normalizedAnswer = normalizeAnswer(rawAnswer);
+  return acceptedAnswers.some((acceptedAnswer) => normalizeAnswer(acceptedAnswer) === normalizedAnswer);
+}

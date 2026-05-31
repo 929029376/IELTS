@@ -229,13 +229,13 @@ Answer normalization:
 
 **Outcome:** The user can open a passage or listening section, answer questions, submit, receive correctness, and save history.
 
-- [ ] Implement session creation API:
+- [x] Implement session creation API:
   - `POST /api/practice/start`
   - `POST /api/practice/:attemptId/answer`
   - `POST /api/practice/:attemptId/submit`
   - `GET /api/practice/:attemptId/review`
-- [ ] Implement answer normalization and scoring in `packages/shared/src/scoring.ts`.
-- [ ] Support V1 question types:
+- [x] Implement answer normalization and scoring in `packages/shared/src/scoring.ts`.
+- [x] Support V1 question types:
   - fill blank,
   - single choice,
   - multiple choice,
@@ -245,9 +245,9 @@ Answer normalization:
   - short answer,
   - table/form/flow completion,
   - map/plan label.
-- [ ] Build reusable answer components in `apps/web/src/features/questions`.
-- [ ] Add question navigation state: unanswered, answered, current, marked for review, correct, incorrect.
-- [ ] Save every answer change locally through the API.
+- [x] Build reusable answer components in `apps/web/src/features/questions`.
+- [x] Add question navigation state: unanswered, answered, current, marked for review, correct, incorrect.
+- [x] Save every answer change locally through the API.
 
 **Acceptance:** A seeded set of 40 questions can be answered, submitted, reviewed, and reopened from history.
 

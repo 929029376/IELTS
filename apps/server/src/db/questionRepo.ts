@@ -43,6 +43,13 @@ export interface PassageWithQuestions extends PassageRecord {
   questions: Array<QuestionRecord & { answerKeys: AnswerKeyRecord[] }>;
 }
 
+export interface PracticeQuestionRecord extends QuestionRecord {
+  passageTitle: string;
+  subject: Subject;
+  part: Part;
+  answerKeys: AnswerKeyRecord[];
+}
+
 export interface ListeningAudioRecord {
   id: string;
   passageId: string;
@@ -56,6 +63,39 @@ function parseJson<T>(value: string): T {
 }
 
 export function createQuestionRepo(db: DatabaseHandle) {
+  function listAnswerKeys(questionId: string): AnswerKeyRecord[] {
+    return (db
+      .prepare(
+        `
+        SELECT
+          id,
+          question_id AS questionId,
+          accepted_answers_json AS acceptedAnswersJson,
+          answer_sentence AS answerSentence,
+          explanation,
+          synonyms_json AS synonymsJson
+        FROM answer_keys
+        WHERE question_id = ?
+        ORDER BY created_at ASC
+      `
+      )
+      .all(questionId) as Array<{
+      id: string;
+      questionId: string;
+      acceptedAnswersJson: string;
+      answerSentence: string | null;
+      explanation: string | null;
+      synonymsJson: string;
+    }>).map((answer) => ({
+      id: answer.id,
+      questionId: answer.questionId,
+      acceptedAnswers: parseJson<string[]>(answer.acceptedAnswersJson),
+      answerSentence: answer.answerSentence,
+      explanation: answer.explanation,
+      synonyms: parseJson<string[]>(answer.synonymsJson)
+    }));
+  }
+
   return {
     createSource(input: Omit<SourceRecord, "id">): SourceRecord {
       const record: SourceRecord = { id: randomUUID(), ...input };
@@ -188,6 +228,88 @@ export function createQuestionRepo(db: DatabaseHandle) {
           }))
         }))
       };
-    }
+    },
+
+    listPracticeQuestions(input: { subject: Subject; limit: number }): PracticeQuestionRecord[] {
+      const rows = db
+        .prepare(
+          `
+          SELECT
+            q.id,
+            q.passage_id AS passageId,
+            q.question_number AS questionNumber,
+            q.question_type AS questionType,
+            q.prompt,
+            q.answer_rules_json AS answerRulesJson,
+            p.title AS passageTitle,
+            p.subject,
+            p.part
+          FROM questions q
+          JOIN passages p ON p.id = q.passage_id
+          WHERE p.subject = ?
+          ORDER BY p.part ASC, q.question_number ASC
+          LIMIT ?
+        `
+        )
+        .all(input.subject, input.limit) as Array<
+        Omit<PracticeQuestionRecord, "answerRules" | "answerKeys"> & { answerRulesJson: string }
+      >;
+
+      return rows.map((row) => ({
+        id: row.id,
+        passageId: row.passageId,
+        questionNumber: row.questionNumber,
+        questionType: row.questionType,
+        prompt: row.prompt,
+        answerRules: parseJson<Record<string, unknown>>(row.answerRulesJson),
+        passageTitle: row.passageTitle,
+        subject: row.subject,
+        part: row.part,
+        answerKeys: listAnswerKeys(row.id)
+      }));
+    },
+
+    getQuestionWithAnswerKeys(questionId: string): PracticeQuestionRecord | null {
+      const row = db
+        .prepare(
+          `
+          SELECT
+            q.id,
+            q.passage_id AS passageId,
+            q.question_number AS questionNumber,
+            q.question_type AS questionType,
+            q.prompt,
+            q.answer_rules_json AS answerRulesJson,
+            p.title AS passageTitle,
+            p.subject,
+            p.part
+          FROM questions q
+          JOIN passages p ON p.id = q.passage_id
+          WHERE q.id = ?
+        `
+        )
+        .get(questionId) as
+        | (Omit<PracticeQuestionRecord, "answerRules" | "answerKeys"> & { answerRulesJson: string })
+        | undefined;
+
+      if (!row) {
+        return null;
+      }
+
+      return {
+        id: row.id,
+        passageId: row.passageId,
+        questionNumber: row.questionNumber,
+        questionType: row.questionType,
+        prompt: row.prompt,
+        answerRules: parseJson<Record<string, unknown>>(row.answerRulesJson),
+        passageTitle: row.passageTitle,
+        subject: row.subject,
+        part: row.part,
+        answerKeys: listAnswerKeys(row.id)
+      };
+    },
+
+    listAnswerKeys
   };
 }
