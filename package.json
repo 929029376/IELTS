@@ -1,0 +1,17 @@
+{
+  "name": "ielts-local-app",
+  "version": "0.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.4",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @ielts/server --filter @ielts/web dev",
+    "build": "pnpm -r --if-present build",
+    "test": "pnpm -r --if-present test",
+    "test:e2e": "pnpm --filter @ielts/web test:e2e",
+    "db:migrate": "pnpm --filter @ielts/server db:migrate"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
