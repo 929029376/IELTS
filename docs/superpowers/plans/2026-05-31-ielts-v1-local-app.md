@@ -286,19 +286,19 @@ Answer normalization:
 
 **Outcome:** The app can generate random practice sets and mock tests that prioritize high-frequency materials while preserving variety.
 
-- [ ] Implement weighted selection service in `apps/server/src/services/testBuilder.ts`.
-- [ ] Apply weights:
+- [x] Implement weighted selection service in `apps/server/src/services/testBuilder.ts`.
+- [x] Apply weights:
   - high frequency: `5`,
   - medium frequency: `3`,
   - low frequency: `1`,
   - no frequency data: `1`.
-- [ ] Apply recency penalty:
+- [x] Apply recency penalty:
   - completed in last 7 days: multiply by `0.1`,
   - completed in last 30 days: multiply by `0.4`,
   - never completed: multiply by `1`.
-- [ ] Build listening full set: one P1, one P2, one P3, one P4.
-- [ ] Build reading full set: one P1, one P2, one P3.
-- [ ] Add practice filters: subject, part, frequency class, question type, mistake label.
+- [x] Build listening full set: one P1, one P2, one P3, one P4.
+- [x] Build reading full set: one P1, one P2, one P3.
+- [x] Add practice filters: subject, part, frequency class, question type, mistake label.
 
 **Acceptance:** Generated sets prefer high-frequency items, contain the correct part distribution, and avoid excessive recent repetition.
 

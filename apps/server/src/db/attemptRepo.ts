@@ -104,6 +104,15 @@ export function createAttemptRepo(db: DatabaseHandle) {
       `).run(input);
     },
 
+    addMistakeLabel(input: { attemptAnswerId: string; label: string }): { id: string; label: string } {
+      const record = { id: randomUUID(), ...input };
+      db.prepare(`
+        INSERT OR IGNORE INTO mistake_labels (id, attempt_answer_id, label)
+        VALUES (@id, @attemptAnswerId, @label)
+      `).run(record);
+      return { id: record.id, label: record.label };
+    },
+
     getAttemptWithAnswers(attemptId: string): AttemptWithAnswers | null {
       const attempt = db
         .prepare(
