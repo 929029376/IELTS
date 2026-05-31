@@ -175,16 +175,16 @@ Answer normalization:
 
 **Outcome:** The app has durable local storage for question bank, attempts, answers, frequency entries, and sync event ids.
 
-- [ ] Define shared Zod schemas in `packages/shared/src/schemas.ts`.
-- [ ] Define question type enum in `packages/shared/src/questionTypes.ts`.
-- [ ] Implement SQLite migrations for all V1 tables.
-- [ ] Implement repositories:
+- [x] Define shared Zod schemas in `packages/shared/src/schemas.ts`.
+- [x] Define question type enum in `packages/shared/src/questionTypes.ts`.
+- [x] Implement SQLite migrations for all V1 tables.
+- [x] Implement repositories:
   - `apps/server/src/db/questionRepo.ts`
   - `apps/server/src/db/attemptRepo.ts`
   - `apps/server/src/db/frequencyRepo.ts`
   - `apps/server/src/db/syncRepo.ts`
-- [ ] Add seed command for a tiny sample listening section and reading passage.
-- [ ] Add tests for creating a passage, question, answer key, attempt, and answer.
+- [x] Add seed command for a tiny sample listening section and reading passage.
+- [x] Add tests for creating a passage, question, answer key, attempt, and answer.
 
 **Acceptance:** A sample question can be inserted, answered, scored, and retrieved from history after server restart.
 

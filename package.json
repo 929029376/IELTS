@@ -8,7 +8,8 @@
     "build": "pnpm -r --if-present build",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @ielts/web test:e2e",
-    "db:migrate": "pnpm --filter @ielts/server db:migrate"
+    "db:migrate": "pnpm --filter @ielts/server db:migrate",
+    "db:seed": "pnpm --filter @ielts/server db:seed"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
