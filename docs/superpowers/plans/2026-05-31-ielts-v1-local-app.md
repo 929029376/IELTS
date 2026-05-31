@@ -402,9 +402,9 @@ Answer normalization:
 
 **Outcome:** V1 can be used on Mac and Windows.
 
-- [ ] Verify local web mode on Mac.
+- [x] Verify local web mode on Mac.
 - [ ] Verify local web mode on Windows.
-- [ ] Add production build command:
+- [x] Add production build command:
   - `pnpm build`.
 - [ ] Add desktop packaging with Tauri after web mode is stable:
   - Mac `.dmg`,

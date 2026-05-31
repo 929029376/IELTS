@@ -1,0 +1,20 @@
+[package]
+name = "ielts-local-practice"
+version = "0.0.0"
+description = "Local IELTS listening and reading practice app"
+authors = ["IELTS Local Practice"]
+edition = "2021"
+license = "UNLICENSED"
+
+[lib]
+name = "ielts_local_practice_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[features]
+default = []
