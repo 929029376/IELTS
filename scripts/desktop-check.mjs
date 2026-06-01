@@ -9,7 +9,8 @@ const requiredFiles = [
   "Cargo.toml",
   "build.rs",
   "src/lib.rs",
-  "src/main.rs"
+  "src/main.rs",
+  "icons/icon.png"
 ];
 
 for (const file of requiredFiles) {

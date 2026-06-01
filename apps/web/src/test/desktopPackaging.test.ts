@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -13,7 +13,7 @@ describe("desktop packaging configuration", () => {
     };
 
     expect(packageJson.devDependencies["@tauri-apps/cli"]).toBeDefined();
-    expect(packageJson.scripts["desktop:build:mac"]).toContain("--bundles dmg");
+    expect(packageJson.scripts["desktop:build:mac"]).toContain("--bundles dmg --ci");
     expect(packageJson.scripts["desktop:build:win"]).toContain("--bundles nsis");
   });
 
@@ -39,5 +39,9 @@ describe("desktop packaging configuration", () => {
 
     expect(packageJson.scripts.build).toBe("pnpm -r --if-present build");
     expect(packageJson.scripts["desktop:check"]).toBe("node scripts/desktop-check.mjs");
+  });
+
+  it("includes the Tauri icon required by generate_context", () => {
+    expect(existsSync(resolve(webRoot, "src-tauri/icons/icon.png"))).toBe(true);
   });
 });

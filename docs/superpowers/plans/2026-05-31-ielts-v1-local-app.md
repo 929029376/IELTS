@@ -407,8 +407,8 @@ Answer normalization:
 - [x] Add production build command:
   - `pnpm build`.
 - [ ] Add desktop packaging with Tauri after web mode is stable:
-  - Mac `.dmg`,
-  - Windows `.exe`.
+  - [x] Mac `.dmg`,
+  - [ ] Windows `.exe`.
 - [ ] Verify file picker, audio playback, PDF viewing, SQLite path, and sync folder path on both systems.
 
 **Acceptance:** The same app can run on both systems, use local data, import question files, and sync history through the selected Baidu Cloud folder.

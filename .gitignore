@@ -17,3 +17,5 @@ test-results/
 .env.local
 listening/
 reading/
+apps/web/src-tauri/gen/
+apps/web/src-tauri/target/

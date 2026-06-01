@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -p tsconfig.build.json && vite build",
     "desktop:build": "tauri build",
-    "desktop:build:mac": "tauri build --bundles dmg",
+    "desktop:build:mac": "tauri build --bundles dmg --ci",
     "desktop:build:win": "tauri build --bundles nsis",
     "test": "vitest run --config vitest.config.ts",
     "test:e2e": "playwright test"
