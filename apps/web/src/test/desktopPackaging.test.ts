@@ -89,6 +89,7 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("Verify Windows packaged runtime install");
     expect(workflow).toContain("/S");
     expect(workflow).toContain("-RequireInstalledApp");
+    expect(workflow).toContain("-RequireAppDataDir");
     expect(workflow).toContain("Start-Sleep -Seconds 10");
     expect(workflow).not.toContain("-SkipLaunch");
 
@@ -112,7 +113,10 @@ describe("desktop packaging configuration", () => {
     expect(script).toContain("Start-Process");
     expect(script).toContain("Get-Process");
     expect(script).toContain("Stop-Process");
-    expect(script).toContain("Test-Path $expectedAppData");
+    expect(script).toContain("Get-AppDataDirectory");
+    expect(script).toContain("$appDataCandidates");
+    expect(script).toContain("RequireAppDataDir");
+    expect(script).toContain("local.ielts.practice");
     expect(script).toContain("RequireInstalledApp");
   });
 });

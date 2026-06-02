@@ -2,6 +2,7 @@ param(
   [string]$ManifestPath = ".\windows-package-manifest.json",
   [string]$InstallerPath = "",
   [switch]$RequireInstalledApp,
+  [switch]$RequireAppDataDir,
   [switch]$SkipLaunch
 )
 
@@ -47,9 +48,6 @@ if ($installerToCheck) {
   Write-Host ""
 }
 
-$expectedAppData = Join-Path $env:APPDATA "IELTS Local Practice"
-$expectedDatabase = Join-Path $expectedAppData "ielts.db"
-
 function Join-IfRoot {
   param(
     [string]$Root,
@@ -61,6 +59,41 @@ function Join-IfRoot {
   }
 
   return Join-Path $Root $RelativePath
+}
+
+$appDataCandidates = @(
+  (Join-IfRoot $env:APPDATA "IELTS Local Practice"),
+  (Join-IfRoot $env:APPDATA "local.ielts.practice"),
+  (Join-IfRoot $env:LOCALAPPDATA "IELTS Local Practice"),
+  (Join-IfRoot $env:LOCALAPPDATA "local.ielts.practice")
+)
+$expectedAppData = $appDataCandidates | Where-Object { $_ } | Select-Object -First 1
+$expectedDatabase = if ($expectedAppData) { Join-Path $expectedAppData "ielts.db" } else { "ielts.db" }
+
+function Get-AppDataDirectory {
+  $existing = $appDataCandidates | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+  if ($existing) {
+    return $existing
+  }
+
+  return $null
+}
+
+function Wait-AppDataDirectory {
+  param(
+    [int]$TimeoutSeconds = 30
+  )
+
+  for ($i = 0; $i -lt $TimeoutSeconds; $i++) {
+    $existing = Get-AppDataDirectory
+    if ($existing) {
+      return $existing
+    }
+
+    Start-Sleep -Seconds 1
+  }
+
+  return $null
 }
 
 $appExeFileNames = @("IELTS Local Practice.exe", "ielts-local-practice.exe")
@@ -116,6 +149,13 @@ if ($exeCandidates.Count -gt 0) {
     }
 
     Write-Host ("Launch check passed. Process id: {0}" -f $runningProcess.Id)
+    $launchedAppData = Wait-AppDataDirectory -TimeoutSeconds 30
+    if ($launchedAppData) {
+      Write-Host ("App data directory exists after launch: {0}" -f $launchedAppData)
+    } elseif ($RequireAppDataDir) {
+      throw "App data directory was required after launch but was not found."
+    }
+
     Stop-Process -Id $runningProcess.Id -Force -ErrorAction SilentlyContinue
     Write-Host "Launch check process stopped."
   }
@@ -134,11 +174,22 @@ if ($exeCandidates.Count -gt 0) {
   }
 }
 
-if (Test-Path $expectedAppData) {
-  Write-Host ("App data directory exists: {0}" -f $expectedAppData)
+$detectedAppData = Get-AppDataDirectory
+if ($detectedAppData) {
+  Write-Host ("App data directory exists: {0}" -f $detectedAppData)
 } else {
-  Write-Host ("App data directory not found yet: {0}" -f $expectedAppData)
+  Write-Host "App data directory not found yet."
+  Write-Host "Expected one of:"
+  foreach ($candidateAppData in $appDataCandidates) {
+    if ($candidateAppData) {
+      Write-Host ("  {0}" -f $candidateAppData)
+    }
+  }
   Write-Host "Open the app once and re-run this script after closing it."
+
+  if ($RequireAppDataDir) {
+    throw "App data directory was required but was not found."
+  }
 }
 
 Write-Host ""

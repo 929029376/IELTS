@@ -164,4 +164,5 @@ jobs:
           ./scripts/windows-packaged-runtime-check.ps1 `
             -ManifestPath "windows-verification-kit/windows-package-manifest.json" `
             -InstallerPath $installer.FullName `
-            -RequireInstalledApp
+            -RequireInstalledApp `
+            -RequireAppDataDir
