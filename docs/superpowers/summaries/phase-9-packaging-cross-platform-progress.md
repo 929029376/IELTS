@@ -674,28 +674,28 @@
   - Passed after requiring non-empty `observedEvidence` for every passed manual
     checklist item, adding blank `observedEvidence` fields to the PowerShell report
     template, and updating the Windows hands-on guide.
-- GitHub Actions run `26828531634`
-  - Triggered by commit `5400c5e` on `master`.
-  - Passed Windows unit tests including the V1 readiness gate coverage, web build,
-    Windows local web smoke, Windows `desktop:check`, Windows NSIS installer build,
-    Windows verification kit creation, installer upload, verification kit upload,
-    Windows packaged runtime install, launch smoke, app data directory smoke,
-    runtime report validation, and runtime report upload.
+- GitHub Actions run `26829543197`
+  - Triggered by commit `765e9fa` on `master`.
+  - Passed Windows unit tests including the stricter observed-evidence coverage,
+    web build, Windows local web smoke, Windows `desktop:check`, Windows NSIS
+    installer build, Windows verification kit creation, installer upload,
+    verification kit upload, Windows packaged runtime install, launch smoke, app
+    data directory smoke, runtime report validation, and runtime report upload.
   - Used runner label `windows-2022`.
   - Uploaded artifact `ielts-local-practice-windows-nsis`.
-  - Installer artifact size: `1855496` bytes.
-  - Installer artifact digest: `sha256:bda78257be747a66b732cf4d22ebe9fbcc230785ca8d7f3f2844af4b20c67b12`.
+  - Installer artifact size: `1855191` bytes.
+  - Installer artifact digest: `sha256:0b07acefecbd78289ec8e4db0aa4d02caa0b96c6a713ef190040a6ebc870c7b7`.
   - Uploaded artifact `ielts-local-practice-windows-verification-kit`.
-  - Verification kit artifact size: `5055` bytes.
-  - Verification kit artifact digest: `sha256:6cf956148896c22a69ea5031d5a7a96142525dfddd71e7a970458a8e10e79fa0`.
+  - Verification kit artifact size: `5117` bytes.
+  - Verification kit artifact digest: `sha256:d0df235f722e4f5356de37655eeb3f0132058062e5486b7baacff9f1117ad208`.
   - Uploaded artifact `ielts-local-practice-windows-runtime-report`.
-  - Runtime report artifact size: `1340` bytes.
-  - Runtime report artifact digest: `sha256:aa83d5e4f2fb20cb23d3cab70a4b18ad1e3f5fe667f39b14e6abf6937e76f5b9`.
-  - All three artifacts expire at `2026-08-31T15:02:29Z`.
+  - Runtime report artifact size: `1351` bytes.
+  - Runtime report artifact digest: `sha256:148d8e24ffe475f354d23da70fcb78325e1a994971c7ca282e34088b91432fa0`.
+  - All three artifacts expire at `2026-08-31T15:19:20Z`.
 
 ## Remaining Phase 9 Work
 
-- Windows local web mode is verified on `windows-2022` by GitHub Actions run `26828531634`.
+- Windows local web mode is verified on `windows-2022` by GitHub Actions run `26829543197`.
 - Windows `.exe` packaging is complete through the GitHub Actions artifact
   `ielts-local-practice-windows-nsis`.
 - Windows packaged runtime hands-on verification now has a downloadable verification
@@ -718,16 +718,16 @@
   passed manual checklist item, so Phase 9 evidence records what was actually seen
   in the packaged Windows UI.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
-  on `windows-2022` through GitHub Actions run `26828531634`.
+  on `windows-2022` through GitHub Actions run `26829543197`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,
   report-capable PowerShell verifier execution, runtime report JSON validation, and
-  runtime report artifact upload are verified in GitHub Actions run `26828531634`.
+  runtime report artifact upload are verified in GitHub Actions run `26829543197`.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
 Download the Windows NSIS installer artifact and Windows verification kit artifact from
-GitHub Actions run `26828531634`, then run `windows-packaged-runtime-check.ps1` on a
+GitHub Actions run `26829543197`, then run `windows-packaged-runtime-check.ps1` on a
 Windows environment with the downloaded installer path. Use `-ReportPath`, and
 optionally pass `-BaiduSyncPath`, `-ListeningZipPath`, `-AudioPath`, and
 `-ReadingPdfPath`, so the generated `windows-packaged-runtime-report.json` captures

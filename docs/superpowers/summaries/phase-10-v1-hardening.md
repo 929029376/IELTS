@@ -1,6 +1,6 @@
 # Phase 10 V1 Hardening
 
-**Date:** 2026-06-01
+**Date:** 2026-06-01 to 2026-06-02
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -95,12 +95,13 @@
     hash, installed executable discovery, app launch, process, app data checks, and
     structured `windows-packaged-runtime-report.json` output before the remaining UI
     checklist.
-  - GitHub Actions run `26828531634` on `master` passed Windows unit tests, web
-    build, Windows local web smoke, `desktop:check` with Rust packaged runtime
-    diagnostics, Windows NSIS build, artifact uploads, and Windows packaged runtime
-    silent-install plus launch smoke plus app data directory verification plus
-    report-capable PowerShell verifier execution plus runtime report JSON validation
-    plus runtime report artifact upload on `windows-2022`.
+  - GitHub Actions run `26829543197` on `master` passed Windows unit tests,
+    including stricter observed-evidence coverage, web build, Windows local web
+    smoke, `desktop:check` with Rust packaged runtime diagnostics, Windows NSIS
+    build, artifact uploads, and Windows packaged runtime silent-install plus
+    launch smoke plus app data directory verification plus report-capable
+    PowerShell verifier execution plus runtime report JSON validation plus runtime
+    report artifact upload on `windows-2022`.
   - Windows packaged runtime diagnostics field construction is verified in CI, but
     the rendered diagnostics panel still needs hands-on inspection on a real
     Windows environment.
@@ -109,7 +110,7 @@
     needed to close the remaining Phase 9 evidence gap.
   - A repo-tracked Windows runtime report validator now checks the completed report
     before Phase 9 can be closed.
-  - The Windows verification kit artifact from run `26828531634` ships that
+  - The Windows verification kit artifact from run `26829543197` ships that
     validator, reducing the real Windows validation dependency to the downloaded
     installer and kit artifacts.
   - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
