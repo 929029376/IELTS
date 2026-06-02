@@ -90,6 +90,7 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("/S");
     expect(workflow).toContain("-RequireInstalledApp");
     expect(workflow).toContain("Start-Sleep -Seconds 10");
+    expect(workflow).not.toContain("-SkipLaunch");
 
     const uploadIndex = workflow.indexOf("Upload Windows installer");
     const installVerificationIndex = workflow.indexOf("Verify Windows packaged runtime install");
@@ -110,6 +111,7 @@ describe("desktop packaging configuration", () => {
     expect(script).toContain("Where-Object");
     expect(script).toContain("Start-Process");
     expect(script).toContain("Get-Process");
+    expect(script).toContain("Stop-Process");
     expect(script).toContain("Test-Path $expectedAppData");
     expect(script).toContain("RequireInstalledApp");
   });

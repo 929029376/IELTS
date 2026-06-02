@@ -116,6 +116,8 @@ if ($exeCandidates.Count -gt 0) {
     }
 
     Write-Host ("Launch check passed. Process id: {0}" -f $runningProcess.Id)
+    Stop-Process -Id $runningProcess.Id -Force -ErrorAction SilentlyContinue
+    Write-Host "Launch check process stopped."
   }
 } else {
   Write-Host "Installed app executable was not found automatically."
