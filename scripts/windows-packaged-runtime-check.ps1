@@ -1,12 +1,24 @@
 param(
   [string]$ManifestPath = ".\windows-package-manifest.json",
   [string]$InstallerPath = "",
+  [string]$ReportPath = ".\windows-packaged-runtime-report.json",
+  [string]$BaiduSyncPath = "",
+  [string]$ListeningZipPath = "",
+  [string]$AudioPath = "",
+  [string]$ReadingPdfPath = "",
   [switch]$RequireInstalledApp,
   [switch]$RequireAppDataDir,
+  [switch]$RequireBaiduSyncPath,
   [switch]$SkipLaunch
 )
 
 $ErrorActionPreference = "Stop"
+$actualHash = ""
+$installerHashVerified = $false
+$appExe = ""
+$launchChecked = $false
+$processStayedRunning = $false
+$launchedAppData = $null
 
 Write-Host "IELTS Local Practice - Windows packaged runtime verification"
 Write-Host ""
@@ -44,6 +56,7 @@ if ($installerToCheck) {
     throw "Installer SHA256 does not match the manifest."
   }
 
+  $installerHashVerified = $true
   Write-Host "Installer SHA256 check passed."
   Write-Host ""
 }
@@ -140,6 +153,7 @@ if ($exeCandidates.Count -gt 0) {
   Write-Host ("Installed app executable found: {0}" -f $appExe)
 
   if (-not $SkipLaunch) {
+    $launchChecked = $true
     $process = Start-Process -FilePath $appExe -PassThru
     Start-Sleep -Seconds 5
     $runningProcess = Get-Process -Id $process.Id -ErrorAction SilentlyContinue
@@ -148,6 +162,7 @@ if ($exeCandidates.Count -gt 0) {
       throw "IELTS Local Practice process did not stay running after launch."
     }
 
+    $processStayedRunning = $true
     Write-Host ("Launch check passed. Process id: {0}" -f $runningProcess.Id)
     $launchedAppData = Wait-AppDataDirectory -TimeoutSeconds 30
     if ($launchedAppData) {
@@ -194,6 +209,114 @@ if ($detectedAppData) {
 
 Write-Host ""
 
+function Get-PathCheck {
+  param(
+    [string]$Label,
+    [string]$Path
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Path)) {
+    return [ordered]@{
+      label = $Label
+      path = ""
+      provided = $false
+      exists = $false
+      status = "not_provided"
+    }
+  }
+
+  $exists = Test-Path $Path
+  $status = "missing"
+  if ($exists) {
+    $status = "exists"
+  }
+
+  return [ordered]@{
+    label = $Label
+    path = $Path
+    provided = $true
+    exists = $exists
+    status = $status
+  }
+}
+
+$baiduSyncCheck = Get-PathCheck -Label "Baidu Cloud sync folder" -Path $BaiduSyncPath
+if ($baiduSyncCheck.provided) {
+  Write-Host ("Baidu Cloud sync folder supplied: {0}" -f $baiduSyncCheck.path)
+  if ($baiduSyncCheck.exists) {
+    Write-Host "Baidu Cloud sync folder exists."
+  } elseif ($RequireBaiduSyncPath) {
+    throw "BaiduSyncPath was required but the folder was not found: $BaiduSyncPath"
+  } else {
+    Write-Host "Baidu Cloud sync folder was not found."
+  }
+}
+
+$assetChecks = @(
+  (Get-PathCheck -Label "Listening ZIP" -Path $ListeningZipPath),
+  (Get-PathCheck -Label "Listening audio" -Path $AudioPath),
+  (Get-PathCheck -Label "Reading PDF" -Path $ReadingPdfPath)
+)
+
+$expectedSyncEvidence = "Record the selected Windows Baidu Cloud folder."
+if ($BaiduSyncPath) {
+  $expectedSyncEvidence = $BaiduSyncPath
+}
+
+$expectedZipEvidence = "Record the selected listening ZIP path."
+if ($ListeningZipPath) {
+  $expectedZipEvidence = $ListeningZipPath
+}
+
+$expectedAudioEvidence = "Record the selected listening audio path and observed duration."
+if ($AudioPath) {
+  $expectedAudioEvidence = $AudioPath
+}
+
+$expectedPdfEvidence = "Record the selected reading PDF path and rendered passage title."
+if ($ReadingPdfPath) {
+  $expectedPdfEvidence = $ReadingPdfPath
+}
+
+$manualChecklist = @(
+  [ordered]@{
+    id = "runtime-platform"
+    label = "Desktop runtime diagnostics shows platform windows."
+    status = "manual"
+    expectedEvidence = "The diagnostics panel lists platform windows."
+  },
+  [ordered]@{
+    id = "runtime-sqlite-path"
+    label = "Desktop runtime diagnostics shows the expected SQLite path."
+    status = "manual"
+    expectedEvidence = $expectedDatabase
+  },
+  [ordered]@{
+    id = "runtime-sync-path"
+    label = "Desktop runtime diagnostics shows the selected Baidu Cloud sync folder."
+    status = "manual"
+    expectedEvidence = $expectedSyncEvidence
+  },
+  [ordered]@{
+    id = "listening-zip-picker"
+    label = "The file picker accepts a listening ZIP."
+    status = "manual"
+    expectedEvidence = $expectedZipEvidence
+  },
+  [ordered]@{
+    id = "listening-audio-playback"
+    label = "The file picker accepts an extracted listening audio file, and audio loads duration, plays, and pauses."
+    status = "manual"
+    expectedEvidence = $expectedAudioEvidence
+  },
+  [ordered]@{
+    id = "reading-pdf-preview"
+    label = "The file picker accepts a reading PDF, and PDF viewing renders passage and question pages."
+    status = "manual"
+    expectedEvidence = $expectedPdfEvidence
+  }
+)
+
 Write-Host "Manual checklist"
 Write-Host "  [ ] Install the NSIS .exe from the GitHub artifact."
 Write-Host "  [ ] Open IELTS Local Practice from the Start menu."
@@ -207,4 +330,46 @@ Write-Host "  [ ] The file picker accepts a reading PDF."
 Write-Host "  [ ] PDF viewing renders passage and question pages."
 Write-Host ""
 
+$manifestSha256 = ""
+if ($manifest -and $manifest.sha256) {
+  $manifestSha256 = $manifest.sha256
+}
+
+$report = [ordered]@{
+  generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+  manifestPath = $ManifestPath
+  reportPath = $ReportPath
+  manifest = $manifest
+  installer = [ordered]@{
+    path = $installerToCheck
+    sha256 = $actualHash
+    manifestSha256 = $manifestSha256
+    hashVerified = $installerHashVerified
+  }
+  installedApp = [ordered]@{
+    executablePath = $appExe
+    found = (-not [string]::IsNullOrWhiteSpace($appExe))
+    launchChecked = $launchChecked
+    processStayedRunning = $processStayedRunning
+  }
+  appData = [ordered]@{
+    detectedPath = $detectedAppData
+    detectedAfterLaunch = $launchedAppData
+    expectedCandidates = @($appDataCandidates | Where-Object { $_ })
+    expectedDatabase = $expectedDatabase
+  }
+  baiduSync = $baiduSyncCheck
+  assetChecks = $assetChecks
+  manualChecklist = $manualChecklist
+  nextAction = "Complete each manualChecklist item on Windows and attach this report to the Phase 9 summary."
+}
+
+$reportDir = Split-Path -Parent $ReportPath
+if (-not [string]::IsNullOrWhiteSpace($reportDir)) {
+  New-Item -ItemType Directory -Path $reportDir -Force | Out-Null
+}
+
+$report | ConvertTo-Json -Depth 6 | Set-Content -Encoding utf8 $ReportPath
+
+Write-Host ("Verification report written to: {0}" -f $ReportPath)
 Write-Host "Record the exact Windows Baidu Cloud sync folder and any failed checklist item in docs/superpowers/summaries/phase-9-packaging-cross-platform-progress.md."

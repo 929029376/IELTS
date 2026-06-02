@@ -119,6 +119,7 @@ jobs:
             installerPath = $installer.FullName
             sizeBytes = $installer.Length
             sha256 = $hash
+            manualReportName = "windows-packaged-runtime-report.json"
             requiredRuntimeChecks = @(
               "Desktop runtime diagnostics",
               "SQLite path",

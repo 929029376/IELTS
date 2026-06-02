@@ -88,6 +88,8 @@ describe("desktop packaging configuration", () => {
 
     expect(workflow).toContain("Create Windows verification kit");
     expect(workflow).toContain("windows-package-manifest.json");
+    expect(workflow).toContain("manualReportName");
+    expect(workflow).toContain("windows-packaged-runtime-report.json");
     expect(workflow).toContain("ielts-local-practice-windows-verification-kit");
     expect(workflow).toContain("scripts/windows-packaged-runtime-check.ps1");
     expect(workflow).toContain("Verify Windows packaged runtime install");
@@ -111,6 +113,15 @@ describe("desktop packaging configuration", () => {
     expect(script).toContain("PDF viewing");
     expect(script).toContain("Get-FileHash");
     expect(script).toContain("InstallerPath");
+    expect(script).toContain("ReportPath");
+    expect(script).toContain("BaiduSyncPath");
+    expect(script).toContain("ListeningZipPath");
+    expect(script).toContain("AudioPath");
+    expect(script).toContain("ReadingPdfPath");
+    expect(script).toContain("RequireBaiduSyncPath");
+    expect(script).toContain("manualChecklist");
+    expect(script).toContain("windows-packaged-runtime-report.json");
+    expect(script).toContain("ConvertTo-Json -Depth 6");
     expect(script).toContain("IELTS Local Practice.exe");
     expect(script).toContain("ielts-local-practice.exe");
     expect(script).toContain("Where-Object");
