@@ -105,8 +105,26 @@ Keep the report with the installer run evidence. The report is complete when:
   `exists`,
 - every `manualChecklist` item is marked as passed.
 
+## Final Report Validator
+
+After updating the manual checklist, copy the completed report back to this repo or
+run the validator from the repo root:
+
+```powershell
+node scripts/validate-windows-runtime-report.mjs ".\windows-packaged-runtime-report.json"
+```
+
+The validator must print:
+
+```text
+Windows runtime report is complete and Phase 9 evidence-ready.
+```
+
+If it fails, fix the missing Windows evidence before updating the Phase 9 summary.
+
 ## Phase 9 Completion Rule
 
 Do not mark Phase 9 complete until the real Windows report proves desktop runtime
 diagnostics, SQLite path, Baidu Cloud sync folder path, file picker, audio playback,
-and PDF viewing on a real Windows environment.
+and PDF viewing on a real Windows environment, and
+`scripts/validate-windows-runtime-report.mjs` passes against that completed report.

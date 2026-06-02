@@ -1,4 +1,6 @@
-import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -174,5 +176,52 @@ describe("desktop packaging configuration", () => {
     expect(guide).toContain("manualChecklist");
     expect(guide).toContain("status = \"passed\"");
     expect(guide).toContain("Phase 9");
+  });
+
+  it("validates completed Windows runtime reports before Phase 9 is closed", () => {
+    const validatorPath = resolve(workspaceRoot, "scripts/validate-windows-runtime-report.mjs");
+
+    expect(existsSync(validatorPath)).toBe(true);
+
+    const tempDir = mkdtempSync(resolve(tmpdir(), "ielts-runtime-report-"));
+    const passingReportPath = resolve(tempDir, "passing-report.json");
+    const failingReportPath = resolve(tempDir, "failing-report.json");
+    const baseReport = {
+      installer: { hashVerified: true },
+      installedApp: { found: true, processStayedRunning: true },
+      appData: {
+        detectedPath: "C:\\Users\\tester\\AppData\\Roaming\\local.ielts.practice",
+        expectedDatabase: "C:\\Users\\tester\\AppData\\Roaming\\local.ielts.practice\\ielts.db"
+      },
+      baiduSync: { provided: true, exists: true, status: "exists" },
+      assetChecks: [
+        { label: "Listening ZIP", provided: true, exists: true, status: "exists" },
+        { label: "Listening audio", provided: true, exists: true, status: "exists" },
+        { label: "Reading PDF", provided: true, exists: true, status: "exists" }
+      ],
+      manualChecklist: [
+        { id: "runtime-platform", status: "passed" },
+        { id: "runtime-sqlite-path", status: "passed" },
+        { id: "runtime-sync-path", status: "passed" },
+        { id: "listening-zip-picker", status: "passed" },
+        { id: "listening-audio-playback", status: "passed" },
+        { id: "reading-pdf-preview", status: "passed" }
+      ]
+    };
+
+    writeFileSync(passingReportPath, JSON.stringify(baseReport), "utf8");
+    writeFileSync(
+      failingReportPath,
+      JSON.stringify({
+        ...baseReport,
+        manualChecklist: [{ id: "runtime-platform", status: "manual" }]
+      }),
+      "utf8"
+    );
+
+    expect(execFileSync("node", [validatorPath, passingReportPath], { encoding: "utf8" })).toContain("Windows runtime report is complete");
+    expect(() => execFileSync("node", [validatorPath, failingReportPath], { encoding: "utf8", stdio: "pipe" })).toThrow(
+      /manualChecklist/
+    );
   });
 });

@@ -88,6 +88,8 @@
   - A repo-tracked Windows hands-on verification guide now documents the exact
     artifact set, PowerShell command, manual checklist, and report completion rule
     needed to close the remaining Phase 9 evidence gap.
+  - A repo-tracked Windows runtime report validator now checks the completed report
+    before Phase 9 can be closed.
   - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
     SQLite path, and sync folder path still need hands-on verification on a real
     Windows environment.

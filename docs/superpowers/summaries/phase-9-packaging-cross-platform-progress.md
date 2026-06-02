@@ -88,6 +88,11 @@
   `windows-packaged-runtime-check.ps1` PowerShell command, Baidu Cloud and asset
   path arguments, manual UI checks, `manualChecklist` report updates, and the Phase
   9 completion rule.
+- Added `scripts/validate-windows-runtime-report.mjs` so a completed real Windows
+  report can be checked automatically before Phase 9 is closed. It rejects missing
+  installer hash evidence, installed app evidence, app data paths, Baidu Cloud path
+  evidence, listening ZIP/audio/PDF path evidence, and any `manualChecklist` item
+  that is not marked `passed`.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -523,6 +528,11 @@
     cover installer, verification kit, runtime report, PowerShell arguments, desktop
     runtime diagnostics, SQLite path, file picker, audio playback, PDF viewing,
     `manualChecklist`, and the Phase 9 completion rule.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because `scripts/validate-windows-runtime-report.mjs` did not
+    exist.
+  - Passed after adding a validator that accepts a fully passed Windows runtime
+    report and rejects a report with incomplete `manualChecklist` evidence.
 - GitHub Actions run `26825215775`
   - Triggered by commit `02bf79e` on `master`.
   - Passed Windows unit tests including the Windows verification guide coverage,
@@ -604,6 +614,9 @@
   `windows-packaged-runtime-report.json` for the remaining hands-on evidence.
 - Windows packaged runtime hands-on verification now has a repo-tracked guide at
   `docs/superpowers/windows-packaged-runtime-verification.md`.
+- Completed Windows packaged runtime reports can now be checked with
+  `node scripts/validate-windows-runtime-report.mjs <report-path>` before Phase 9
+  is closed.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
   on `windows-2022` through GitHub Actions run `26825215775`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,
@@ -619,4 +632,6 @@ Windows environment with the downloaded installer path. Use `-ReportPath`, and
 optionally pass `-BaiduSyncPath`, `-ListeningZipPath`, `-AudioPath`, and
 `-ReadingPdfPath`, so the generated `windows-packaged-runtime-report.json` captures
 the remaining file picker, audio playback, PDF viewing, SQLite path, and Baidu Cloud
-sync folder evidence.
+sync folder evidence. After marking every manual checklist item as `passed`, run
+`node scripts/validate-windows-runtime-report.mjs <report-path>` and record the
+passing validator output in this summary.

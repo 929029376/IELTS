@@ -419,6 +419,7 @@ Answer normalization:
   - [x] Windows CI uploads the generated runtime report as a GitHub Actions artifact.
   - [x] Windows CI validates the generated runtime report JSON before upload.
   - [x] Windows hands-on verification guide documents the artifact download, PowerShell command, manual UI checklist, and report completion rule.
+  - [x] Windows runtime report validator can reject incomplete manual evidence before Phase 9 is closed.
   - [ ] Windows packaged runtime diagnostic and hands-on verification.
 
 **Acceptance:** The same app can run on both systems, use local data, import question files, and sync history through the selected Baidu Cloud folder.
