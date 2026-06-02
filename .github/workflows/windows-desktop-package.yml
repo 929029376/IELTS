@@ -169,6 +169,39 @@ jobs:
             -RequireInstalledApp `
             -RequireAppDataDir
 
+      - name: Validate Windows runtime report
+        shell: pwsh
+        run: |
+          $reportPath = "windows-verification-kit/windows-packaged-runtime-report.json"
+          if (-not (Test-Path $reportPath)) {
+            throw "Windows runtime report was not generated."
+          }
+
+          $report = Get-Content $reportPath -Raw | ConvertFrom-Json
+          if (-not $report.installer.hashVerified) {
+            throw "Windows runtime report did not confirm installer hash verification."
+          }
+
+          if (-not $report.installedApp.found) {
+            throw "Windows runtime report did not record an installed app executable."
+          }
+
+          if (-not $report.installedApp.processStayedRunning) {
+            throw "Windows runtime report did not confirm the app process stayed running."
+          }
+
+          if (-not $report.appData.detectedPath) {
+            throw "Windows runtime report did not record a detected app data path."
+          }
+
+          if (-not $report.appData.expectedDatabase) {
+            throw "Windows runtime report did not record an expectedDatabase path."
+          }
+
+          if (-not $report.manualChecklist -or $report.manualChecklist.Count -lt 6) {
+            throw "Windows runtime report did not include the manualChecklist evidence items."
+          }
+
       - name: Upload Windows runtime report
         uses: actions/upload-artifact@v4
         with:
