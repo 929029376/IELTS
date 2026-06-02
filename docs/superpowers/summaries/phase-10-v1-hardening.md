@@ -67,7 +67,7 @@
 ## Remaining V1 Gaps
 
 - Phase 9 remains partially blocked by environment:
-  - Windows local web mode is verified in GitHub Actions on `windows-latest`.
+  - Windows local web mode is verified in GitHub Actions on `windows-2022`.
   - Mac `.dmg` packaging and packaged Mac hands-on checks are complete.
   - Windows `.exe` packaging is complete through the GitHub Actions artifact
     `ielts-local-practice-windows-nsis`.
@@ -75,10 +75,10 @@
     manifest plus `windows-packaged-runtime-check.ps1`, including automated installer
     hash, installed executable discovery, app launch, process, and app data checks
     before the remaining UI checklist.
-  - GitHub Actions run `26799826230` on `master` passed Windows unit tests, web
+  - GitHub Actions run `26800364659` on `master` passed Windows unit tests, web
     build, Windows local web smoke, desktop packaging config, Windows NSIS build,
-    artifact uploads, and Windows packaged runtime silent-install verification on
-    `windows-2022`.
+    artifact uploads, and Windows packaged runtime silent-install plus launch smoke
+    verification on `windows-2022`.
   - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
     SQLite path, and sync folder path still need hands-on verification on a real
     Windows environment.

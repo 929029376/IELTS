@@ -403,7 +403,7 @@ Answer normalization:
 **Outcome:** V1 can be used on Mac and Windows.
 
 - [x] Verify local web mode on Mac.
-- [x] Verify local web mode on Windows via GitHub Actions `windows-latest` smoke test.
+- [x] Verify local web mode on Windows via GitHub Actions `windows-2022` smoke test.
 - [x] Add production build command:
   - `pnpm build`.
 - [x] Add desktop packaging with Tauri after web mode is stable:
@@ -412,6 +412,7 @@ Answer normalization:
 - [ ] Verify file picker, audio playback, PDF viewing, SQLite path, and sync folder path on both systems:
   - [x] Mac packaged runtime diagnostic confirms SQLite path, sync folder path, and file/audio/PDF modes.
   - [x] Mac hands-on file picker, audio playback, and PDF viewing with real imported assets.
+  - [x] Windows packaged runtime silent install and launch smoke via GitHub Actions.
   - [ ] Windows packaged runtime diagnostic and hands-on verification.
 
 **Acceptance:** The same app can run on both systems, use local data, import question files, and sync history through the selected Baidu Cloud folder.
