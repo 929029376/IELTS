@@ -41,6 +41,10 @@
 - Added a Windows local web smoke test to the GitHub Actions packaging workflow so
   `windows-latest` starts `pnpm dev` and verifies both the API health endpoint and
   Vite HTML shell before building the Windows installer.
+- Added a Windows packaged runtime verification kit to the GitHub Actions packaging
+  workflow. The kit includes a generated installer manifest and
+  `scripts/windows-packaged-runtime-check.ps1` so the remaining Windows hands-on
+  runtime checks can be run from the same workflow artifact set as the installer.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -159,6 +163,34 @@
   - Artifact size: `1853541` bytes.
   - Artifact digest: `sha256:26a6aa2da2fc84fff61c751a4257e30b3b6ee0f96538e7fa53015bb36502b77e`.
   - Artifact expires at `2026-08-31T04:11:41Z`.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the Windows workflow did not ship a packaged runtime
+    verification kit.
+  - Passed after adding the PowerShell checklist script and requiring the workflow to
+    create `windows-package-manifest.json` plus upload
+    `ielts-local-practice-windows-verification-kit`.
+- `npx pnpm@9.15.4 test`
+  - Shared: 3 tests passed.
+  - Server: 40 tests passed.
+  - Web: 28 tests passed.
+- `npx pnpm@9.15.4 build`
+  - Shared TypeScript build passed.
+  - Server TypeScript build passed.
+  - Web TypeScript and Vite production build passed.
+- `npx pnpm@9.15.4 desktop:check`
+  - Desktop packaging configuration check passed.
+- GitHub Actions run `26798309569`
+  - Triggered by commit `d18abe0` on `master`.
+  - Passed Windows unit tests, web build, Windows local web smoke, desktop packaging
+    config check, Windows NSIS installer build, Windows verification kit creation,
+    Windows installer upload, and Windows verification kit upload.
+  - Uploaded artifact `ielts-local-practice-windows-nsis`.
+  - Installer artifact size: `1854090` bytes.
+  - Installer artifact digest: `sha256:4a100f6fb3d62d922080ad47c430ce34614932e97a89ea4dc2de7ab9c57cf771`.
+  - Uploaded artifact `ielts-local-practice-windows-verification-kit`.
+  - Verification kit artifact size: `1440` bytes.
+  - Verification kit artifact digest: `sha256:0351b6ec747eb43686565591640d947dd3546c1331d464a6c9a2ae6915286dac`.
+  - Both artifacts expire at `2026-08-31T04:25:10Z`.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
@@ -214,10 +246,13 @@
 - Windows local web mode is verified on `windows-latest` by GitHub Actions run `26797896087`.
 - Windows `.exe` packaging is complete through the GitHub Actions artifact
   `ielts-local-practice-windows-nsis`.
+- Windows packaged runtime hands-on verification now has a downloadable verification
+  kit artifact with a manifest and PowerShell checklist script.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
-Download the Windows NSIS installer artifact from GitHub Actions run `26797896087`,
-then repeat local web, packaged runtime diagnostics, file picker, audio playback, PDF
-viewing, SQLite path, and Baidu Cloud sync folder checks on a Windows environment.
+Download the Windows NSIS installer artifact and Windows verification kit artifact from
+GitHub Actions run `26798309569`, then run `windows-packaged-runtime-check.ps1` on a
+Windows environment while checking packaged runtime diagnostics, file picker, audio
+playback, PDF viewing, SQLite path, and Baidu Cloud sync folder behavior.
