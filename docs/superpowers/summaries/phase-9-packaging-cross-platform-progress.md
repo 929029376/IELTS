@@ -83,6 +83,11 @@
   `ConvertFrom-Json` and fails CI if installer hash verification, installed app
   discovery, process launch smoke, app data detection, expected SQLite path, or the
   manual checklist evidence is missing.
+- Added `docs/superpowers/windows-packaged-runtime-verification.md` to document the
+  real Windows hands-on verification workflow. It covers artifact download, the
+  `windows-packaged-runtime-check.ps1` PowerShell command, Baidu Cloud and asset
+  path arguments, manual UI checks, `manualChecklist` report updates, and the Phase
+  9 completion rule.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -511,6 +516,13 @@
   - Runtime report artifact size: `1344` bytes.
   - Runtime report artifact digest: `sha256:45a4701c19ca9a39f2d0d47c81ef493fdc7afa962aab31fcf604d7d8cb4f9c99`.
   - All three artifacts expire at `2026-08-31T13:51:05Z`.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because `docs/superpowers/windows-packaged-runtime-verification.md`
+    did not exist.
+  - Passed after adding the Windows hands-on verification guide and requiring it to
+    cover installer, verification kit, runtime report, PowerShell arguments, desktop
+    runtime diagnostics, SQLite path, file picker, audio playback, PDF viewing,
+    `manualChecklist`, and the Phase 9 completion rule.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
@@ -571,6 +583,8 @@
   installed executable discovery, app launch, process, and app data checks before
   manual UI verification. The script can now also write a structured
   `windows-packaged-runtime-report.json` for the remaining hands-on evidence.
+- Windows packaged runtime hands-on verification now has a repo-tracked guide at
+  `docs/superpowers/windows-packaged-runtime-verification.md`.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
   on `windows-2022` through GitHub Actions run `26824224735`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,

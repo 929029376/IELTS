@@ -85,6 +85,9 @@
   - Windows packaged runtime diagnostics field construction is verified in CI, but
     the rendered diagnostics panel still needs hands-on inspection on a real
     Windows environment.
+  - A repo-tracked Windows hands-on verification guide now documents the exact
+    artifact set, PowerShell command, manual checklist, and report completion rule
+    needed to close the remaining Phase 9 evidence gap.
   - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
     SQLite path, and sync folder path still need hands-on verification on a real
     Windows environment.

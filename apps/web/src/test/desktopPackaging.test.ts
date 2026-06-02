@@ -149,4 +149,30 @@ describe("desktop packaging configuration", () => {
     expect(script).toContain("local.ielts.practice");
     expect(script).toContain("RequireInstalledApp");
   });
+
+  it("documents the Windows hands-on packaged runtime verification workflow", () => {
+    const guidePath = resolve(workspaceRoot, "docs/superpowers/windows-packaged-runtime-verification.md");
+
+    expect(existsSync(guidePath)).toBe(true);
+
+    const guide = readFileSync(guidePath, "utf8");
+
+    expect(guide).toContain("ielts-local-practice-windows-nsis");
+    expect(guide).toContain("ielts-local-practice-windows-verification-kit");
+    expect(guide).toContain("ielts-local-practice-windows-runtime-report");
+    expect(guide).toContain("windows-packaged-runtime-check.ps1");
+    expect(guide).toContain("-BaiduSyncPath");
+    expect(guide).toContain("-ListeningZipPath");
+    expect(guide).toContain("-AudioPath");
+    expect(guide).toContain("-ReadingPdfPath");
+    expect(guide).toContain("-RequireBaiduSyncPath");
+    expect(guide).toContain("Desktop runtime diagnostics");
+    expect(guide).toContain("SQLite path");
+    expect(guide).toContain("file picker");
+    expect(guide).toContain("audio playback");
+    expect(guide).toContain("PDF viewing");
+    expect(guide).toContain("manualChecklist");
+    expect(guide).toContain("status = \"passed\"");
+    expect(guide).toContain("Phase 9");
+  });
 });
