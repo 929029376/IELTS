@@ -93,5 +93,11 @@ describe("desktop packaging configuration", () => {
     expect(script).toContain("file picker");
     expect(script).toContain("audio playback");
     expect(script).toContain("PDF viewing");
+    expect(script).toContain("Get-FileHash");
+    expect(script).toContain("InstallerPath");
+    expect(script).toContain("IELTS Local Practice.exe");
+    expect(script).toContain("Start-Process");
+    expect(script).toContain("Get-Process");
+    expect(script).toContain("Test-Path $expectedAppData");
   });
 });
