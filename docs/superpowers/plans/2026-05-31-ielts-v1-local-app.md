@@ -414,6 +414,7 @@ Answer normalization:
   - [x] Mac hands-on file picker, audio playback, and PDF viewing with real imported assets.
   - [x] Windows packaged runtime silent install and launch smoke via GitHub Actions.
   - [x] Windows packaged app data path creation smoke via GitHub Actions.
+  - [x] Windows packaged runtime diagnostic field construction via `desktop:check` Rust test on GitHub Actions.
   - [ ] Windows packaged runtime diagnostic and hands-on verification.
 
 **Acceptance:** The same app can run on both systems, use local data, import question files, and sync history through the selected Baidu Cloud folder.

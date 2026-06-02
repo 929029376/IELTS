@@ -75,10 +75,14 @@
     manifest plus `windows-packaged-runtime-check.ps1`, including automated installer
     hash, installed executable discovery, app launch, process, and app data checks
     before the remaining UI checklist.
-  - GitHub Actions run `26801307144` on `master` passed Windows unit tests, web
-    build, Windows local web smoke, desktop packaging config, Windows NSIS build,
-    artifact uploads, and Windows packaged runtime silent-install plus launch smoke
-    plus app data directory verification on `windows-2022`.
+  - GitHub Actions run `26821603976` on `master` passed Windows unit tests, web
+    build, Windows local web smoke, `desktop:check` with Rust packaged runtime
+    diagnostics, Windows NSIS build, artifact uploads, and Windows packaged runtime
+    silent-install plus launch smoke plus app data directory verification on
+    `windows-2022`.
+  - Windows packaged runtime diagnostics field construction is verified in CI, but
+    the rendered diagnostics panel still needs hands-on inspection on a real
+    Windows environment.
   - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
     SQLite path, and sync folder path still need hands-on verification on a real
     Windows environment.
