@@ -72,7 +72,9 @@
   - Windows `.exe` packaging is complete through the GitHub Actions artifact
     `ielts-local-practice-windows-nsis`.
   - A Windows verification kit artifact now ships with the installer and includes a
-    manifest plus `windows-packaged-runtime-check.ps1` checklist.
+    manifest plus `windows-packaged-runtime-check.ps1`, including automated installer
+    hash, installed executable, app launch, process, and app data checks before the
+    remaining UI checklist.
   - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
     SQLite path, and sync folder path still need hands-on verification on a real
     Windows environment.
