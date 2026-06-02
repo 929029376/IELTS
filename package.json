@@ -9,6 +9,7 @@
     "desktop:check": "node scripts/desktop-check.mjs",
     "desktop:build:mac": "pnpm --filter @ielts/web desktop:build:mac",
     "desktop:build:win": "pnpm --filter @ielts/web desktop:build:win",
+    "mac:check": "node scripts/mac-readiness-check.mjs",
     "windows:handoff": "node scripts/windows-verification-handoff.mjs",
     "v1:check": "node scripts/v1-readiness-check.mjs",
     "test": "pnpm -r --if-present test",

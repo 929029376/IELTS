@@ -402,6 +402,11 @@ Answer normalization:
 
 **Outcome:** V1 can be used on Mac and Windows.
 
+**Current priority note:** Per the 2026-06-02 instruction, Windows hands-on work is
+deferred for now. The Mac implementation is verified independently through
+`pnpm mac:check`; the cross-platform `pnpm v1:check` gate still requires the final
+real Windows runtime report before V1 is globally complete.
+
 - [x] Verify local web mode on Mac.
 - [x] Verify local web mode on Windows via GitHub Actions `windows-2022` smoke test.
 - [x] Add production build command:
@@ -412,6 +417,7 @@ Answer normalization:
 - [ ] Verify file picker, audio playback, PDF viewing, SQLite path, and sync folder path on both systems:
   - [x] Mac packaged runtime diagnostic confirms SQLite path, sync folder path, and file/audio/PDF modes.
   - [x] Mac hands-on file picker, audio playback, and PDF viewing with real imported assets.
+  - [x] Mac-only V1 readiness gate `pnpm mac:check` verifies unit tests, Playwright, production build, desktop diagnostics, and Mac DMG packaging.
   - [x] Windows packaged runtime silent install and launch smoke via GitHub Actions.
   - [x] Windows packaged app data path creation smoke via GitHub Actions.
   - [x] Windows packaged runtime diagnostic field construction via `desktop:check` Rust test on GitHub Actions.
@@ -451,10 +457,14 @@ Answer normalization:
   - requires a completed real Windows packaged runtime report,
   - requires observed evidence text for every passed Windows manual checklist item,
   - validates that report before V1 can be treated as complete.
+- [x] Add Mac-only readiness gate while Windows hands-on evidence is deferred:
+  - `pnpm mac:check`.
 - [x] Run final verification:
   - `pnpm test`,
   - `pnpm test:e2e`,
   - `pnpm build`.
+  - `pnpm desktop:check`,
+  - `pnpm desktop:build:mac`.
 
 **Acceptance:** V1 supports the full personal study loop: import, practice, mock exam, review, intensive study, history, prediction, report export, and cross-device record sync.
 

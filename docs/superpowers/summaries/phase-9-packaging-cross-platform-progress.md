@@ -102,6 +102,9 @@
   artifacts, artifact digests, download URLs, and final validation commands can be
   printed without relying on a stale hard-coded run id in the Windows verification
   guide.
+- Added `scripts/mac-readiness-check.mjs` and root `pnpm mac:check` so the current
+  Mac-first V1 work can be verified independently while Windows hands-on evidence
+  is deferred.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -691,6 +694,25 @@
   - Printed latest successful Windows packaging run `26829543197`, run URL
     `https://github.com/929029376/IELTS/actions/runs/26829543197`, and the three
     required artifacts with their current digests.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because root `mac:check` did not exist.
+  - Passed after adding a Mac-only readiness command and script.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the Mac readiness list exposed `npx pnpm@9.15.4`
+    commands rather than the stable `pnpm ...` readiness commands.
+  - Passed after changing the script list output to `pnpm test`,
+    `pnpm test:e2e`, `pnpm build`, `pnpm desktop:check`, and
+    `pnpm desktop:build:mac`.
+- `node scripts/mac-readiness-check.mjs`
+  - Passed on macOS.
+  - Shared: 3 tests passed.
+  - Server: 40 tests passed.
+  - Web: 33 tests passed.
+  - Playwright Chromium: 2 tests passed.
+  - Production build passed.
+  - `desktop:check` passed, including Rust runtime diagnostics.
+  - Mac DMG packaging passed and generated
+    `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
 - GitHub Actions run `26829543197`
   - Triggered by commit `765e9fa` on `master`.
   - Passed Windows unit tests including the stricter observed-evidence coverage,
@@ -734,6 +756,8 @@
 - Root `pnpm v1:check -- --windows-report <report-path>` now acts as the V1
   evidence gate. It remains intentionally blocked until the real Windows hands-on
   runtime report validates successfully.
+- Root `pnpm mac:check` now acts as the Mac-first V1 readiness gate while Windows
+  work is deferred.
 - The final Windows report must include non-empty `observedEvidence` on every
   passed manual checklist item, so Phase 9 evidence records what was actually seen
   in the packaged Windows UI.
@@ -746,15 +770,18 @@
 
 ## Next Step
 
-Download the Windows NSIS installer artifact and Windows verification kit artifact from
-GitHub Actions run `26829543197`, then run `windows-packaged-runtime-check.ps1` on a
-Windows environment with the downloaded installer path. Use `-ReportPath`, and
-optionally pass `-BaiduSyncPath`, `-ListeningZipPath`, `-AudioPath`, and
-`-ReadingPdfPath`, so the generated `windows-packaged-runtime-report.json` captures
-the remaining file picker, audio playback, PDF viewing, SQLite path, and Baidu Cloud
-sync folder evidence. After marking every manual checklist item as `passed` and
-adding `observedEvidence` text to each item, run
+Per the 2026-06-02 direction, Windows hands-on verification is deferred while the
+Mac implementation is finished first. Continue Mac work behind `pnpm mac:check`.
+When Windows work resumes, download the Windows NSIS installer artifact and Windows
+verification kit artifact from the latest successful run printed by
+`pnpm windows:handoff`, then run `windows-packaged-runtime-check.ps1` on a Windows
+environment with the downloaded installer path. Use `-ReportPath`, and optionally
+pass `-BaiduSyncPath`, `-ListeningZipPath`, `-AudioPath`, and `-ReadingPdfPath`, so
+the generated `windows-packaged-runtime-report.json` captures the remaining file
+picker, audio playback, PDF viewing, SQLite path, and Baidu Cloud sync folder
+evidence. After marking every manual checklist item as `passed` and adding
+`observedEvidence` text to each item, run
 `node .\validate-windows-runtime-report.mjs .\windows-packaged-runtime-report.json`
 from the extracted verification kit folder and record the passing validator output
 in this summary. Then run `npx pnpm@9.15.4 v1:check -- --windows-report
-<report-path>` from the repo root before closing V1.
+<report-path>` from the repo root before closing cross-platform V1.

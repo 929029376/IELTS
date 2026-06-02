@@ -41,6 +41,12 @@
     each passed Windows manual checklist item,
   - the gate prevents V1 from being marked complete while the remaining Windows
     hands-on evidence is missing.
+- Added a Mac-only V1 readiness gate for the current priority shift:
+  - root `pnpm mac:check`,
+  - `scripts/mac-readiness-check.mjs`,
+  - the gate verifies unit/component coverage, Playwright main UI flow, production
+    build, desktop runtime diagnostics, and Mac DMG packaging without requiring the
+    deferred Windows report.
 - Expanded Playwright coverage for dashboard, import report, practice, mock exam, review, history, and sync settings anchors.
 
 ## Verification Evidence
@@ -67,6 +73,26 @@
       but no observed Windows UI evidence text.
     - Passed after requiring non-empty `observedEvidence` on every passed Windows
       manual checklist item.
+- Mac-only readiness gate:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+    - Initially failed because root `mac:check` did not exist.
+    - Passed after adding `scripts/mac-readiness-check.mjs` and test coverage for
+      a Mac-only readiness command that does not require a Windows report.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+    - Initially failed because the Mac readiness list exposed `npx pnpm@9.15.4`
+      instead of the stable `pnpm ...` gate commands.
+    - Passed after changing the script to present `pnpm` commands while resolving
+      the available pnpm executable at runtime.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed on macOS with network permission for the `npx pnpm@9.15.4` fallback.
+    - Shared: 3 tests passed.
+    - Server: 40 tests passed.
+    - Web: 33 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed, including Rust runtime diagnostics.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
 - Full verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

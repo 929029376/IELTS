@@ -359,4 +359,26 @@ describe("desktop packaging configuration", () => {
     expect(output).toContain("windows-packaged-runtime-check.ps1");
     expect(output).toContain("validate-windows-runtime-report.mjs");
   });
+
+  it("provides a Mac-only V1 readiness command while Windows evidence is deferred", () => {
+    const packageJson = JSON.parse(readFileSync(resolve(workspaceRoot, "package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    };
+    const macReadinessPath = resolve(workspaceRoot, "scripts/mac-readiness-check.mjs");
+
+    expect(packageJson.scripts["mac:check"]).toBe("node scripts/mac-readiness-check.mjs");
+    expect(existsSync(macReadinessPath)).toBe(true);
+
+    const output = execFileSync("node", [macReadinessPath, "--list"], { encoding: "utf8" });
+
+    expect(output).toContain("Mac V1 readiness checks");
+    expect(output).toContain("pnpm test");
+    expect(output).toContain("pnpm test:e2e");
+    expect(output).toContain("pnpm build");
+    expect(output).toContain("pnpm desktop:check");
+    expect(output).toContain("pnpm desktop:build:mac");
+    expect(output).not.toContain("npx pnpm@");
+    expect(output).not.toContain("desktop:build:win");
+    expect(output).not.toContain("windows-report");
+  });
 });
