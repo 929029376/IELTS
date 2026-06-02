@@ -101,9 +101,47 @@ jobs:
       - name: Build Windows NSIS installer
         run: npx pnpm@9.15.4 desktop:build:win
 
+      - name: Create Windows verification kit
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path "apps/web/src-tauri/target/release/bundle/nsis" -Filter "*.exe" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $installer) {
+            throw "Windows NSIS installer was not found."
+          }
+
+          New-Item -ItemType Directory -Path "windows-verification-kit" -Force | Out-Null
+
+          $hash = (Get-FileHash -Path $installer.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          $manifest = [ordered]@{
+            generatedAt = (Get-Date).ToUniversalTime().ToString("o")
+            headSha = $env:GITHUB_SHA
+            installerName = $installer.Name
+            installerPath = $installer.FullName
+            sizeBytes = $installer.Length
+            sha256 = $hash
+            requiredRuntimeChecks = @(
+              "Desktop runtime diagnostics",
+              "SQLite path",
+              "Baidu Cloud sync folder",
+              "file picker",
+              "audio playback",
+              "PDF viewing"
+            )
+          }
+
+          $manifest | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 "windows-verification-kit/windows-package-manifest.json"
+          Copy-Item "scripts/windows-packaged-runtime-check.ps1" "windows-verification-kit/windows-packaged-runtime-check.ps1"
+
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
           name: ielts-local-practice-windows-nsis
           path: apps/web/src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+
+      - name: Upload Windows verification kit
+        uses: actions/upload-artifact@v4
+        with:
+          name: ielts-local-practice-windows-verification-kit
+          path: windows-verification-kit/*
           if-no-files-found: error

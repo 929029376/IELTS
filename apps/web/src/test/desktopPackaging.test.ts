@@ -72,4 +72,26 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("npx pnpm@9.15.4 desktop:build:win");
     expect(workflow).toContain("apps/web/src-tauri/target/release/bundle/nsis/*.exe");
   });
+
+  it("ships a Windows packaged runtime verification kit with the installer workflow", () => {
+    const workflowPath = resolve(workspaceRoot, ".github/workflows/windows-desktop-package.yml");
+    const scriptPath = resolve(workspaceRoot, "scripts/windows-packaged-runtime-check.ps1");
+
+    expect(existsSync(scriptPath)).toBe(true);
+
+    const workflow = readFileSync(workflowPath, "utf8");
+    const script = readFileSync(scriptPath, "utf8");
+
+    expect(workflow).toContain("Create Windows verification kit");
+    expect(workflow).toContain("windows-package-manifest.json");
+    expect(workflow).toContain("ielts-local-practice-windows-verification-kit");
+    expect(workflow).toContain("scripts/windows-packaged-runtime-check.ps1");
+
+    expect(script).toContain("Desktop runtime diagnostics");
+    expect(script).toContain("SQLite path");
+    expect(script).toContain("Baidu Cloud sync folder");
+    expect(script).toContain("file picker");
+    expect(script).toContain("audio playback");
+    expect(script).toContain("PDF viewing");
+  });
 });
