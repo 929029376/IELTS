@@ -406,9 +406,9 @@ Answer normalization:
 - [ ] Verify local web mode on Windows.
 - [x] Add production build command:
   - `pnpm build`.
-- [ ] Add desktop packaging with Tauri after web mode is stable:
+- [x] Add desktop packaging with Tauri after web mode is stable:
   - [x] Mac `.dmg`,
-  - [ ] Windows `.exe`.
+  - [x] Windows `.exe` via GitHub Actions artifact `ielts-local-practice-windows-nsis`.
 - [ ] Verify file picker, audio playback, PDF viewing, SQLite path, and sync folder path on both systems:
   - [x] Mac packaged runtime diagnostic confirms SQLite path, sync folder path, and file/audio/PDF modes.
   - [x] Mac hands-on file picker, audio playback, and PDF viewing with real imported assets.

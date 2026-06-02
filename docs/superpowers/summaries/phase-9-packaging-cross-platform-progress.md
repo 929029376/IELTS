@@ -1,6 +1,6 @@
 # Phase 9 Packaging and Cross-Platform Verification Progress
 
-**Date:** 2026-06-01
+**Date:** 2026-06-01 to 2026-06-02
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -35,6 +35,9 @@
   including `icon.ico` for Windows NSIS packaging and `icon.icns` for Mac packaging.
 - Updated the Tauri bundle config and desktop packaging checks to require the desktop
   icon set explicitly instead of relying on a single PNG.
+- Confirmed remote `master` points to commit `f6a74d4` after the icon-set fix.
+- Confirmed GitHub Actions run `26794619213` on `master` completed successfully and
+  uploaded the Windows NSIS installer artifact `ielts-local-practice-windows-nsis`.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -111,6 +114,24 @@
 - `npx pnpm@9.15.4 desktop:check`
   - Passed after requiring `32x32.png`, `128x128.png`, `128x128@2x.png`,
     `icon.icns`, `icon.ico`, and `icon.png`.
+- `npx pnpm@9.15.4 test`
+  - Shared: 3 tests passed.
+  - Server: 40 tests passed.
+  - Web: 27 tests passed.
+- `npx pnpm@9.15.4 build`
+  - Shared TypeScript build passed.
+  - Server TypeScript build passed.
+  - Web TypeScript and Vite production build passed.
+- `git diff --check`
+  - No whitespace errors reported.
+- GitHub Actions run `26794619213`
+  - Triggered by commit `f6a74d4` on `master`.
+  - Passed Windows unit tests, web build, desktop packaging config check,
+    Windows NSIS installer build, and Windows installer upload.
+  - Uploaded artifact `ielts-local-practice-windows-nsis`.
+  - Artifact size: `1851855` bytes.
+  - Artifact digest: `sha256:a5f1fc6fddde46d1ebd20c5ee797267b5ce6fb324a975bc1d4293790550195a2`.
+  - Artifact expires at `2026-08-31T02:28:46Z`.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
@@ -146,8 +167,8 @@
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.
-    - Server: 39 tests passed.
-    - Web: 26 tests passed.
+    - Server: 40 tests passed.
+    - Web: 27 tests passed.
   - `npx pnpm@9.15.4 build`
     - Shared TypeScript build passed.
     - Server TypeScript build passed.
@@ -164,15 +185,12 @@
 ## Remaining Phase 9 Work
 
 - Windows local web mode still needs a real Windows run.
-- Windows `.exe` package artifact still needs a Windows build environment.
-- The Windows GitHub Actions packaging workflow needs to run on GitHub and produce an
-  `apps/web/src-tauri/target/release/bundle/nsis/*.exe` artifact before marking the
-  Windows `.exe` item complete.
+- Windows `.exe` packaging is complete through the GitHub Actions artifact
+  `ielts-local-practice-windows-nsis`.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
-Run the Windows Desktop Package GitHub Actions workflow on `master`, download the NSIS
-installer artifact, then repeat local web, packaged runtime diagnostics, file picker,
-audio playback, PDF viewing, SQLite path, and Baidu Cloud sync folder checks on a
-Windows environment.
+Download the Windows NSIS installer artifact from GitHub Actions run `26794619213`,
+then repeat local web, packaged runtime diagnostics, file picker, audio playback, PDF
+viewing, SQLite path, and Baidu Cloud sync folder checks on a Windows environment.
