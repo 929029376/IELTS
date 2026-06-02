@@ -284,36 +284,42 @@ $manualChecklist = @(
     label = "Desktop runtime diagnostics shows platform windows."
     status = "manual"
     expectedEvidence = "The diagnostics panel lists platform windows."
+    observedEvidence = ""
   },
   [ordered]@{
     id = "runtime-sqlite-path"
     label = "Desktop runtime diagnostics shows the expected SQLite path."
     status = "manual"
     expectedEvidence = $expectedDatabase
+    observedEvidence = ""
   },
   [ordered]@{
     id = "runtime-sync-path"
     label = "Desktop runtime diagnostics shows the selected Baidu Cloud sync folder."
     status = "manual"
     expectedEvidence = $expectedSyncEvidence
+    observedEvidence = ""
   },
   [ordered]@{
     id = "listening-zip-picker"
     label = "The file picker accepts a listening ZIP."
     status = "manual"
     expectedEvidence = $expectedZipEvidence
+    observedEvidence = ""
   },
   [ordered]@{
     id = "listening-audio-playback"
     label = "The file picker accepts an extracted listening audio file, and audio loads duration, plays, and pauses."
     status = "manual"
     expectedEvidence = $expectedAudioEvidence
+    observedEvidence = ""
   },
   [ordered]@{
     id = "reading-pdf-preview"
     label = "The file picker accepts a reading PDF, and PDF viewing renders passage and question pages."
     status = "manual"
     expectedEvidence = $expectedPdfEvidence
+    observedEvidence = ""
   }
 )
 

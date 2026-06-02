@@ -68,6 +68,10 @@ function validateManualChecklist(report) {
     if (item.status !== "passed") {
       fail(`manualChecklist item ${id} must be passed before Phase 9 can close.`);
     }
+
+    if (typeof item.observedEvidence !== "string" || item.observedEvidence.trim().length === 0) {
+      fail(`manualChecklist item ${id} must include observedEvidence before Phase 9 can close.`);
+    }
   }
 }
 

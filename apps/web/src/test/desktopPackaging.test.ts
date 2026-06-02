@@ -179,6 +179,7 @@ describe("desktop packaging configuration", () => {
     expect(guide).toContain("PDF viewing");
     expect(guide).toContain("manualChecklist");
     expect(guide).toContain("status = \"passed\"");
+    expect(guide).toContain("observedEvidence");
     expect(guide).toContain("Phase 9");
   });
 
@@ -204,12 +205,16 @@ describe("desktop packaging configuration", () => {
         { label: "Reading PDF", provided: true, exists: true, status: "exists" }
       ],
       manualChecklist: [
-        { id: "runtime-platform", status: "passed" },
-        { id: "runtime-sqlite-path", status: "passed" },
-        { id: "runtime-sync-path", status: "passed" },
-        { id: "listening-zip-picker", status: "passed" },
-        { id: "listening-audio-playback", status: "passed" },
-        { id: "reading-pdf-preview", status: "passed" }
+        { id: "runtime-platform", status: "passed", observedEvidence: "Diagnostics panel showed platform windows." },
+        {
+          id: "runtime-sqlite-path",
+          status: "passed",
+          observedEvidence: "Diagnostics panel showed C:\\Users\\tester\\AppData\\Roaming\\local.ielts.practice\\ielts.db."
+        },
+        { id: "runtime-sync-path", status: "passed", observedEvidence: "Diagnostics panel showed C:\\Users\\tester\\BaiduSyncdisk\\IELTS-Sync." },
+        { id: "listening-zip-picker", status: "passed", observedEvidence: "Selected sample.zip and the filename rendered." },
+        { id: "listening-audio-playback", status: "passed", observedEvidence: "Selected audio.mp3; duration loaded, play and pause worked." },
+        { id: "reading-pdf-preview", status: "passed", observedEvidence: "Selected reading.pdf and the passage rendered in the PDF preview." }
       ]
     };
 
@@ -218,7 +223,19 @@ describe("desktop packaging configuration", () => {
       failingReportPath,
       JSON.stringify({
         ...baseReport,
-        manualChecklist: [{ id: "runtime-platform", status: "manual" }]
+        manualChecklist: [{ id: "runtime-platform", status: "manual", observedEvidence: "" }]
+      }),
+      "utf8"
+    );
+    const missingEvidenceReportPath = resolve(tempDir, "missing-evidence-report.json");
+    writeFileSync(
+      missingEvidenceReportPath,
+      JSON.stringify({
+        ...baseReport,
+        manualChecklist: [
+          { id: "runtime-platform", status: "passed", observedEvidence: "" },
+          ...baseReport.manualChecklist.slice(1)
+        ]
       }),
       "utf8"
     );
@@ -226,6 +243,9 @@ describe("desktop packaging configuration", () => {
     expect(execFileSync("node", [validatorPath, passingReportPath], { encoding: "utf8" })).toContain("Windows runtime report is complete");
     expect(() => execFileSync("node", [validatorPath, failingReportPath], { encoding: "utf8", stdio: "pipe" })).toThrow(
       /manualChecklist/
+    );
+    expect(() => execFileSync("node", [validatorPath, missingEvidenceReportPath], { encoding: "utf8", stdio: "pipe" })).toThrow(
+      /observedEvidence/
     );
   });
 
@@ -256,12 +276,16 @@ describe("desktop packaging configuration", () => {
           { label: "Reading PDF", provided: true, exists: true, status: "exists" }
         ],
         manualChecklist: [
-          { id: "runtime-platform", status: "passed" },
-          { id: "runtime-sqlite-path", status: "passed" },
-          { id: "runtime-sync-path", status: "passed" },
-          { id: "listening-zip-picker", status: "passed" },
-          { id: "listening-audio-playback", status: "passed" },
-          { id: "reading-pdf-preview", status: "passed" }
+          { id: "runtime-platform", status: "passed", observedEvidence: "Diagnostics panel showed platform windows." },
+          {
+            id: "runtime-sqlite-path",
+            status: "passed",
+            observedEvidence: "Diagnostics panel showed C:\\Users\\tester\\AppData\\Roaming\\local.ielts.practice\\ielts.db."
+          },
+          { id: "runtime-sync-path", status: "passed", observedEvidence: "Diagnostics panel showed C:\\Users\\tester\\BaiduSyncdisk\\IELTS-Sync." },
+          { id: "listening-zip-picker", status: "passed", observedEvidence: "Selected sample.zip and the filename rendered." },
+          { id: "listening-audio-playback", status: "passed", observedEvidence: "Selected audio.mp3; duration loaded, play and pause worked." },
+          { id: "reading-pdf-preview", status: "passed", observedEvidence: "Selected reading.pdf and the passage rendered in the PDF preview." }
         ]
       }),
       "utf8"

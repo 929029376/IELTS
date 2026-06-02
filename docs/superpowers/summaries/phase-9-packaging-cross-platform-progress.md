@@ -667,6 +667,13 @@
   - Passed after adding `scripts/v1-readiness-check.mjs`, wiring root
     `v1:check`, and requiring a completed real Windows packaged runtime report
     before V1 can be treated as evidence-complete.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the Windows hands-on guide did not document
+    `observedEvidence`, and the runtime report validator accepted a passed manual
+    checklist item without any observed Windows UI evidence text.
+  - Passed after requiring non-empty `observedEvidence` for every passed manual
+    checklist item, adding blank `observedEvidence` fields to the PowerShell report
+    template, and updating the Windows hands-on guide.
 - GitHub Actions run `26828531634`
   - Triggered by commit `5400c5e` on `master`.
   - Passed Windows unit tests including the V1 readiness gate coverage, web build,
@@ -707,6 +714,9 @@
 - Root `pnpm v1:check -- --windows-report <report-path>` now acts as the V1
   evidence gate. It remains intentionally blocked until the real Windows hands-on
   runtime report validates successfully.
+- The final Windows report must include non-empty `observedEvidence` on every
+  passed manual checklist item, so Phase 9 evidence records what was actually seen
+  in the packaged Windows UI.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
   on `windows-2022` through GitHub Actions run `26828531634`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,
@@ -722,7 +732,8 @@ Windows environment with the downloaded installer path. Use `-ReportPath`, and
 optionally pass `-BaiduSyncPath`, `-ListeningZipPath`, `-AudioPath`, and
 `-ReadingPdfPath`, so the generated `windows-packaged-runtime-report.json` captures
 the remaining file picker, audio playback, PDF viewing, SQLite path, and Baidu Cloud
-sync folder evidence. After marking every manual checklist item as `passed`, run
+sync folder evidence. After marking every manual checklist item as `passed` and
+adding `observedEvidence` text to each item, run
 `node .\validate-windows-runtime-report.mjs .\windows-packaged-runtime-report.json`
 from the extracted verification kit folder and record the passing validator output
 in this summary. Then run `npx pnpm@9.15.4 v1:check -- --windows-report

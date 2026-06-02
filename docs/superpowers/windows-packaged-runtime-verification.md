@@ -93,7 +93,13 @@ after hands-on verification. Each completed item should use:
 
 ```text
 status = "passed"
+observedEvidence = "<what you saw on the Windows screen>"
 ```
+
+Use `observedEvidence` to record the exact Windows UI evidence for each item, such
+as the diagnostics path shown, the selected Baidu Cloud folder, the rendered file
+name, observed audio duration/play-pause result, or the reading PDF title that
+appeared in the packaged WebView.
 
 Keep the report with the installer run evidence. The report is complete when:
 
@@ -104,7 +110,8 @@ Keep the report with the installer run evidence. The report is complete when:
 - `appData.expectedDatabase` is not empty,
 - Baidu Cloud, listening ZIP, listening audio, and reading PDF path checks are
   `exists`,
-- every `manualChecklist` item is marked as passed.
+- every `manualChecklist` item is marked as passed,
+- every passed `manualChecklist` item has non-empty `observedEvidence`.
 
 ## Final Report Validator
 
@@ -129,5 +136,6 @@ If it fails, fix the missing Windows evidence before updating the Phase 9 summar
 
 Do not mark Phase 9 complete until the real Windows report proves desktop runtime
 diagnostics, SQLite path, Baidu Cloud sync folder path, file picker, audio playback,
-and PDF viewing on a real Windows environment, and
+and PDF viewing on a real Windows environment, each passed manual checklist item has
+non-empty `observedEvidence`, and
 `scripts/validate-windows-runtime-report.mjs` passes against that completed report.

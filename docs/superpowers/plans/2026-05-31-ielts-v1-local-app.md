@@ -449,6 +449,7 @@ Answer normalization:
   - sync settings.
 - [x] Add V1 readiness gate:
   - requires a completed real Windows packaged runtime report,
+  - requires observed evidence text for every passed Windows manual checklist item,
   - validates that report before V1 can be treated as complete.
 - [x] Run final verification:
   - `pnpm test`,
