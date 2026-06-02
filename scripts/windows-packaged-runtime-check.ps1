@@ -49,25 +49,54 @@ if ($installerToCheck) {
 
 $expectedAppData = Join-Path $env:APPDATA "IELTS Local Practice"
 $expectedDatabase = Join-Path $expectedAppData "ielts.db"
+
+function Join-IfRoot {
+  param(
+    [string]$Root,
+    [string]$RelativePath
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Root)) {
+    return $null
+  }
+
+  return Join-Path $Root $RelativePath
+}
+
+$appExeFileNames = @("IELTS Local Practice.exe", "ielts-local-practice.exe")
 $exeCandidates = @(
-  (Join-Path $env:LOCALAPPDATA "Programs\IELTS Local Practice\IELTS Local Practice.exe"),
-  (Join-Path $env:LOCALAPPDATA "IELTS Local Practice\IELTS Local Practice.exe"),
-  (Join-Path $env:ProgramFiles "IELTS Local Practice\IELTS Local Practice.exe"),
-  (Join-Path ${env:ProgramFiles(x86)} "IELTS Local Practice\IELTS Local Practice.exe")
+  (Join-IfRoot $env:LOCALAPPDATA "Programs\IELTS Local Practice\IELTS Local Practice.exe"),
+  (Join-IfRoot $env:LOCALAPPDATA "Programs\IELTS Local Practice\ielts-local-practice.exe"),
+  (Join-IfRoot $env:LOCALAPPDATA "Programs\ielts-local-practice\ielts-local-practice.exe"),
+  (Join-IfRoot $env:LOCALAPPDATA "IELTS Local Practice\IELTS Local Practice.exe"),
+  (Join-IfRoot $env:ProgramFiles "IELTS Local Practice\IELTS Local Practice.exe"),
+  (Join-IfRoot ${env:ProgramFiles(x86)} "IELTS Local Practice\IELTS Local Practice.exe")
 ) | Where-Object { $_ -and (Test-Path $_) }
 
 if ($exeCandidates.Count -eq 0) {
   $searchRoots = @(
-    (Join-Path $env:LOCALAPPDATA "Programs"),
+    (Join-IfRoot $env:LOCALAPPDATA "Programs"),
     $env:LOCALAPPDATA,
     $env:ProgramFiles,
     ${env:ProgramFiles(x86)}
   ) | Where-Object { $_ -and (Test-Path $_) }
 
   foreach ($searchRoot in $searchRoots) {
-    $found = Get-ChildItem -Path $searchRoot -Filter "IELTS Local Practice.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($found) {
-      $exeCandidates = @($found.FullName)
+    Write-Host ("Searching installed app executables under: {0}" -f $searchRoot)
+    $found = Get-ChildItem -Path $searchRoot -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue |
+      Where-Object {
+        $appExeFileNames -contains $_.Name -or
+        $_.FullName -match "IELTS Local Practice|ielts-local-practice|local\.ielts\.practice"
+      } |
+      Select-Object -First 5
+
+    if (@($found).Count -gt 0) {
+      Write-Host "Installed app executable candidates:"
+      foreach ($candidateExe in @($found)) {
+        Write-Host ("  {0}" -f $candidateExe.FullName)
+      }
+
+      $exeCandidates = @($found | Select-Object -ExpandProperty FullName)
       break
     }
   }
@@ -91,6 +120,9 @@ if ($exeCandidates.Count -gt 0) {
 } else {
   Write-Host "Installed app executable was not found automatically."
   Write-Host "Expected one of:"
+  Write-Host "  %LOCALAPPDATA%\Programs\IELTS Local Practice\IELTS Local Practice.exe"
+  Write-Host "  %LOCALAPPDATA%\Programs\IELTS Local Practice\ielts-local-practice.exe"
+  Write-Host "  %LOCALAPPDATA%\Programs\ielts-local-practice\ielts-local-practice.exe"
   Write-Host "  %LOCALAPPDATA%\IELTS Local Practice\IELTS Local Practice.exe"
   Write-Host "  %ProgramFiles%\IELTS Local Practice\IELTS Local Practice.exe"
   Write-Host "  %ProgramFiles(x86)%\IELTS Local Practice\IELTS Local Practice.exe"

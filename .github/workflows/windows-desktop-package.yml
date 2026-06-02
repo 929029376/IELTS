@@ -18,7 +18,7 @@ on:
 jobs:
   package-windows:
     name: Build Windows NSIS package
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       - name: Check out repository
@@ -132,25 +132,6 @@ jobs:
           $manifest | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 "windows-verification-kit/windows-package-manifest.json"
           Copy-Item "scripts/windows-packaged-runtime-check.ps1" "windows-verification-kit/windows-packaged-runtime-check.ps1"
 
-      - name: Verify Windows packaged runtime install
-        shell: pwsh
-        run: |
-          $installer = Get-ChildItem -Path "apps/web/src-tauri/target/release/bundle/nsis" -Filter "*.exe" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-          if (-not $installer) {
-            throw "Windows NSIS installer was not found."
-          }
-
-          $installProcess = Start-Process -FilePath $installer.FullName -ArgumentList "/S" -Wait -PassThru
-          if ($installProcess.ExitCode -ne 0) {
-            throw "Windows NSIS installer failed with exit code $($installProcess.ExitCode)."
-          }
-
-          ./scripts/windows-packaged-runtime-check.ps1 `
-            -ManifestPath "windows-verification-kit/windows-package-manifest.json" `
-            -InstallerPath $installer.FullName `
-            -RequireInstalledApp `
-            -SkipLaunch
-
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4
         with:
@@ -164,3 +145,24 @@ jobs:
           name: ielts-local-practice-windows-verification-kit
           path: windows-verification-kit/*
           if-no-files-found: error
+
+      - name: Verify Windows packaged runtime install
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path "apps/web/src-tauri/target/release/bundle/nsis" -Filter "*.exe" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $installer) {
+            throw "Windows NSIS installer was not found."
+          }
+
+          $installProcess = Start-Process -FilePath $installer.FullName -ArgumentList "/S" -Wait -PassThru
+          if ($installProcess.ExitCode -ne 0) {
+            throw "Windows NSIS installer failed with exit code $($installProcess.ExitCode)."
+          }
+
+          Start-Sleep -Seconds 10
+
+          ./scripts/windows-packaged-runtime-check.ps1 `
+            -ManifestPath "windows-verification-kit/windows-package-manifest.json" `
+            -InstallerPath $installer.FullName `
+            -RequireInstalledApp `
+            -SkipLaunch

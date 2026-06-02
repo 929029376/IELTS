@@ -59,7 +59,7 @@ describe("desktop packaging configuration", () => {
     expect(existsSync(workflowPath)).toBe(true);
 
     const workflow = readFileSync(workflowPath, "utf8");
-    expect(workflow).toContain("runs-on: windows-latest");
+    expect(workflow).toContain("runs-on: windows-2022");
     expect(workflow).toContain("pnpm/action-setup");
     expect(workflow).toContain("dtolnay/rust-toolchain@stable");
     expect(workflow).toContain("npx pnpm@9.15.4 test");
@@ -89,6 +89,13 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("Verify Windows packaged runtime install");
     expect(workflow).toContain("/S");
     expect(workflow).toContain("-RequireInstalledApp");
+    expect(workflow).toContain("Start-Sleep -Seconds 10");
+
+    const uploadIndex = workflow.indexOf("Upload Windows installer");
+    const installVerificationIndex = workflow.indexOf("Verify Windows packaged runtime install");
+    expect(uploadIndex).toBeGreaterThan(-1);
+    expect(installVerificationIndex).toBeGreaterThan(-1);
+    expect(uploadIndex).toBeLessThan(installVerificationIndex);
 
     expect(script).toContain("Desktop runtime diagnostics");
     expect(script).toContain("SQLite path");
@@ -99,6 +106,8 @@ describe("desktop packaging configuration", () => {
     expect(script).toContain("Get-FileHash");
     expect(script).toContain("InstallerPath");
     expect(script).toContain("IELTS Local Practice.exe");
+    expect(script).toContain("ielts-local-practice.exe");
+    expect(script).toContain("Where-Object");
     expect(script).toContain("Start-Process");
     expect(script).toContain("Get-Process");
     expect(script).toContain("Test-Path $expectedAppData");
