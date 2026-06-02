@@ -1,6 +1,7 @@
 param(
   [string]$ManifestPath = ".\windows-package-manifest.json",
   [string]$InstallerPath = "",
+  [switch]$RequireInstalledApp,
   [switch]$SkipLaunch
 )
 
@@ -49,10 +50,28 @@ if ($installerToCheck) {
 $expectedAppData = Join-Path $env:APPDATA "IELTS Local Practice"
 $expectedDatabase = Join-Path $expectedAppData "ielts.db"
 $exeCandidates = @(
+  (Join-Path $env:LOCALAPPDATA "Programs\IELTS Local Practice\IELTS Local Practice.exe"),
   (Join-Path $env:LOCALAPPDATA "IELTS Local Practice\IELTS Local Practice.exe"),
   (Join-Path $env:ProgramFiles "IELTS Local Practice\IELTS Local Practice.exe"),
   (Join-Path ${env:ProgramFiles(x86)} "IELTS Local Practice\IELTS Local Practice.exe")
 ) | Where-Object { $_ -and (Test-Path $_) }
+
+if ($exeCandidates.Count -eq 0) {
+  $searchRoots = @(
+    (Join-Path $env:LOCALAPPDATA "Programs"),
+    $env:LOCALAPPDATA,
+    $env:ProgramFiles,
+    ${env:ProgramFiles(x86)}
+  ) | Where-Object { $_ -and (Test-Path $_) }
+
+  foreach ($searchRoot in $searchRoots) {
+    $found = Get-ChildItem -Path $searchRoot -Filter "IELTS Local Practice.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($found) {
+      $exeCandidates = @($found.FullName)
+      break
+    }
+  }
+}
 
 if ($exeCandidates.Count -gt 0) {
   $appExe = $exeCandidates[0]
@@ -75,6 +94,10 @@ if ($exeCandidates.Count -gt 0) {
   Write-Host "  %LOCALAPPDATA%\IELTS Local Practice\IELTS Local Practice.exe"
   Write-Host "  %ProgramFiles%\IELTS Local Practice\IELTS Local Practice.exe"
   Write-Host "  %ProgramFiles(x86)%\IELTS Local Practice\IELTS Local Practice.exe"
+
+  if ($RequireInstalledApp) {
+    throw "Installed app executable was required but was not found."
+  }
 }
 
 if (Test-Path $expectedAppData) {

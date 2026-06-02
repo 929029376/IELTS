@@ -86,6 +86,9 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("windows-package-manifest.json");
     expect(workflow).toContain("ielts-local-practice-windows-verification-kit");
     expect(workflow).toContain("scripts/windows-packaged-runtime-check.ps1");
+    expect(workflow).toContain("Verify Windows packaged runtime install");
+    expect(workflow).toContain("/S");
+    expect(workflow).toContain("-RequireInstalledApp");
 
     expect(script).toContain("Desktop runtime diagnostics");
     expect(script).toContain("SQLite path");
@@ -99,5 +102,6 @@ describe("desktop packaging configuration", () => {
     expect(script).toContain("Start-Process");
     expect(script).toContain("Get-Process");
     expect(script).toContain("Test-Path $expectedAppData");
+    expect(script).toContain("RequireInstalledApp");
   });
 });
