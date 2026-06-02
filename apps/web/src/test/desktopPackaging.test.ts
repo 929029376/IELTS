@@ -64,6 +64,10 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("dtolnay/rust-toolchain@stable");
     expect(workflow).toContain("npx pnpm@9.15.4 test");
     expect(workflow).toContain("npx pnpm@9.15.4 build");
+    expect(workflow).toContain("Verify Windows local web mode");
+    expect(workflow).toContain("Start-Job");
+    expect(workflow).toContain("http://127.0.0.1:5174/health");
+    expect(workflow).toContain("http://127.0.0.1:5173/");
     expect(workflow).toContain("npx pnpm@9.15.4 desktop:check");
     expect(workflow).toContain("npx pnpm@9.15.4 desktop:build:win");
     expect(workflow).toContain("apps/web/src-tauri/target/release/bundle/nsis/*.exe");

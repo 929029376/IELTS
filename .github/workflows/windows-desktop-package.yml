@@ -47,6 +47,54 @@ jobs:
       - name: Build web app
         run: npx pnpm@9.15.4 build
 
+      - name: Verify Windows local web mode
+        shell: pwsh
+        run: |
+          $workspace = $env:GITHUB_WORKSPACE
+          $job = Start-Job -ScriptBlock {
+            Set-Location $using:workspace
+            npx pnpm@9.15.4 dev
+          }
+
+          try {
+            $healthOk = $false
+            $webOk = $false
+
+            for ($i = 0; $i -lt 60; $i++) {
+              try {
+                $health = Invoke-RestMethod -Uri "http://127.0.0.1:5174/health" -TimeoutSec 3
+                if ($health.ok -eq $true) {
+                  $healthOk = $true
+                }
+              } catch {}
+
+              try {
+                $web = Invoke-WebRequest -Uri "http://127.0.0.1:5173/" -TimeoutSec 3
+                if ($web.StatusCode -eq 200 -and $web.Content.Contains('<div id="root"></div>')) {
+                  $webOk = $true
+                }
+              } catch {}
+
+              if ($healthOk -and $webOk) {
+                break
+              }
+
+              Start-Sleep -Seconds 2
+            }
+
+            if (-not $healthOk) {
+              throw "API health endpoint did not become available on Windows."
+            }
+
+            if (-not $webOk) {
+              throw "Vite web shell did not become available on Windows."
+            }
+          } finally {
+            Stop-Job $job -ErrorAction SilentlyContinue
+            Receive-Job $job -ErrorAction SilentlyContinue
+            Remove-Job $job -Force -ErrorAction SilentlyContinue
+          }
+
       - name: Check desktop packaging config
         run: npx pnpm@9.15.4 desktop:check
 
