@@ -1,9 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 
 const workspaceRoot = resolve(import.meta.dirname, "..");
 const webRoot = resolve(workspaceRoot, "apps/web");
 const tauriRoot = resolve(webRoot, "src-tauri");
+const cargoBinary = process.env.CARGO ?? (process.env.HOME ? resolve(process.env.HOME, ".cargo/bin/cargo") : "cargo");
 const requiredFiles = [
   "tauri.conf.json",
   "Cargo.toml",
@@ -33,6 +35,19 @@ if (!targets.has("dmg") || !targets.has("nsis")) {
 
 if (config.build?.frontendDist !== "../dist") {
   throw new Error("Tauri frontendDist must point to ../dist.");
+}
+
+const cargoTest = spawnSync(
+  cargoBinary,
+  ["test", "--manifest-path", resolve(tauriRoot, "Cargo.toml"), "runtime_status_includes_packaged_modes"],
+  {
+    encoding: "utf8",
+    stdio: "inherit"
+  }
+);
+
+if (cargoTest.status !== 0) {
+  throw new Error("Tauri runtime diagnostics cargo test failed.");
 }
 
 console.log("Desktop packaging configuration is present for dmg and nsis targets.");

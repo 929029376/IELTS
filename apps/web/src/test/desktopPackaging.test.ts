@@ -39,9 +39,13 @@ describe("desktop packaging configuration", () => {
     const packageJson = JSON.parse(readFileSync(resolve(workspaceRoot, "package.json"), "utf8")) as {
       scripts: Record<string, string>;
     };
+    const desktopCheck = readFileSync(resolve(workspaceRoot, "scripts/desktop-check.mjs"), "utf8");
 
     expect(packageJson.scripts.build).toBe("pnpm -r --if-present build");
     expect(packageJson.scripts["desktop:check"]).toBe("node scripts/desktop-check.mjs");
+    expect(desktopCheck).toContain("cargo");
+    expect(desktopCheck).toContain(".cargo/bin/cargo");
+    expect(desktopCheck).toContain("runtime_status_includes_packaged_modes");
   });
 
   it("includes the Tauri icon required by generate_context", () => {
