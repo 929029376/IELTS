@@ -93,6 +93,9 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("ielts-local-practice-windows-verification-kit");
     expect(workflow).toContain("scripts/windows-packaged-runtime-check.ps1");
     expect(workflow).toContain("Verify Windows packaged runtime install");
+    expect(workflow).toContain("-ReportPath");
+    expect(workflow).toContain("Upload Windows runtime report");
+    expect(workflow).toContain("ielts-local-practice-windows-runtime-report");
     expect(workflow).toContain("/S");
     expect(workflow).toContain("-RequireInstalledApp");
     expect(workflow).toContain("-RequireAppDataDir");
@@ -101,9 +104,12 @@ describe("desktop packaging configuration", () => {
 
     const uploadIndex = workflow.indexOf("Upload Windows installer");
     const installVerificationIndex = workflow.indexOf("Verify Windows packaged runtime install");
+    const reportUploadIndex = workflow.indexOf("Upload Windows runtime report");
     expect(uploadIndex).toBeGreaterThan(-1);
     expect(installVerificationIndex).toBeGreaterThan(-1);
+    expect(reportUploadIndex).toBeGreaterThan(-1);
     expect(uploadIndex).toBeLessThan(installVerificationIndex);
+    expect(installVerificationIndex).toBeLessThan(reportUploadIndex);
 
     expect(script).toContain("Desktop runtime diagnostics");
     expect(script).toContain("SQLite path");

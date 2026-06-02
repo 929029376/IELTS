@@ -165,5 +165,13 @@ jobs:
           ./scripts/windows-packaged-runtime-check.ps1 `
             -ManifestPath "windows-verification-kit/windows-package-manifest.json" `
             -InstallerPath $installer.FullName `
+            -ReportPath "windows-verification-kit/windows-packaged-runtime-report.json" `
             -RequireInstalledApp `
             -RequireAppDataDir
+
+      - name: Upload Windows runtime report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ielts-local-practice-windows-runtime-report
+          path: windows-verification-kit/windows-packaged-runtime-report.json
+          if-no-files-found: error
