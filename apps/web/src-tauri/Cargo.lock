@@ -1462,6 +1462,7 @@ dependencies = [
 name = "ielts-local-practice"
 version = "0.0.0"
 dependencies = [
+ "serde",
  "tauri",
  "tauri-build",
 ]

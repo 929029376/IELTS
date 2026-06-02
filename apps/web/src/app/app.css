@@ -510,6 +510,59 @@ h1 {
   font-size: 13px;
 }
 
+.desktop-runtime-panel {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.runtime-diagnostics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.runtime-row {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.runtime-row dt {
+  color: #66768c;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.runtime-row dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  color: #172033;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.desktop-runtime-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed #cbd6e3;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #5d6c7f;
+}
+
+.desktop-runtime-empty p {
+  margin: 0;
+}
+
 .intensive-preview-grid {
   display: grid;
   grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
@@ -927,7 +980,8 @@ h1 {
 
   .nav-list,
   .summary-grid,
-  .report-metrics {
+  .report-metrics,
+  .runtime-diagnostics-grid {
     grid-template-columns: 1fr;
   }
 

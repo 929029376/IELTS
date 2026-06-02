@@ -409,7 +409,10 @@ Answer normalization:
 - [ ] Add desktop packaging with Tauri after web mode is stable:
   - [x] Mac `.dmg`,
   - [ ] Windows `.exe`.
-- [ ] Verify file picker, audio playback, PDF viewing, SQLite path, and sync folder path on both systems.
+- [ ] Verify file picker, audio playback, PDF viewing, SQLite path, and sync folder path on both systems:
+  - [x] Mac packaged runtime diagnostic confirms SQLite path, sync folder path, and file/audio/PDF modes.
+  - [ ] Mac hands-on file picker, audio playback, and PDF viewing with real imported assets.
+  - [ ] Windows packaged runtime diagnostic and hands-on verification.
 
 **Acceptance:** The same app can run on both systems, use local data, import question files, and sync history through the selected Baidu Cloud folder.
 

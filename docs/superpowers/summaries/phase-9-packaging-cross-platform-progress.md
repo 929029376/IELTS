@@ -29,6 +29,8 @@
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
 - Added `apps/web/src-tauri/Cargo.lock` so desktop builds are reproducible.
+- Added `@tauri-apps/api` and a Tauri `desktop_runtime_status` command for packaged runtime diagnostics.
+- Added a desktop runtime diagnostics panel in the Sync settings area.
 - Updated Mac desktop packaging to run Tauri with `--ci`, avoiding Finder AppleScript hangs during DMG creation.
 - Built and verified the Mac DMG:
   - `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
@@ -36,6 +38,14 @@
   - `IELTS Local Practice.app`,
   - `Applications` link,
   - app `Info.plist` with bundle identifier `local.ielts.practice`.
+- Launched the app from the mounted DMG and confirmed the packaged runtime diagnostics panel showed:
+  - platform `macos`,
+  - app data directory `/Users/musheng/Library/Application Support/local.ielts.practice`,
+  - SQLite path `/Users/musheng/Library/Application Support/local.ielts.practice/ielts.db`,
+  - sync folder `/Users/musheng/Desktop/同步空间/IELTS-Sync`,
+  - file picker mode `web-file-input`,
+  - audio mode `html-audio`,
+  - PDF mode `webview-pdf`.
 - Verified Mac local web mode by starting `pnpm dev`:
   - API health returned `{"ok":true}` from `http://127.0.0.1:5174/health`,
   - Vite served the dashboard shell from `http://127.0.0.1:5173/`.
@@ -58,6 +68,8 @@
   - Desktop packaging configuration check passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
   - 4 desktop packaging configuration tests passed, including icon presence and Mac `--ci` packaging script.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
+  - 2 desktop runtime diagnostics tests passed.
 - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac`
   - Initially failed because `apps/web/src-tauri/icons/icon.png` was missing.
 - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac`
@@ -68,6 +80,13 @@
   - Mounted the generated DMG read-only.
   - Confirmed `IELTS Local Practice.app` and `Applications` link are present.
   - Confirmed `CFBundleIdentifier` is `local.ielts.practice`.
+- Packaged app runtime inspection:
+  - Started `IELTS Local Practice.app` from the mounted DMG.
+  - Confirmed the app loaded at `tauri://localhost`.
+  - Confirmed desktop runtime diagnostics rendered the Mac app data path, SQLite path, sync path, file picker mode, audio mode, and PDF mode.
+- Final Mac DMG verification after adding packaged runtime diagnostics:
+  - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac` completed successfully.
+  - `hdiutil verify apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg` reported the checksum is valid.
 - Mac local web mode verification:
   - `npx pnpm@9.15.4 dev` started server and web dev mode.
   - `curl -fsS http://127.0.0.1:5174/health` returned `{"ok":true}`.
@@ -76,7 +95,7 @@
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.
     - Server: 39 tests passed.
-    - Web: 23 tests passed.
+    - Web: 25 tests passed.
   - `npx pnpm@9.15.4 build`
     - Shared TypeScript build passed.
     - Server TypeScript build passed.
@@ -84,7 +103,7 @@
   - `npx pnpm@9.15.4 db:migrate`
     - Migration command completed with `Database migrations applied.`
   - `npx pnpm@9.15.4 test:e2e`
-    - Playwright Chromium dashboard and exam preview test passed.
+    - 2 Playwright Chromium tests passed.
   - `npx pnpm@9.15.4 desktop:check`
     - Tauri desktop packaging configuration check passed.
   - `git diff --check`
@@ -94,8 +113,9 @@
 
 - Windows local web mode still needs a real Windows run.
 - Windows `.exe` package artifact still needs a Windows build environment.
-- File picker, audio playback, PDF viewing, SQLite path, and sync folder path still need hands-on verification in the packaged Mac app and in the packaged Windows app.
+- Mac hands-on file picker, audio playback, and PDF viewing with real imported assets still need interactive verification.
+- Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
-Run the generated Mac app interactively to verify packaged runtime behavior, then repeat on Windows for `.exe` generation and Windows runtime checks.
+Use real imported listening and reading assets to exercise Mac packaged file picker, audio, and PDF viewing, then repeat packaging and runtime checks on Windows.

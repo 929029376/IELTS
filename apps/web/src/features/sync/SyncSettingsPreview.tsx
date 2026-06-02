@@ -1,8 +1,10 @@
 import { FolderSync, RefreshCw } from "lucide-react";
+import { DesktopRuntimeDiagnostics, type DesktopRuntimeStatus } from "../desktop/DesktopRuntimeDiagnostics";
 
 export interface SyncSettingsPreviewProps {
   deviceName: string;
   lastSyncAt: string | null;
+  runtimeStatus?: DesktopRuntimeStatus | null;
   syncFiles: string[];
   syncPath: string;
 }
@@ -10,6 +12,7 @@ export interface SyncSettingsPreviewProps {
 export function SyncSettingsPreview({
   deviceName,
   lastSyncAt,
+  runtimeStatus = null,
   syncFiles,
   syncPath
 }: SyncSettingsPreviewProps) {
@@ -54,6 +57,7 @@ export function SyncSettingsPreview({
           </div>
         </div>
       </div>
+      <DesktopRuntimeDiagnostics status={runtimeStatus} />
     </section>
   );
 }

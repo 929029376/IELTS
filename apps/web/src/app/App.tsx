@@ -4,6 +4,7 @@ import { HardeningCenter } from "../features/hardening/HardeningCenter";
 import { IntensivePracticePreview } from "../features/intensive/IntensivePracticePreview";
 import { HistoryReportsPreview } from "../features/reports/HistoryReportsPreview";
 import { SyncSettingsPreview } from "../features/sync/SyncSettingsPreview";
+import { useDesktopRuntimeStatus } from "../features/desktop/desktopRuntime";
 import "./app.css";
 
 const cards = [
@@ -107,6 +108,8 @@ const sampleHardeningStatus = {
 };
 
 export function App() {
+  const desktopRuntimeStatus = useDesktopRuntimeStatus();
+
   return (
     <main className="app-shell">
       <aside className="sidebar" aria-label="Primary navigation">
@@ -171,6 +174,7 @@ export function App() {
         <SyncSettingsPreview
           deviceName="Mac local device"
           lastSyncAt={null}
+          runtimeStatus={desktopRuntimeStatus}
           syncFiles={[
             "attempts.jsonl",
             "answers.jsonl",
