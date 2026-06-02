@@ -563,6 +563,82 @@ h1 {
   margin: 0;
 }
 
+.desktop-asset-verifier {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.asset-input-grid,
+.asset-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.asset-input-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #405169;
+}
+
+.asset-input-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #20314a;
+  font-weight: 700;
+}
+
+.asset-input-card input {
+  max-width: 100%;
+  color: #405169;
+  font: inherit;
+  font-size: 13px;
+}
+
+.asset-input-card strong {
+  overflow-wrap: anywhere;
+  color: #172033;
+  font-size: 13px;
+}
+
+.asset-preview-grid {
+  grid-template-columns: minmax(280px, 0.8fr) minmax(320px, 1.2fr);
+  margin-top: 12px;
+}
+
+.asset-preview-panel {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.asset-preview-panel h4 {
+  margin: 0;
+  color: #172033;
+  font-size: 15px;
+}
+
+.asset-preview-panel audio,
+.pdf-preview-object {
+  width: 100%;
+}
+
+.pdf-preview-object {
+  min-height: 360px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
 .intensive-preview-grid {
   display: grid;
   grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
@@ -981,7 +1057,9 @@ h1 {
   .nav-list,
   .summary-grid,
   .report-metrics,
-  .runtime-diagnostics-grid {
+  .runtime-diagnostics-grid,
+  .asset-input-grid,
+  .asset-preview-grid {
     grid-template-columns: 1fr;
   }
 

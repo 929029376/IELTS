@@ -1,4 +1,5 @@
 import { FolderSync, RefreshCw } from "lucide-react";
+import { DesktopAssetVerifier } from "../desktop/DesktopAssetVerifier";
 import { DesktopRuntimeDiagnostics, type DesktopRuntimeStatus } from "../desktop/DesktopRuntimeDiagnostics";
 
 export interface SyncSettingsPreviewProps {
@@ -58,6 +59,7 @@ export function SyncSettingsPreview({
         </div>
       </div>
       <DesktopRuntimeDiagnostics status={runtimeStatus} />
+      <DesktopAssetVerifier />
     </section>
   );
 }

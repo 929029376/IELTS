@@ -31,6 +31,8 @@
 - Added `apps/web/src-tauri/Cargo.lock` so desktop builds are reproducible.
 - Added `@tauri-apps/api` and a Tauri `desktop_runtime_status` command for packaged runtime diagnostics.
 - Added a desktop runtime diagnostics panel in the Sync settings area.
+- Added a packaged asset interaction verifier in the Sync settings area for selecting a listening ZIP,
+  an extracted listening audio file, and a reading PDF inside the packaged app.
 - Updated Mac desktop packaging to run Tauri with `--ci`, avoiding Finder AppleScript hangs during DMG creation.
 - Built and verified the Mac DMG:
   - `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
@@ -46,6 +48,15 @@
   - file picker mode `web-file-input`,
   - audio mode `html-audio`,
   - PDF mode `webview-pdf`.
+- Exercised the packaged Mac app with real local assets:
+  - selected listening ZIP
+    `/Users/musheng/Desktop/IELTS/listening/IELTS Listening 虾滑/P4/高频/52. P4 Underwater Archaeological Sites.zip`,
+  - extracted and selected `/private/tmp/ielts-audio-check/audio.mp3`,
+  - selected reading PDF
+    `/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - The History of Tea 茶叶的历史.pdf`,
+  - confirmed the ZIP and PDF filenames rendered in the packaged app,
+  - confirmed the audio preview showed duration `8:19`, played, and paused,
+  - confirmed the PDF preview rendered `The History of Tea` passage and questions in the packaged WebView.
 - Verified Mac local web mode by starting `pnpm dev`:
   - API health returned `{"ok":true}` from `http://127.0.0.1:5174/health`,
   - Vite served the dashboard shell from `http://127.0.0.1:5173/`.
@@ -70,6 +81,9 @@
   - 4 desktop packaging configuration tests passed, including icon presence and Mac `--ci` packaging script.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
+  - Initially failed because `DesktopAssetVerifier` did not exist.
+  - Passed after adding the verifier component and object URL mocks.
 - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac`
   - Initially failed because `apps/web/src-tauri/icons/icon.png` was missing.
 - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac`
@@ -84,6 +98,12 @@
   - Started `IELTS Local Practice.app` from the mounted DMG.
   - Confirmed the app loaded at `tauri://localhost`.
   - Confirmed desktop runtime diagnostics rendered the Mac app data path, SQLite path, sync path, file picker mode, audio mode, and PDF mode.
+- Packaged app real-asset inspection:
+  - Confirmed the Mac file picker accepted the real high-frequency listening ZIP.
+  - Confirmed the Mac file picker accepted the extracted MP3 from that listening ZIP.
+  - Confirmed the packaged audio control loaded duration `8:19`, started playback, and paused.
+  - Confirmed the Mac file picker accepted the real reading PDF.
+  - Confirmed the packaged PDF preview rendered the reading passage and question pages.
 - Final Mac DMG verification after adding packaged runtime diagnostics:
   - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac` completed successfully.
   - `hdiutil verify apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg` reported the checksum is valid.
@@ -95,7 +115,7 @@
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.
     - Server: 39 tests passed.
-    - Web: 25 tests passed.
+    - Web: 26 tests passed.
   - `npx pnpm@9.15.4 build`
     - Shared TypeScript build passed.
     - Server TypeScript build passed.
@@ -113,9 +133,9 @@
 
 - Windows local web mode still needs a real Windows run.
 - Windows `.exe` package artifact still needs a Windows build environment.
-- Mac hands-on file picker, audio playback, and PDF viewing with real imported assets still need interactive verification.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
-Use real imported listening and reading assets to exercise Mac packaged file picker, audio, and PDF viewing, then repeat packaging and runtime checks on Windows.
+Repeat local web, packaging, runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path,
+and Baidu Cloud sync folder checks on a Windows environment.
