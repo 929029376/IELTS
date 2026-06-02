@@ -31,6 +31,10 @@
   packaging workflow run showed that server unit tests failed on `windows-latest`.
 - Updated runtime path construction so Mac and Windows path outputs are based on the
   requested target platform instead of the operating system running the test.
+- Generated the full Tauri desktop icon set from `apps/web/src-tauri/icons/icon.png`,
+  including `icon.ico` for Windows NSIS packaging and `icon.icns` for Mac packaging.
+- Updated the Tauri bundle config and desktop packaging checks to require the desktop
+  icon set explicitly instead of relying on a single PNG.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -96,6 +100,17 @@
   - Passed after changing runtime path construction to normalize and append path segments explicitly.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/runtimePaths.test.ts`
   - 3 runtime path tests passed after the host-independence fix.
+- GitHub Actions run `26794083343`
+  - Triggered by commit `721d097` on `master`.
+  - Passed the Windows unit tests, web build, and desktop packaging config check.
+  - Failed at the `Build Windows NSIS installer` step.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because `apps/web/src-tauri/icons/icon.ico` did not exist.
+  - Initially failed again because `tauri.conf.json` did not explicitly list bundle icons.
+  - Passed after generating the Tauri icon set and adding `bundle.icon`.
+- `npx pnpm@9.15.4 desktop:check`
+  - Passed after requiring `32x32.png`, `128x128.png`, `128x128@2x.png`,
+    `icon.icns`, `icon.ico`, and `icon.png`.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`

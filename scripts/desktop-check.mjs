@@ -10,6 +10,11 @@ const requiredFiles = [
   "build.rs",
   "src/lib.rs",
   "src/main.rs",
+  "icons/32x32.png",
+  "icons/128x128.png",
+  "icons/128x128@2x.png",
+  "icons/icon.icns",
+  "icons/icon.ico",
   "icons/icon.png"
 ];
 
