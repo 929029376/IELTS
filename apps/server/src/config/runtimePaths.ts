@@ -1,5 +1,3 @@
-import { join } from "node:path";
-
 export interface RuntimePathOptions {
   appDataDir?: string;
   homeDir?: string;
@@ -11,18 +9,24 @@ export function normalizeUserSelectedPath(pathValue: string): string {
   return pathValue.replace(/\\/g, "/");
 }
 
+function appendPath(basePath: string, ...segments: string[]): string {
+  const normalizedBase = normalizeUserSelectedPath(basePath).replace(/\/+$/g, "");
+  const normalizedSegments = segments.map((segment) => normalizeUserSelectedPath(segment).replace(/^\/+|\/+$/g, ""));
+  return [normalizedBase, ...normalizedSegments].filter(Boolean).join("/");
+}
+
 export function getDefaultDataDir(options: RuntimePathOptions): string {
   if (options.platform === "win32") {
     const appDataDir = normalizeUserSelectedPath(options.appDataDir ?? "%APPDATA%");
-    return `${appDataDir}/IELTS Local Practice`;
+    return appendPath(appDataDir, "IELTS Local Practice");
   }
 
   const homeDir = options.homeDir ?? process.env.HOME ?? ".";
-  return join(homeDir, "Library/Application Support/IELTS Local Practice");
+  return appendPath(homeDir, "Library/Application Support/IELTS Local Practice");
 }
 
 export function getDefaultDatabasePath(options: RuntimePathOptions): string {
-  return join(getDefaultDataDir(options), "ielts.db");
+  return appendPath(getDefaultDataDir(options), "ielts.db");
 }
 
 export function getDefaultSyncFolderPath(options: RuntimePathOptions): string {
@@ -31,5 +35,5 @@ export function getDefaultSyncFolderPath(options: RuntimePathOptions): string {
   }
 
   const homeDir = options.homeDir ?? process.env.HOME ?? ".";
-  return join(homeDir, "Desktop/同步空间/IELTS-Sync");
+  return appendPath(homeDir, "Desktop/同步空间/IELTS-Sync");
 }

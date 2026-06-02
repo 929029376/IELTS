@@ -27,6 +27,10 @@
 - Added `scripts/desktop-check.mjs` to verify Tauri config presence and bundle targets.
 - Added `.github/workflows/windows-desktop-package.yml` so GitHub can build Windows NSIS
   installer artifacts from `master` and preserve the `.exe` as workflow evidence.
+- Added a host-independence regression test for runtime paths after the first Windows
+  packaging workflow run showed that server unit tests failed on `windows-latest`.
+- Updated runtime path construction so Mac and Windows path outputs are based on the
+  requested target platform instead of the operating system running the test.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -84,6 +88,14 @@
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
   - Initially failed because `.github/workflows/windows-desktop-package.yml` did not exist.
   - Passed after adding the Windows desktop packaging workflow.
+- GitHub Actions run `26793775740`
+  - Triggered by commit `a99258f` on `master`.
+  - Failed at the `Run unit tests` step on `windows-latest`, before web build and NSIS packaging ran.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/runtimePathsHostIndependence.test.ts`
+  - Initially failed because `node:path.join` let the runner OS change target-platform path output.
+  - Passed after changing runtime path construction to normalize and append path segments explicitly.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/runtimePaths.test.ts`
+  - 3 runtime path tests passed after the host-independence fix.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
