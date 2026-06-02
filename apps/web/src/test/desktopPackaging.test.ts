@@ -44,4 +44,20 @@ describe("desktop packaging configuration", () => {
   it("includes the Tauri icon required by generate_context", () => {
     expect(existsSync(resolve(webRoot, "src-tauri/icons/icon.png"))).toBe(true);
   });
+
+  it("keeps a GitHub Actions workflow for Windows NSIS packaging evidence", () => {
+    const workflowPath = resolve(workspaceRoot, ".github/workflows/windows-desktop-package.yml");
+
+    expect(existsSync(workflowPath)).toBe(true);
+
+    const workflow = readFileSync(workflowPath, "utf8");
+    expect(workflow).toContain("runs-on: windows-latest");
+    expect(workflow).toContain("pnpm/action-setup");
+    expect(workflow).toContain("dtolnay/rust-toolchain@stable");
+    expect(workflow).toContain("npx pnpm@9.15.4 test");
+    expect(workflow).toContain("npx pnpm@9.15.4 build");
+    expect(workflow).toContain("npx pnpm@9.15.4 desktop:check");
+    expect(workflow).toContain("npx pnpm@9.15.4 desktop:build:win");
+    expect(workflow).toContain("apps/web/src-tauri/target/release/bundle/nsis/*.exe");
+  });
 });

@@ -25,6 +25,8 @@
   - web `desktop:build:mac`,
   - web `desktop:build:win`.
 - Added `scripts/desktop-check.mjs` to verify Tauri config presence and bundle targets.
+- Added `.github/workflows/windows-desktop-package.yml` so GitHub can build Windows NSIS
+  installer artifacts from `master` and preserve the `.exe` as workflow evidence.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -79,6 +81,9 @@
   - Desktop packaging configuration check passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
   - 4 desktop packaging configuration tests passed, including icon presence and Mac `--ci` packaging script.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because `.github/workflows/windows-desktop-package.yml` did not exist.
+  - Passed after adding the Windows desktop packaging workflow.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
@@ -133,9 +138,14 @@
 
 - Windows local web mode still needs a real Windows run.
 - Windows `.exe` package artifact still needs a Windows build environment.
+- The Windows GitHub Actions packaging workflow needs to run on GitHub and produce an
+  `apps/web/src-tauri/target/release/bundle/nsis/*.exe` artifact before marking the
+  Windows `.exe` item complete.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
-Repeat local web, packaging, runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path,
-and Baidu Cloud sync folder checks on a Windows environment.
+Run the Windows Desktop Package GitHub Actions workflow on `master`, download the NSIS
+installer artifact, then repeat local web, packaged runtime diagnostics, file picker,
+audio playback, PDF viewing, SQLite path, and Baidu Cloud sync folder checks on a
+Windows environment.
