@@ -26,7 +26,8 @@ The folder should contain:
 
 - the NSIS installer `.exe`,
 - `windows-package-manifest.json`,
-- `windows-packaged-runtime-check.ps1`.
+- `windows-packaged-runtime-check.ps1`,
+- `validate-windows-runtime-report.mjs`.
 
 ## Test Assets
 
@@ -107,12 +108,14 @@ Keep the report with the installer run evidence. The report is complete when:
 
 ## Final Report Validator
 
-After updating the manual checklist, copy the completed report back to this repo or
-run the validator from the repo root:
+After updating the manual checklist, run the validator included in the verification kit:
 
 ```powershell
-node scripts/validate-windows-runtime-report.mjs ".\windows-packaged-runtime-report.json"
+node ".\validate-windows-runtime-report.mjs" ".\windows-packaged-runtime-report.json"
 ```
+
+The same script is also available in this repo at
+`scripts/validate-windows-runtime-report.mjs`.
 
 The validator must print:
 

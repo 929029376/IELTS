@@ -90,6 +90,8 @@
     needed to close the remaining Phase 9 evidence gap.
   - A repo-tracked Windows runtime report validator now checks the completed report
     before Phase 9 can be closed.
+  - The Windows verification kit artifact now ships that validator, reducing the
+    real Windows validation dependency to the downloaded installer and kit artifacts.
   - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
     SQLite path, and sync folder path still need hands-on verification on a real
     Windows environment.

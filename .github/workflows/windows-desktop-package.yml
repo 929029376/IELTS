@@ -132,6 +132,7 @@ jobs:
 
           $manifest | ConvertTo-Json -Depth 4 | Set-Content -Encoding utf8 "windows-verification-kit/windows-package-manifest.json"
           Copy-Item "scripts/windows-packaged-runtime-check.ps1" "windows-verification-kit/windows-packaged-runtime-check.ps1"
+          Copy-Item "scripts/validate-windows-runtime-report.mjs" "windows-verification-kit/validate-windows-runtime-report.mjs"
 
       - name: Upload Windows installer
         uses: actions/upload-artifact@v4

@@ -93,6 +93,10 @@
   installer hash evidence, installed app evidence, app data paths, Baidu Cloud path
   evidence, listening ZIP/audio/PDF path evidence, and any `manualChecklist` item
   that is not marked `passed`.
+- Updated the Windows verification kit workflow to include
+  `validate-windows-runtime-report.mjs` alongside `windows-packaged-runtime-check.ps1`,
+  so a Windows machine only needs the installer artifact and verification kit
+  artifact to generate and validate final Phase 9 evidence.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -533,6 +537,12 @@
     exist.
   - Passed after adding a validator that accepts a fully passed Windows runtime
     report and rejects a report with incomplete `manualChecklist` evidence.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the Windows verification kit workflow did not copy
+    `scripts/validate-windows-runtime-report.mjs` into the artifact and the Windows
+    hands-on guide did not say the validator is included in the verification kit.
+  - Passed after shipping `validate-windows-runtime-report.mjs` in
+    `windows-verification-kit/` and updating the Windows verification guide.
 - `npx pnpm@9.15.4 test`
   - Shared: 3 tests passed.
   - Server: 40 tests passed.
@@ -649,6 +659,9 @@
 - Completed Windows packaged runtime reports can now be checked with
   `node scripts/validate-windows-runtime-report.mjs <report-path>` before Phase 9
   is closed.
+- The Windows verification kit artifact now includes the report validator, so the
+  final command can be run as `node .\validate-windows-runtime-report.mjs
+  .\windows-packaged-runtime-report.json` from the extracted kit folder.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
   on `windows-2022` through GitHub Actions run `26826263442`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,

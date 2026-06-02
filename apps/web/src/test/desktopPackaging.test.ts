@@ -94,6 +94,8 @@ describe("desktop packaging configuration", () => {
     expect(workflow).toContain("windows-packaged-runtime-report.json");
     expect(workflow).toContain("ielts-local-practice-windows-verification-kit");
     expect(workflow).toContain("scripts/windows-packaged-runtime-check.ps1");
+    expect(workflow).toContain("scripts/validate-windows-runtime-report.mjs");
+    expect(workflow).toContain("windows-verification-kit/validate-windows-runtime-report.mjs");
     expect(workflow).toContain("Verify Windows packaged runtime install");
     expect(workflow).toContain("-ReportPath");
     expect(workflow).toContain("Validate Windows runtime report");
@@ -163,6 +165,8 @@ describe("desktop packaging configuration", () => {
     expect(guide).toContain("ielts-local-practice-windows-verification-kit");
     expect(guide).toContain("ielts-local-practice-windows-runtime-report");
     expect(guide).toContain("windows-packaged-runtime-check.ps1");
+    expect(guide).toContain("validate-windows-runtime-report.mjs");
+    expect(guide).toContain("included in the verification kit");
     expect(guide).toContain("-BaiduSyncPath");
     expect(guide).toContain("-ListeningZipPath");
     expect(guide).toContain("-AudioPath");
