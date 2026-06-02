@@ -49,6 +49,15 @@
   kit can check the installer SHA256, locate the installed app executable, launch the
   app, verify the process remains running, and report the expected app data and
   SQLite paths before the remaining UI checklist.
+- Fixed the Windows packaging workflow after the first strict silent-install run
+  failed without preserving downloadable artifacts.
+- Pinned the Windows packaging workflow to `windows-2022` for a stable runner image.
+- Moved Windows installer and verification-kit artifact uploads before the packaged
+  runtime install check, so future install-check failures still leave downloadable
+  evidence.
+- Hardened `scripts/windows-packaged-runtime-check.ps1` to search both
+  `IELTS Local Practice.exe` and `ielts-local-practice.exe`, print discovered
+  executable candidates, and check common `%LOCALAPPDATA%\Programs` install paths.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -221,6 +230,47 @@
   - Verification kit artifact size: `2101` bytes.
   - Verification kit artifact digest: `sha256:d2c0f3c9e69e735b776efe7a52c662b370bfae7fd9326f11b79f8333378ce14f`.
   - Both artifacts expire at `2026-08-31T04:38:16Z`.
+- GitHub Actions run `26799247989`
+  - Triggered by commit `f4c7fe7` on `master`.
+  - Passed Windows unit tests, web build, Windows local web smoke, desktop packaging
+    config check, Windows NSIS installer build, and Windows verification kit creation.
+  - Failed at `Verify Windows packaged runtime install`.
+  - The REST logs endpoint returned `403` without repository admin rights, and the
+    workflow uploaded no artifacts because upload steps were after the failing
+    install-verification step.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the workflow did not wait after silent install, did not
+    upload artifacts before install verification, and the verification script did not
+    search for `ielts-local-practice.exe`.
+  - Passed after pinning the runner to `windows-2022`, moving uploads before install
+    verification, adding a post-install wait, and broadening installed executable
+    discovery.
+- `npx pnpm@9.15.4 test`
+  - Shared: 3 tests passed.
+  - Server: 40 tests passed.
+  - Web: 28 tests passed.
+- `npx pnpm@9.15.4 build`
+  - Shared TypeScript build passed.
+  - Server TypeScript build passed.
+  - Web TypeScript and Vite production build passed.
+- `npx pnpm@9.15.4 desktop:check`
+  - Desktop packaging configuration check passed.
+- `git diff --check`
+  - No whitespace errors reported.
+- GitHub Actions run `26799826230`
+  - Triggered by commit `d73ba77` on `master`.
+  - Passed Windows unit tests, web build, Windows local web smoke, desktop packaging
+    config check, Windows NSIS installer build, Windows verification kit creation,
+    Windows installer upload, Windows verification kit upload, and Windows packaged
+    runtime install verification.
+  - Used runner label `windows-2022`.
+  - Uploaded artifact `ielts-local-practice-windows-nsis`.
+  - Installer artifact size: `1852528` bytes.
+  - Installer artifact digest: `sha256:0b31d6f3fde5a8bcad4403a92fe2a412b3ab5e97081a9375f6ee186983abeecc`.
+  - Uploaded artifact `ielts-local-practice-windows-verification-kit`.
+  - Verification kit artifact size: `2540` bytes.
+  - Verification kit artifact digest: `sha256:7fb8bc54e81312b12206522ab76a8c90041a7780d20ff7dec373cf7674aea34a`.
+  - Both artifacts expire at `2026-08-31T05:11:30Z`.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
@@ -273,19 +323,20 @@
 
 ## Remaining Phase 9 Work
 
-- Windows local web mode is verified on `windows-latest` by GitHub Actions run `26797896087`.
+- Windows local web mode is verified on `windows-2022` by GitHub Actions run `26799826230`.
 - Windows `.exe` packaging is complete through the GitHub Actions artifact
   `ielts-local-practice-windows-nsis`.
 - Windows packaged runtime hands-on verification now has a downloadable verification
   kit artifact with a manifest and PowerShell script that can automate installer hash,
-  installed executable, app launch, process, and app data checks before manual UI
-  verification.
+  installed executable discovery, app launch, process, and app data checks before
+  manual UI verification.
+- Windows packaged runtime silent install is verified in GitHub Actions run `26799826230`.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
 Download the Windows NSIS installer artifact and Windows verification kit artifact from
-GitHub Actions run `26798729548`, then run `windows-packaged-runtime-check.ps1` on a
+GitHub Actions run `26799826230`, then run `windows-packaged-runtime-check.ps1` on a
 Windows environment with the downloaded installer path. Use the script output plus
 packaged runtime diagnostics to finish checking file picker, audio playback, PDF
 viewing, SQLite path, and Baidu Cloud sync folder behavior.
