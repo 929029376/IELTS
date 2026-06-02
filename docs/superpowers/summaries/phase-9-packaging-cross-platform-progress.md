@@ -533,6 +533,38 @@
     exist.
   - Passed after adding a validator that accepts a fully passed Windows runtime
     report and rejects a report with incomplete `manualChecklist` evidence.
+- `npx pnpm@9.15.4 test`
+  - Shared: 3 tests passed.
+  - Server: 40 tests passed.
+  - Web: 30 tests passed.
+- `npx pnpm@9.15.4 build`
+  - Shared TypeScript build passed.
+  - Server TypeScript build passed.
+  - Web TypeScript and Vite production build passed.
+- `npx pnpm@9.15.4 desktop:check`
+  - Rust test `runtime_status_includes_packaged_modes` passed.
+  - Desktop packaging configuration check passed.
+- `git diff --check`
+  - No whitespace errors reported.
+- GitHub Actions run `26826263442`
+  - Triggered by commit `5446478` on `master`.
+  - Passed Windows unit tests including the report validator coverage, web build,
+    Windows local web smoke, Windows `desktop:check` including Rust packaged
+    runtime diagnostics, Windows NSIS installer build, Windows verification kit
+    creation, installer upload, verification kit upload, Windows packaged runtime
+    install, launch smoke, app data directory smoke, runtime report validation, and
+    runtime report upload.
+  - Used runner label `windows-2022`.
+  - Uploaded artifact `ielts-local-practice-windows-nsis`.
+  - Installer artifact size: `1854550` bytes.
+  - Installer artifact digest: `sha256:e44f3b662904f89369092f62dcf0f5aa94197568acbe4b4204c8bc076c152108`.
+  - Uploaded artifact `ielts-local-practice-windows-verification-kit`.
+  - Verification kit artifact size: `3896` bytes.
+  - Verification kit artifact digest: `sha256:4362f2682411462fa561e4d255d1466bc537adef9339e1cd7d7bb210c2c7ce39`.
+  - Uploaded artifact `ielts-local-practice-windows-runtime-report`.
+  - Runtime report artifact size: `1344` bytes.
+  - Runtime report artifact digest: `sha256:19828fadcbb6c4c28a55455280adcb0f0f5882eeb96b2bdad6643d45cbdc1deb`.
+  - All three artifacts expire at `2026-08-31T14:25:28Z`.
 - GitHub Actions run `26825215775`
   - Triggered by commit `02bf79e` on `master`.
   - Passed Windows unit tests including the Windows verification guide coverage,
@@ -604,7 +636,7 @@
 
 ## Remaining Phase 9 Work
 
-- Windows local web mode is verified on `windows-2022` by GitHub Actions run `26825215775`.
+- Windows local web mode is verified on `windows-2022` by GitHub Actions run `26826263442`.
 - Windows `.exe` packaging is complete through the GitHub Actions artifact
   `ielts-local-practice-windows-nsis`.
 - Windows packaged runtime hands-on verification now has a downloadable verification
@@ -618,16 +650,16 @@
   `node scripts/validate-windows-runtime-report.mjs <report-path>` before Phase 9
   is closed.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
-  on `windows-2022` through GitHub Actions run `26825215775`.
+  on `windows-2022` through GitHub Actions run `26826263442`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,
   report-capable PowerShell verifier execution, runtime report JSON validation, and
-  runtime report artifact upload are verified in GitHub Actions run `26825215775`.
+  runtime report artifact upload are verified in GitHub Actions run `26826263442`.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
 Download the Windows NSIS installer artifact and Windows verification kit artifact from
-GitHub Actions run `26825215775`, then run `windows-packaged-runtime-check.ps1` on a
+GitHub Actions run `26826263442`, then run `windows-packaged-runtime-check.ps1` on a
 Windows environment with the downloaded installer path. Use `-ReportPath`, and
 optionally pass `-BaiduSyncPath`, `-ListeningZipPath`, `-AudioPath`, and
 `-ReadingPdfPath`, so the generated `windows-packaged-runtime-report.json` captures

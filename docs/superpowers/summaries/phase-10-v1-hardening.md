@@ -76,7 +76,7 @@
     hash, installed executable discovery, app launch, process, app data checks, and
     structured `windows-packaged-runtime-report.json` output before the remaining UI
     checklist.
-  - GitHub Actions run `26825215775` on `master` passed Windows unit tests, web
+  - GitHub Actions run `26826263442` on `master` passed Windows unit tests, web
     build, Windows local web smoke, `desktop:check` with Rust packaged runtime
     diagnostics, Windows NSIS build, artifact uploads, and Windows packaged runtime
     silent-install plus launch smoke plus app data directory verification plus
