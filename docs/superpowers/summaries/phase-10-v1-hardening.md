@@ -110,6 +110,9 @@
     needed to close the remaining Phase 9 evidence gap.
   - A repo-tracked Windows runtime report validator now checks the completed report
     before Phase 9 can be closed.
+  - A root `pnpm windows:handoff` command now prints the latest successful Windows
+    Desktop Package run on `master`, required artifact names, artifact digests,
+    download URLs, and the remaining Windows validation commands.
   - The Windows verification kit artifact from run `26829543197` ships that
     validator, reducing the real Windows validation dependency to the downloaded
     installer and kit artifacts.

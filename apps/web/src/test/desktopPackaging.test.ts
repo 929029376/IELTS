@@ -296,4 +296,67 @@ describe("desktop packaging configuration", () => {
       "V1 readiness evidence is complete"
     );
   });
+
+  it("provides a Windows verification handoff command without stale run ids in the guide", () => {
+    const packageJson = JSON.parse(readFileSync(resolve(workspaceRoot, "package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    };
+    const handoffPath = resolve(workspaceRoot, "scripts/windows-verification-handoff.mjs");
+    const guidePath = resolve(workspaceRoot, "docs/superpowers/windows-packaged-runtime-verification.md");
+
+    expect(packageJson.scripts["windows:handoff"]).toBe("node scripts/windows-verification-handoff.mjs");
+    expect(existsSync(handoffPath)).toBe(true);
+
+    const guide = readFileSync(guidePath, "utf8");
+    expect(guide).toContain("pnpm windows:handoff");
+    expect(guide).toContain("latest successful run on `master`");
+    expect(guide).not.toContain("26824224735");
+
+    const fixturePath = resolve(mkdtempSync(resolve(tmpdir(), "ielts-windows-handoff-")), "artifacts.json");
+    writeFileSync(
+      fixturePath,
+      JSON.stringify({
+        workflow_run: {
+          id: 12345,
+          html_url: "https://github.com/929029376/IELTS/actions/runs/12345",
+          head_sha: "abc123",
+          display_title: "tools: require observed windows evidence"
+        },
+        artifacts: [
+          {
+            name: "ielts-local-practice-windows-nsis",
+            size_in_bytes: 1855191,
+            digest: "sha256:installer",
+            archive_download_url: "https://api.github.com/repos/929029376/IELTS/actions/artifacts/1/zip"
+          },
+          {
+            name: "ielts-local-practice-windows-verification-kit",
+            size_in_bytes: 5117,
+            digest: "sha256:kit",
+            archive_download_url: "https://api.github.com/repos/929029376/IELTS/actions/artifacts/2/zip"
+          },
+          {
+            name: "ielts-local-practice-windows-runtime-report",
+            size_in_bytes: 1351,
+            digest: "sha256:report",
+            archive_download_url: "https://api.github.com/repos/929029376/IELTS/actions/artifacts/3/zip"
+          }
+        ]
+      }),
+      "utf8"
+    );
+
+    const output = execFileSync("node", [handoffPath, "--from-artifacts-json", fixturePath], { encoding: "utf8" });
+
+    expect(output).toContain("Latest successful Windows packaging run: 12345");
+    expect(output).toContain("tools: require observed windows evidence");
+    expect(output).toContain("ielts-local-practice-windows-nsis");
+    expect(output).toContain("sha256:installer");
+    expect(output).toContain("ielts-local-practice-windows-verification-kit");
+    expect(output).toContain("sha256:kit");
+    expect(output).toContain("ielts-local-practice-windows-runtime-report");
+    expect(output).toContain("sha256:report");
+    expect(output).toContain("windows-packaged-runtime-check.ps1");
+    expect(output).toContain("validate-windows-runtime-report.mjs");
+  });
 });

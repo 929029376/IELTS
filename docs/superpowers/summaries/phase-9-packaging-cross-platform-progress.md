@@ -97,6 +97,11 @@
   `validate-windows-runtime-report.mjs` alongside `windows-packaged-runtime-check.ps1`,
   so a Windows machine only needs the installer artifact and verification kit
   artifact to generate and validate final Phase 9 evidence.
+- Added `scripts/windows-verification-handoff.mjs` and root `pnpm windows:handoff`
+  so the latest successful Windows Desktop Package run on `master`, required
+  artifacts, artifact digests, download URLs, and final validation commands can be
+  printed without relying on a stale hard-coded run id in the Windows verification
+  guide.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -674,6 +679,18 @@
   - Passed after requiring non-empty `observedEvidence` for every passed manual
     checklist item, adding blank `observedEvidence` fields to the PowerShell report
     template, and updating the Windows hands-on guide.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the repo did not expose a `windows:handoff` command
+    and the Windows verification guide still contained a stale hard-coded run id.
+  - Passed after adding `scripts/windows-verification-handoff.mjs`, wiring the root
+    `pnpm windows:handoff` command, making the guide point to that command, and
+    fixture-testing the handoff output for required artifact names, digests, and
+    final Windows validation commands.
+- `node scripts/windows-verification-handoff.mjs`
+  - Passed with network access.
+  - Printed latest successful Windows packaging run `26829543197`, run URL
+    `https://github.com/929029376/IELTS/actions/runs/26829543197`, and the three
+    required artifacts with their current digests.
 - GitHub Actions run `26829543197`
   - Triggered by commit `765e9fa` on `master`.
   - Passed Windows unit tests including the stricter observed-evidence coverage,
@@ -705,6 +722,9 @@
   `windows-packaged-runtime-report.json` for the remaining hands-on evidence.
 - Windows packaged runtime hands-on verification now has a repo-tracked guide at
   `docs/superpowers/windows-packaged-runtime-verification.md`.
+- The guide now points to `pnpm windows:handoff` to fetch the latest successful
+  Windows packaging run and required artifacts instead of relying on a stale run
+  number.
 - Completed Windows packaged runtime reports can now be checked with
   `node scripts/validate-windows-runtime-report.mjs <report-path>` before Phase 9
   is closed.

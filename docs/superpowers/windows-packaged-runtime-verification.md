@@ -5,8 +5,17 @@ Local Practice app on a real Windows machine and preserving a structured runtime
 report.
 
 This guide uses the GitHub Actions artifacts produced by the Windows Desktop Package
-workflow. Use the latest successful run on `master`; at the time this guide was
-created, run `26824224735` is the current evidence run.
+workflow. Use the latest successful run on `master`.
+
+From the repo root, print the current handoff information with:
+
+```bash
+pnpm windows:handoff
+```
+
+The command lists the latest successful Windows packaging run, the required artifact
+names, artifact digests, download URLs, and the validation commands to run after the
+hands-on Windows checks.
 
 ## Required Artifacts
 
