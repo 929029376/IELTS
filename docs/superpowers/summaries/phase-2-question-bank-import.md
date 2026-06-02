@@ -1,6 +1,6 @@
 # Phase 2 Question Bank Import Summary
 
-**Date:** 2026-05-31
+**Date:** 2026-05-31, with Mac import route follow-up on 2026-06-03
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -38,6 +38,19 @@
 - Added `apps/web/src/features/import/FrequencyCorrectionTable.tsx`.
   - Provides an editable table for OCR/manual frequency row correction before import.
   - Covers subject, part, English title, Chinese title, frequency class, difficulty, and source month.
+- Added `apps/server/src/routes/importRoutes.ts`.
+  - `POST /api/import/listening-zip`.
+  - `POST /api/import/listening-directory`.
+  - `POST /api/import/reading-pdf`.
+  - `POST /api/import/reading-directory`.
+  - `POST /api/import/frequency-file`.
+  - `POST /api/import/frequency-rows`.
+  - Uses the existing importer modules and stores assets under the configured asset root.
+- Added `apps/web/src/features/import/QuestionBankImportPanel.tsx`.
+  - Provides Mac local path inputs for the existing `listening` folder and reading PDF folder.
+  - Provides frequency CSV/XLSX import and corrected frequency row import.
+  - Shows import progress and imported item counts in the dashboard.
+- Integrated the Question Bank import panel into the main app dashboard.
 
 ## Verification Evidence
 
@@ -58,6 +71,27 @@
   - Migration command completed with `Database migrations applied.`
 - `npx pnpm@9.15.4 test:e2e`
   - Playwright Chromium dashboard smoke test passed.
+- Mac import route follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/importRoutes.test.ts`
+    - Initially failed with 404 because the import API routes were missing.
+    - Passed after adding `registerImportRoutes` and wiring it into `buildServer`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
+    - Initially failed because `QuestionBankImportPanel` did not exist.
+    - Passed after adding the panel and API calls for listening, reading, and frequency imports.
+  - `npx pnpm@9.15.4 test:e2e`
+    - 2 Playwright Chromium tests passed, including the Question Bank import region and default Mac local paths.
+  - `npx pnpm@9.15.4 build`
+    - Shared, server, and web production builds passed after the import route and panel changes.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the import route and panel changes.
+    - Shared: 3 tests passed.
+    - Server: 41 tests passed.
+    - Web: 34 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
 - Real local asset smoke import:
   - Imported `listening/IELTS Listening 虾滑/P4/高频/52. P4 Underwater Archaeological Sites.zip`.
   - Result: listening P4, high frequency, title `Underwater Archaeological Sites`, `needs_review`.
@@ -72,4 +106,7 @@
 
 ## Next Phase
 
-With Phase 2 complete, the project has both real-file importers and the Phase 3 practice engine. The next stage should proceed to Phase 4: IELTS-style exam simulation UI.
+With Phase 2 complete, the project has real-file importers, local-path API routes,
+and a Mac dashboard entry point for updating the question bank and frequency table.
+Continue tightening the Mac self-use loop by replacing remaining static dashboard
+preview data with live API data where it affects daily use.

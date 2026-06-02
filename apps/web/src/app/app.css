@@ -148,6 +148,10 @@ h1 {
   margin-top: 28px;
 }
 
+.question-bank-import-band {
+  margin-top: 28px;
+}
+
 .intensive-preview-band {
   margin-top: 28px;
 }
@@ -308,6 +312,113 @@ h1 {
   border-radius: 8px;
   background: #f8fafc;
   color: #5d6c7f;
+  font-size: 14px;
+}
+
+.question-bank-import-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.import-panel,
+.frequency-manual-panel {
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.import-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.import-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #20314a;
+}
+
+.import-panel-title h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.import-panel label,
+.frequency-month-field {
+  display: grid;
+  gap: 6px;
+  color: #405169;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.import-panel input,
+.frequency-month-field input,
+.frequency-manual-panel input,
+.frequency-manual-panel select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #bcc9d9;
+  border-radius: 6px;
+  padding: 8px;
+  color: #172033;
+  font: inherit;
+  font-size: 13px;
+}
+
+.import-panel button,
+.frequency-manual-panel button {
+  min-height: 34px;
+  border: 1px solid #bcc9d9;
+  border-radius: 6px;
+  background: #20314a;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.import-panel button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.frequency-manual-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  overflow-x: auto;
+}
+
+.frequency-manual-panel table {
+  min-width: 820px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.frequency-manual-panel th,
+.frequency-manual-panel td {
+  padding: 8px 6px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+.frequency-manual-panel th {
+  color: #66768c;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.import-status {
+  margin: 12px 0 0;
+  padding: 12px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #405169;
   font-size: 14px;
 }
 
@@ -1034,6 +1145,7 @@ h1 {
 
   .intensive-preview-grid,
   .reports-grid,
+  .question-bank-import-grid,
   .hardening-grid,
   .sync-settings-grid,
   .close-reading-view {

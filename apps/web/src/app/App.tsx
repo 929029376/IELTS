@@ -1,6 +1,7 @@
 import { Activity, BookOpenCheck, Database, Headphones, LineChart, Timer } from "lucide-react";
 import { ExamPreview } from "../features/exam/ExamPreview";
 import { HardeningCenter } from "../features/hardening/HardeningCenter";
+import { QuestionBankImportPanel } from "../features/import/QuestionBankImportPanel";
 import { IntensivePracticePreview } from "../features/intensive/IntensivePracticePreview";
 import { HistoryReportsPreview } from "../features/reports/HistoryReportsPreview";
 import { SyncSettingsPreview } from "../features/sync/SyncSettingsPreview";
@@ -164,6 +165,7 @@ export function App() {
         </section>
 
         <ExamPreview />
+        <QuestionBankImportPanel />
         <IntensivePracticePreview />
         <HistoryReportsPreview
           analytics={sampleAnalytics}

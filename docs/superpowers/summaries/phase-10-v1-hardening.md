@@ -48,6 +48,12 @@
     build, desktop runtime diagnostics, and Mac DMG packaging without requiring the
     deferred Windows report.
 - Expanded Playwright coverage for dashboard, import report, practice, mock exam, review, history, and sync settings anchors.
+- Added a Mac self-use question-bank import surface:
+  - local listening directory import,
+  - local reading PDF directory import,
+  - frequency CSV/XLSX import,
+  - corrected manual frequency row import,
+  - Playwright anchors for the Question Bank import region and default Mac local paths.
 
 ## Verification Evidence
 
@@ -104,6 +110,27 @@
     - Web TypeScript and Vite production build passed.
   - `npx pnpm@9.15.4 db:migrate`
     - Migration command completed with `Database migrations applied.`
+- Mac question-bank import follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/importRoutes.test.ts`
+    - Initially failed with 404 because the import API routes were missing.
+    - Passed after adding import routes and wiring them into `buildServer`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
+    - Initially failed because the Question Bank import panel did not exist.
+    - Passed after adding the panel and local import API calls.
+  - `npx pnpm@9.15.4 test:e2e`
+    - 2 Playwright Chromium tests passed with Question Bank import anchors.
+  - `npx pnpm@9.15.4 build`
+    - Shared, server, and web production builds passed.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after adding the Question Bank import API and dashboard panel.
+    - Shared: 3 tests passed.
+    - Server: 41 tests passed.
+    - Web: 34 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
 - Browser verification:
   - Opened `http://127.0.0.1:5173/` in the in-app browser.
   - Confirmed the page title, V1 hardening center, and sync settings were present.

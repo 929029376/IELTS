@@ -195,6 +195,7 @@ Answer normalization:
 ### Listening ZIP Import
 
 - [x] Implement `apps/server/src/importers/listeningZipImporter.ts`.
+- [x] Expose local-path import API routes for single ZIP and directory import.
 - [x] Parse ZIP files from existing paths such as `listening/IELTS Listening 虾滑/P1/高频/*.zip`.
 - [x] Extract and store:
   - original source path,
@@ -211,6 +212,7 @@ Answer normalization:
 ### Reading PDF Import
 
 - [x] Implement `apps/server/src/importers/readingPdfImporter.ts`.
+- [x] Expose local-path import API routes for single PDF and directory import.
 - [x] Import PDFs from `reading/ReadingPractice/PDF`.
 - [x] Extract title, part, English name, Chinese name from filename.
 - [x] Store PDF asset path and passage metadata.
@@ -219,9 +221,11 @@ Answer normalization:
 ### Frequency Table Import
 
 - [x] Implement `apps/server/src/importers/frequencyImporter.ts`.
+- [x] Expose API routes for CSV/XLSX frequency table imports and corrected manual rows.
 - [x] Support CSV/XLSX structured frequency tables.
 - [x] Support manual correction UI for OCR output from images like `reading/5月高频表格.jpg`.
 - [x] Store entries with `subject`, `part`, `englishTitle`, `chineseTitle`, `frequencyClass`, `difficulty`, `sourceMonth`.
+- [x] Add a Mac local Question Bank import panel with default listening and reading paths plus frequency update controls.
 
 **Acceptance:** Importing current listening and reading folders creates searchable passage records, frequency classes, source versions, and dedupe records.
 

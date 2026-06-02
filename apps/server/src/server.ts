@@ -3,14 +3,17 @@ import Fastify from "fastify";
 import type { FastifyInstance } from "fastify";
 import { openDatabase } from "./db/database";
 import { migrate } from "./db/migrate";
+import { dataDir } from "./config/paths";
 import { registerBackupRoutes } from "./routes/backupRoutes";
 import { registerHardeningRoutes } from "./routes/hardeningRoutes";
+import { registerImportRoutes } from "./routes/importRoutes";
 import { registerPracticeRoutes } from "./routes/practiceRoutes";
 import { registerReportsRoutes } from "./routes/reportsRoutes";
 import { registerSyncRoutes } from "./routes/syncRoutes";
 import { createSyncService, type SyncServiceOptions } from "./sync/syncService";
 
 export interface BuildServerOptions {
+  assetRoot?: string;
   backupDir?: string;
   backupReminderAttemptThreshold?: number;
   databasePath?: string;
@@ -42,6 +45,9 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
   }
 
   server.get("/health", async () => ({ ok: true }));
+  registerImportRoutes(server, db, {
+    assetRoot: options.assetRoot ?? `${dataDir}/assets`
+  });
   registerPracticeRoutes(server, db, sync);
   registerReportsRoutes(server, db, {
     exportDir: options.exportDir,

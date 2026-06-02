@@ -27,6 +27,9 @@ test("covers V1 dashboard, import, practice, history, and sync regression anchor
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "IELTS Local Practice" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Question bank import" })).toContainText("Local import and frequency updates");
+  await expect(page.getByLabel("Listening directory path")).toHaveValue("/Users/musheng/Desktop/IELTS/listening");
+  await expect(page.getByLabel("Reading PDF directory path")).toHaveValue("/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF");
   await expect(page.getByRole("region", { name: "Import failure report" })).toContainText("reading/broken.pdf");
   await expect(page.getByRole("region", { name: "Question-bank completeness" })).toContainText("Airport Enquiry");
   await expect(page.getByRole("region", { name: "Intensive practice preview" })).toBeVisible();
