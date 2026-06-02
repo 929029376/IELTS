@@ -662,6 +662,11 @@
     - Tauri desktop packaging configuration check passed.
   - `git diff --check`
     - No whitespace errors reported.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the root package did not expose `v1:check`.
+  - Passed after adding `scripts/v1-readiness-check.mjs`, wiring root
+    `v1:check`, and requiring a completed real Windows packaged runtime report
+    before V1 can be treated as evidence-complete.
 
 ## Remaining Phase 9 Work
 
@@ -681,6 +686,9 @@
 - The Windows verification kit artifact now includes the report validator, so the
   final command can be run as `node .\validate-windows-runtime-report.mjs
   .\windows-packaged-runtime-report.json` from the extracted kit folder.
+- Root `pnpm v1:check -- --windows-report <report-path>` now acts as the V1
+  evidence gate. It remains intentionally blocked until the real Windows hands-on
+  runtime report validates successfully.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
   on `windows-2022` through GitHub Actions run `26827197252`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,
@@ -699,4 +707,5 @@ the remaining file picker, audio playback, PDF viewing, SQLite path, and Baidu C
 sync folder evidence. After marking every manual checklist item as `passed`, run
 `node .\validate-windows-runtime-report.mjs .\windows-packaged-runtime-report.json`
 from the extracted verification kit folder and record the passing validator output
-in this summary.
+in this summary. Then run `npx pnpm@9.15.4 v1:check -- --windows-report
+<report-path>` from the repo root before closing V1.

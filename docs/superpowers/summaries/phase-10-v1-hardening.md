@@ -33,6 +33,12 @@
   - no completed history,
   - no accuracy analytics,
   - no mistake labels.
+- Added a root V1 readiness gate:
+  - `pnpm v1:check` requires a real Windows packaged runtime report,
+  - the gate delegates completed-report validation to
+    `scripts/validate-windows-runtime-report.mjs`,
+  - the gate prevents V1 from being marked complete while the remaining Windows
+    hands-on evidence is missing.
 - Expanded Playwright coverage for dashboard, import report, practice, mock exam, review, history, and sync settings anchors.
 
 ## Verification Evidence
@@ -48,6 +54,12 @@
     - 3 tests passed.
   - `npx pnpm@9.15.4 test:e2e`
     - 2 Playwright tests passed.
+- V1 readiness gate:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+    - Initially failed because root `v1:check` did not exist.
+    - Passed after adding `scripts/v1-readiness-check.mjs` and test coverage
+      proving it fails without Windows hands-on evidence and passes with a
+      completed Windows runtime report fixture.
 - Full verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

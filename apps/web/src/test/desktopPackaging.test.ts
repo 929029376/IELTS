@@ -228,4 +228,48 @@ describe("desktop packaging configuration", () => {
       /manualChecklist/
     );
   });
+
+  it("keeps a V1 readiness gate that requires completed Windows hands-on evidence", () => {
+    const packageJson = JSON.parse(readFileSync(resolve(workspaceRoot, "package.json"), "utf8")) as {
+      scripts: Record<string, string>;
+    };
+    const readinessPath = resolve(workspaceRoot, "scripts/v1-readiness-check.mjs");
+
+    expect(packageJson.scripts["v1:check"]).toBe("node scripts/v1-readiness-check.mjs");
+    expect(existsSync(readinessPath)).toBe(true);
+
+    const tempDir = mkdtempSync(resolve(tmpdir(), "ielts-v1-readiness-"));
+    const completedReportPath = resolve(tempDir, "completed-windows-report.json");
+    writeFileSync(
+      completedReportPath,
+      JSON.stringify({
+        installer: { hashVerified: true },
+        installedApp: { found: true, processStayedRunning: true },
+        appData: {
+          detectedPath: "C:\\Users\\tester\\AppData\\Roaming\\local.ielts.practice",
+          expectedDatabase: "C:\\Users\\tester\\AppData\\Roaming\\local.ielts.practice\\ielts.db"
+        },
+        baiduSync: { provided: true, exists: true, status: "exists" },
+        assetChecks: [
+          { label: "Listening ZIP", provided: true, exists: true, status: "exists" },
+          { label: "Listening audio", provided: true, exists: true, status: "exists" },
+          { label: "Reading PDF", provided: true, exists: true, status: "exists" }
+        ],
+        manualChecklist: [
+          { id: "runtime-platform", status: "passed" },
+          { id: "runtime-sqlite-path", status: "passed" },
+          { id: "runtime-sync-path", status: "passed" },
+          { id: "listening-zip-picker", status: "passed" },
+          { id: "listening-audio-playback", status: "passed" },
+          { id: "reading-pdf-preview", status: "passed" }
+        ]
+      }),
+      "utf8"
+    );
+
+    expect(() => execFileSync("node", [readinessPath], { encoding: "utf8", stdio: "pipe" })).toThrow(/Windows hands-on/);
+    expect(execFileSync("node", [readinessPath, "--windows-report", completedReportPath], { encoding: "utf8" })).toContain(
+      "V1 readiness evidence is complete"
+    );
+  });
 });

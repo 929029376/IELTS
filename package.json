@@ -9,6 +9,7 @@
     "desktop:check": "node scripts/desktop-check.mjs",
     "desktop:build:mac": "pnpm --filter @ielts/web desktop:build:mac",
     "desktop:build:win": "pnpm --filter @ielts/web desktop:build:win",
+    "v1:check": "node scripts/v1-readiness-check.mjs",
     "test": "pnpm -r --if-present test",
     "test:e2e": "pnpm --filter @ielts/web test:e2e",
     "db:migrate": "pnpm --filter @ielts/server db:migrate",
