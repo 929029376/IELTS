@@ -575,6 +575,25 @@
   - Runtime report artifact size: `1344` bytes.
   - Runtime report artifact digest: `sha256:19828fadcbb6c4c28a55455280adcb0f0f5882eeb96b2bdad6643d45cbdc1deb`.
   - All three artifacts expire at `2026-08-31T14:25:28Z`.
+- GitHub Actions run `26827197252`
+  - Triggered by commit `3cc72f8` on `master`.
+  - Passed Windows unit tests including the verification-kit validator coverage,
+    web build, Windows local web smoke, Windows `desktop:check` including Rust
+    packaged runtime diagnostics, Windows NSIS installer build, Windows verification
+    kit creation with `validate-windows-runtime-report.mjs`, installer upload,
+    verification kit upload, Windows packaged runtime install, launch smoke, app
+    data directory smoke, runtime report validation, and runtime report upload.
+  - Used runner label `windows-2022`.
+  - Uploaded artifact `ielts-local-practice-windows-nsis`.
+  - Installer artifact size: `1855067` bytes.
+  - Installer artifact digest: `sha256:1536c4571087f2f7b42dc523a4451fd94bccf2238901538f2c5e65a0e7104bb8`.
+  - Uploaded artifact `ielts-local-practice-windows-verification-kit`.
+  - Verification kit artifact size: `5055` bytes.
+  - Verification kit artifact digest: `sha256:3e61a4d4cfdd7c4b2fc407de7b5e648a5cb0d8bd5c0de5835a0c09830f1460b5`.
+  - Uploaded artifact `ielts-local-practice-windows-runtime-report`.
+  - Runtime report artifact size: `1341` bytes.
+  - Runtime report artifact digest: `sha256:7738aa6ffc386d5381750f4c9048fff097ab2764263c0261034b74786b6c34c3`.
+  - All three artifacts expire at `2026-08-31T14:40:50Z`.
 - GitHub Actions run `26825215775`
   - Triggered by commit `02bf79e` on `master`.
   - Passed Windows unit tests including the Windows verification guide coverage,
@@ -646,7 +665,7 @@
 
 ## Remaining Phase 9 Work
 
-- Windows local web mode is verified on `windows-2022` by GitHub Actions run `26826263442`.
+- Windows local web mode is verified on `windows-2022` by GitHub Actions run `26827197252`.
 - Windows `.exe` packaging is complete through the GitHub Actions artifact
   `ielts-local-practice-windows-nsis`.
 - Windows packaged runtime hands-on verification now has a downloadable verification
@@ -663,20 +682,21 @@
   final command can be run as `node .\validate-windows-runtime-report.mjs
   .\windows-packaged-runtime-report.json` from the extracted kit folder.
 - Windows packaged runtime diagnostics field construction is verified by `desktop:check`
-  on `windows-2022` through GitHub Actions run `26826263442`.
+  on `windows-2022` through GitHub Actions run `26827197252`.
 - Windows packaged runtime silent install, launch smoke, app data directory smoke,
   report-capable PowerShell verifier execution, runtime report JSON validation, and
-  runtime report artifact upload are verified in GitHub Actions run `26826263442`.
+  runtime report artifact upload are verified in GitHub Actions run `26827197252`.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
 Download the Windows NSIS installer artifact and Windows verification kit artifact from
-GitHub Actions run `26826263442`, then run `windows-packaged-runtime-check.ps1` on a
+GitHub Actions run `26827197252`, then run `windows-packaged-runtime-check.ps1` on a
 Windows environment with the downloaded installer path. Use `-ReportPath`, and
 optionally pass `-BaiduSyncPath`, `-ListeningZipPath`, `-AudioPath`, and
 `-ReadingPdfPath`, so the generated `windows-packaged-runtime-report.json` captures
 the remaining file picker, audio playback, PDF viewing, SQLite path, and Baidu Cloud
 sync folder evidence. After marking every manual checklist item as `passed`, run
-`node scripts/validate-windows-runtime-report.mjs <report-path>` and record the
-passing validator output in this summary.
+`node .\validate-windows-runtime-report.mjs .\windows-packaged-runtime-report.json`
+from the extracted verification kit folder and record the passing validator output
+in this summary.
