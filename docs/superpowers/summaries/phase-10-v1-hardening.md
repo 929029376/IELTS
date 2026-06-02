@@ -73,13 +73,14 @@
     `ielts-local-practice-windows-nsis`.
   - A Windows verification kit artifact now ships with the installer and includes a
     manifest plus `windows-packaged-runtime-check.ps1`, including automated installer
-    hash, installed executable discovery, app launch, process, and app data checks
-    before the remaining UI checklist.
-  - GitHub Actions run `26821603976` on `master` passed Windows unit tests, web
+    hash, installed executable discovery, app launch, process, app data checks, and
+    structured `windows-packaged-runtime-report.json` output before the remaining UI
+    checklist.
+  - GitHub Actions run `26822605341` on `master` passed Windows unit tests, web
     build, Windows local web smoke, `desktop:check` with Rust packaged runtime
     diagnostics, Windows NSIS build, artifact uploads, and Windows packaged runtime
-    silent-install plus launch smoke plus app data directory verification on
-    `windows-2022`.
+    silent-install plus launch smoke plus app data directory verification plus
+    report-capable PowerShell verifier execution on `windows-2022`.
   - Windows packaged runtime diagnostics field construction is verified in CI, but
     the rendered diagnostics panel still needs hands-on inspection on a real
     Windows environment.
