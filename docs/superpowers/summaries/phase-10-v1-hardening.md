@@ -67,6 +67,10 @@
 ## Remaining V1 Gaps
 
 - Phase 9 remains partially blocked by environment:
-  - Windows local web verification still needs a real Windows run.
-  - Mac `.dmg` and Windows `.exe` artifacts still require Rust/Cargo and platform packaging verification.
-  - Packaged file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need hands-on verification on both systems.
+  - Windows local web mode is verified in GitHub Actions on `windows-latest`.
+  - Mac `.dmg` packaging and packaged Mac hands-on checks are complete.
+  - Windows `.exe` packaging is complete through the GitHub Actions artifact
+    `ielts-local-practice-windows-nsis`.
+  - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing,
+    SQLite path, and sync folder path still need hands-on verification on a real
+    Windows environment.

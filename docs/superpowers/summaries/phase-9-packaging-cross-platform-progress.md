@@ -38,6 +38,9 @@
 - Confirmed remote `master` points to commit `f6a74d4` after the icon-set fix.
 - Confirmed GitHub Actions run `26794619213` on `master` completed successfully and
   uploaded the Windows NSIS installer artifact `ielts-local-practice-windows-nsis`.
+- Added a Windows local web smoke test to the GitHub Actions packaging workflow so
+  `windows-latest` starts `pnpm dev` and verifies both the API health endpoint and
+  Vite HTML shell before building the Windows installer.
 - Installed Rust locally with `rustup` using `--no-modify-path` because `/Users/musheng/.bash_profile`
   is owned by `root` and cannot be modified by the current user.
 - Added a Tauri icon at `apps/web/src-tauri/icons/icon.png`.
@@ -132,6 +135,30 @@
   - Artifact size: `1851855` bytes.
   - Artifact digest: `sha256:a5f1fc6fddde46d1ebd20c5ee797267b5ce6fb324a975bc1d4293790550195a2`.
   - Artifact expires at `2026-08-31T02:28:46Z`.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+  - Initially failed because the Windows workflow did not include a local web smoke test.
+  - Passed after requiring the workflow to start `pnpm dev` on `windows-latest` and
+    verify `http://127.0.0.1:5174/health` plus `http://127.0.0.1:5173/`.
+- `npx pnpm@9.15.4 test`
+  - Shared: 3 tests passed.
+  - Server: 40 tests passed.
+  - Web: 27 tests passed.
+- `npx pnpm@9.15.4 build`
+  - Shared TypeScript build passed.
+  - Server TypeScript build passed.
+  - Web TypeScript and Vite production build passed.
+- `npx pnpm@9.15.4 desktop:check`
+  - Desktop packaging configuration check passed.
+- GitHub Actions run `26797896087`
+  - Triggered by commit `90eb01f` on `master`.
+  - Passed Windows unit tests, web build, Windows local web smoke, desktop packaging
+    config check, Windows NSIS installer build, and Windows installer upload.
+  - The Windows local web smoke verified `http://127.0.0.1:5174/health` and
+    `http://127.0.0.1:5173/` on `windows-latest`.
+  - Uploaded artifact `ielts-local-practice-windows-nsis`.
+  - Artifact size: `1853541` bytes.
+  - Artifact digest: `sha256:26a6aa2da2fc84fff61c751a4257e30b3b6ee0f96538e7fa53015bb36502b77e`.
+  - Artifact expires at `2026-08-31T04:11:41Z`.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx`
   - 2 desktop runtime diagnostics tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx`
@@ -184,13 +211,13 @@
 
 ## Remaining Phase 9 Work
 
-- Windows local web mode still needs a real Windows run.
+- Windows local web mode is verified on `windows-latest` by GitHub Actions run `26797896087`.
 - Windows `.exe` packaging is complete through the GitHub Actions artifact
   `ielts-local-practice-windows-nsis`.
 - Windows packaged runtime diagnostics, file picker, audio playback, PDF viewing, SQLite path, and sync folder path still need a real Windows environment.
 
 ## Next Step
 
-Download the Windows NSIS installer artifact from GitHub Actions run `26794619213`,
+Download the Windows NSIS installer artifact from GitHub Actions run `26797896087`,
 then repeat local web, packaged runtime diagnostics, file picker, audio playback, PDF
 viewing, SQLite path, and Baidu Cloud sync folder checks on a Windows environment.

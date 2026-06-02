@@ -403,7 +403,7 @@ Answer normalization:
 **Outcome:** V1 can be used on Mac and Windows.
 
 - [x] Verify local web mode on Mac.
-- [ ] Verify local web mode on Windows.
+- [x] Verify local web mode on Windows via GitHub Actions `windows-latest` smoke test.
 - [x] Add production build command:
   - `pnpm build`.
 - [x] Add desktop packaging with Tauri after web mode is stable:
