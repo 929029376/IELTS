@@ -42,6 +42,15 @@
   - accuracy rows,
   - mistake-label chips,
   - report export actions.
+- Added a Mac follow-up that wires the dashboard/report UI to the live local API
+  instead of static sample data:
+  - `GET /api/reports/history`,
+  - `GET /api/reports/analytics`,
+  - `GET /api/reports/dashboard`,
+  - `GET /api/hardening/status`.
+- Added frontend conversion for the server analytics shape so the dashboard can
+  render part, frequency, question-type, history, prediction, and hardening data
+  from the local database.
 
 ## Verification Evidence
 
@@ -55,6 +64,10 @@
   - History/reports component and dashboard tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/reportsRoutes.test.ts src/test/analyticsService.test.ts`
   - Reports routes and analytics service tests passed.
+- Mac live-dashboard follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because the dashboard did not render live API report data.
+    - Passed after replacing sample report/hardening data with local API fetches.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

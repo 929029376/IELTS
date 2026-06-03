@@ -54,6 +54,11 @@
   - frequency CSV/XLSX import,
   - corrected manual frequency row import,
   - Playwright anchors for the Question Bank import region and default Mac local paths.
+- Replaced static dashboard hardening sample data with live local API data from
+  `/api/hardening/status`.
+- Updated Playwright configuration so the dashboard regression starts the root
+  development command and waits for the local API health endpoint before testing
+  the web app.
 
 ## Verification Evidence
 
@@ -135,6 +140,16 @@
   - Opened `http://127.0.0.1:5173/` in the in-app browser.
   - Confirmed the page title, V1 hardening center, and sync settings were present.
   - Confirmed no horizontal overflow at the checked viewport.
+- Mac live-dashboard follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because the dashboard still used sample report data.
+    - Passed after loading report and hardening data through the local API.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopPackaging.test.ts`
+    - Initially failed because Playwright only started the web dev server.
+    - Passed after changing Playwright to start the root `pnpm dev` command and
+      wait on `http://127.0.0.1:5174/health`.
+  - `npx pnpm@9.15.4 test:e2e`
+    - Passed with the local API and web app running together.
 
 ## Remaining V1 Gaps
 

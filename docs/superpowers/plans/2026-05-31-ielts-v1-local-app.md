@@ -375,6 +375,8 @@ Answer normalization:
   - predicted reading score,
   - weakest question type,
   - recommended next practice.
+- [x] Connect dashboard/report cards to live local API data instead of static
+  sample data.
 
 **Acceptance:** After several attempts, dashboard and analytics show stable history, accuracy, weak points, and predicted band ranges.
 
@@ -463,6 +465,8 @@ real Windows runtime report before V1 is globally complete.
   - validates that report before V1 can be treated as complete.
 - [x] Add Mac-only readiness gate while Windows hands-on evidence is deferred:
   - `pnpm mac:check`.
+- [x] Ensure Playwright Mac dashboard coverage starts both the local API and web
+  app, waiting on `/health` before browser assertions.
 - [x] Run final verification:
   - `pnpm test`,
   - `pnpm test:e2e`,

@@ -381,4 +381,13 @@ describe("desktop packaging configuration", () => {
     expect(output).not.toContain("desktop:build:win");
     expect(output).not.toContain("windows-report");
   });
+
+  it("starts both the local API and web app for Playwright dashboard coverage", () => {
+    const configPath = resolve(webRoot, "playwright.config.ts");
+    const config = readFileSync(configPath, "utf8");
+
+    expect(config).toContain('command: "pnpm --dir ../.. dev"');
+    expect(config).toContain('url: "http://127.0.0.1:5174/health"');
+    expect(config).not.toContain('command: "pnpm dev"');
+  });
 });

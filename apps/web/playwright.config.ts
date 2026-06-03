@@ -13,8 +13,8 @@ export default defineConfig({
     }
   ],
   webServer: {
-    command: "pnpm dev",
-    url: "http://127.0.0.1:5173",
+    command: "pnpm --dir ../.. dev",
+    url: "http://127.0.0.1:5174/health",
     reuseExistingServer: true,
     timeout: 120000
   }

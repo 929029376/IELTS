@@ -1,9 +1,15 @@
+import { useEffect, useState } from "react";
 import { Activity, BookOpenCheck, Database, Headphones, LineChart, Timer } from "lucide-react";
 import { ExamPreview } from "../features/exam/ExamPreview";
-import { HardeningCenter } from "../features/hardening/HardeningCenter";
+import { HardeningCenter, type HardeningStatusView } from "../features/hardening/HardeningCenter";
 import { QuestionBankImportPanel } from "../features/import/QuestionBankImportPanel";
 import { IntensivePracticePreview } from "../features/intensive/IntensivePracticePreview";
-import { HistoryReportsPreview } from "../features/reports/HistoryReportsPreview";
+import {
+  HistoryReportsPreview,
+  type DashboardReportView,
+  type HistoryAttemptView,
+  type ReportsAnalyticsView
+} from "../features/reports/HistoryReportsPreview";
 import { SyncSettingsPreview } from "../features/sync/SyncSettingsPreview";
 import { useDesktopRuntimeStatus } from "../features/desktop/desktopRuntime";
 import "./app.css";
@@ -31,84 +37,213 @@ const cards = [
   }
 ];
 
-const sampleHistory = [
-  {
-    durationSeconds: 3600,
-    estimatedBand: 7,
-    id: "sample-history-1",
-    mode: "mock",
-    rawScore: 31,
-    startedAt: "2026-05-30T10:00:00.000Z",
-    subject: "listening",
-    submittedAt: "2026-05-30T11:00:00.000Z"
-  }
-];
+const emptyHistory: HistoryAttemptView[] = [];
 
-const sampleAnalytics = {
-  mistakeLabels: [{ count: 3, label: "定位失败" }],
-  partRows: [
-    { accuracy: 0.75, correct: 3, label: "Listening P1", total: 4 },
-    { accuracy: 0.5, correct: 2, label: "Reading P2", total: 4 }
-  ],
-  questionTypeRows: [{ accuracy: 0.4, correct: 2, label: "matching", total: 5 }]
+const emptyAnalytics: ReportsAnalyticsView = {
+  mistakeLabels: [],
+  partRows: [],
+  questionTypeRows: []
 };
 
-const sampleDashboardReport = {
-  latestMockScore: "Listening 31/40, Band 7",
-  predictedListening: "6.5-7.5",
-  predictedReading: "6.0-7.0",
-  recommendedNextPractice: "Review matching questions",
-  weakestQuestionType: "matching"
+const emptyDashboardReport: DashboardReportView = {
+  latestMockScore: "No mock submitted",
+  predictedListening: "Need history",
+  predictedReading: "Need history",
+  recommendedNextPractice: "Import a set to begin",
+  weakestQuestionType: "No data"
 };
 
-const sampleHardeningStatus = {
+const emptyHardeningStatus: HardeningStatusView = {
   backupReminder: {
     latestBackupAt: null,
-    reason: "You have 12 submitted attempts and no recent backup.",
-    shouldRemind: true,
-    submittedAttemptCount: 12
+    reason: null,
+    shouldRemind: false,
+    submittedAttemptCount: 0
   },
   importFailures: {
-    byStatus: { failed: 1, needs_review: 1 },
-    sources: [
-      {
-        assetCount: 1,
-        createdAt: "2026-06-01T00:00:00.000Z",
-        id: "source-1",
-        importStatus: "failed",
-        originalPath: "reading/broken.pdf",
-        sourceType: "reading_pdf",
-        version: 1
-      }
-    ],
-    totalUnresolved: 2
+    byStatus: {},
+    sources: [],
+    totalUnresolved: 0
   },
   questionBankCompleteness: {
     issueCounts: {
-      missingAnswerKey: 1,
-      missingAudio: 1,
-      missingExplanation: 1,
-      missingFrequencyEntry: 1,
-      missingListeningCues: 1,
-      missingTranscript: 1
+      missingAnswerKey: 0,
+      missingAudio: 0,
+      missingExplanation: 0,
+      missingFrequencyEntry: 0,
+      missingListeningCues: 0,
+      missingTranscript: 0
     },
-    passages: [
-      {
-        frequencyClass: "unknown",
-        id: "passage-1",
-        issueLabels: ["missing answer key", "missing audio", "missing frequency entry"],
-        part: "P1",
-        questionCount: 2,
-        sourceStatus: "needs_review",
-        subject: "listening",
-        title: "Airport Enquiry"
-      }
-    ],
-    totalPassages: 1
+    passages: [],
+    totalPassages: 0
   }
 };
 
+interface DashboardData {
+  analytics: ReportsAnalyticsView;
+  dashboard: DashboardReportView;
+  hardening: HardeningStatusView;
+  history: HistoryAttemptView[];
+  status: "loading" | "live" | "fallback";
+}
+
+interface AccuracyBucket {
+  accuracy: number;
+  correct: number;
+  total: number;
+}
+
+interface ServerAnalytics {
+  byFrequencyClass?: Record<string, AccuracyBucket>;
+  byPart?: Record<string, Record<string, AccuracyBucket>>;
+  byQuestionType?: Record<string, AccuracyBucket>;
+  mistakeLabels?: Array<{ count: number; label: string }>;
+  partRows?: ReportsAnalyticsView["partRows"];
+  questionTypeRows?: ReportsAnalyticsView["questionTypeRows"];
+}
+
+interface ServerBandPrediction {
+  basisAttempts: number;
+  confidence: "low" | "medium" | "high";
+  predictedBand: number | null;
+  range: { max: number; min: number } | null;
+  subject: string;
+}
+
+interface ServerDashboardReport {
+  latestMockScore: HistoryAttemptView | string | null;
+  predictedListening: ServerBandPrediction | string;
+  predictedReading: ServerBandPrediction | string;
+  recommendedNextPractice: string | null;
+  weakestQuestionType: string | null;
+}
+
+async function fetchJson<T>(path: string): Promise<T> {
+  const response = await fetch(path);
+  if (!response.ok) {
+    throw new Error(`Could not load ${path}`);
+  }
+  return (await response.json()) as T;
+}
+
+function bucketRows(prefix: string, buckets: Record<string, AccuracyBucket> | undefined) {
+  return Object.entries(buckets ?? {}).map(([label, bucket]) => ({
+    accuracy: bucket.accuracy,
+    correct: bucket.correct,
+    label: prefix ? `${prefix} ${label}` : label,
+    total: bucket.total
+  }));
+}
+
+function toAnalyticsView(analytics: ServerAnalytics): ReportsAnalyticsView {
+  if (analytics.partRows && analytics.questionTypeRows) {
+    return {
+      mistakeLabels: analytics.mistakeLabels ?? [],
+      partRows: analytics.partRows,
+      questionTypeRows: analytics.questionTypeRows
+    };
+  }
+
+  return {
+    mistakeLabels: analytics.mistakeLabels ?? [],
+    partRows: [
+      ...bucketRows("Listening", analytics.byPart?.listening),
+      ...bucketRows("Reading", analytics.byPart?.reading),
+      ...bucketRows("Frequency", analytics.byFrequencyClass)
+    ],
+    questionTypeRows: bucketRows("", analytics.byQuestionType)
+  };
+}
+
+function formatPrediction(value: ServerBandPrediction | string): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (!value.range || value.predictedBand === null) {
+    return "Need history";
+  }
+  return `${value.range.min}-${value.range.max}`;
+}
+
+function formatLatestMock(value: HistoryAttemptView | string | null): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (!value) {
+    return "No mock submitted";
+  }
+  const band = value.estimatedBand === null ? "Band pending" : `Band ${value.estimatedBand}`;
+  const rawScore = value.rawScore === null ? "score pending" : `${value.rawScore}/40`;
+  const subject = value.subject.charAt(0).toUpperCase() + value.subject.slice(1);
+  return `${subject} ${rawScore}, ${band}`;
+}
+
+function toDashboardView(report: ServerDashboardReport): DashboardReportView {
+  return {
+    latestMockScore: formatLatestMock(report.latestMockScore),
+    predictedListening: formatPrediction(report.predictedListening),
+    predictedReading: formatPrediction(report.predictedReading),
+    recommendedNextPractice: report.recommendedNextPractice ?? "Import a set to begin",
+    weakestQuestionType: report.weakestQuestionType ?? "No data"
+  };
+}
+
+function useDashboardData(): DashboardData {
+  const [data, setData] = useState<DashboardData>({
+    analytics: emptyAnalytics,
+    dashboard: emptyDashboardReport,
+    hardening: emptyHardeningStatus,
+    history: emptyHistory,
+    status: "loading"
+  });
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (typeof fetch === "undefined") {
+      setData((current) => ({ ...current, status: "fallback" }));
+      return;
+    }
+
+    void Promise.all([
+      fetchJson<HistoryAttemptView[]>("/api/reports/history"),
+      fetchJson<ServerAnalytics>("/api/reports/analytics"),
+      fetchJson<ServerDashboardReport>("/api/reports/dashboard"),
+      fetchJson<HardeningStatusView>("/api/hardening/status")
+    ])
+      .then(([history, analytics, dashboard, hardening]) => {
+        if (mounted) {
+          setData({
+            analytics: toAnalyticsView(analytics),
+            dashboard: toDashboardView(dashboard),
+            hardening,
+            history,
+            status: "live"
+          });
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setData({
+            analytics: emptyAnalytics,
+            dashboard: emptyDashboardReport,
+            hardening: emptyHardeningStatus,
+            history: emptyHistory,
+            status: "fallback"
+          });
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return data;
+}
+
 export function App() {
+  const dashboardData = useDashboardData();
   const desktopRuntimeStatus = useDesktopRuntimeStatus();
 
   return (
@@ -148,7 +283,7 @@ export function App() {
           </div>
           <div className="status-pill">
             <Activity size={16} aria-hidden="true" />
-            Phase 6 intensive study
+            {dashboardData.status === "live" ? "Live local data" : "Local data ready"}
           </div>
         </header>
 
@@ -168,11 +303,11 @@ export function App() {
         <QuestionBankImportPanel />
         <IntensivePracticePreview />
         <HistoryReportsPreview
-          analytics={sampleAnalytics}
-          dashboard={sampleDashboardReport}
-          history={sampleHistory}
+          analytics={dashboardData.analytics}
+          dashboard={dashboardData.dashboard}
+          history={dashboardData.history}
         />
-        <HardeningCenter status={sampleHardeningStatus} />
+        <HardeningCenter status={dashboardData.hardening} />
         <SyncSettingsPreview
           deviceName="Mac local device"
           lastSyncAt={null}
