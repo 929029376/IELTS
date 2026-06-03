@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { createPracticeService } from "../services/practiceService";
+import type { TestBuilderOptions } from "../services/testBuilder";
 import type { SyncService } from "../sync/syncService";
 
 const startPracticeSchema = z.object({
@@ -17,8 +18,13 @@ const answerSchema = z.object({
   markedForReview: z.boolean()
 });
 
-export function registerPracticeRoutes(server: FastifyInstance, db: DatabaseHandle, sync?: SyncService): void {
-  const practice = createPracticeService(db);
+export function registerPracticeRoutes(
+  server: FastifyInstance,
+  db: DatabaseHandle,
+  sync?: SyncService,
+  testBuilderOptions: TestBuilderOptions = {}
+): void {
+  const practice = createPracticeService(db, testBuilderOptions);
   const attempts = createAttemptRepo(db);
 
   server.post("/api/practice/start", async (request, reply) => {

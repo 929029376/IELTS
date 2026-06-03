@@ -305,6 +305,8 @@ Answer normalization:
 - [x] Add practice filters: subject, part, frequency class, question type, mistake label.
 - [x] Add a local study overview API and dashboard queue showing frequency
   distribution, full-mock readiness, cue counts, and recommended mock sets.
+- [x] Use the frequency-weighted full-set builder when starting real mock attempts
+  through `POST /api/practice/start`.
 
 **Acceptance:** Generated sets prefer high-frequency items, contain the correct part distribution, and avoid excessive recent repetition.
 

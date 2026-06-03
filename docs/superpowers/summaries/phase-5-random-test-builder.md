@@ -44,6 +44,9 @@
   - high-frequency-first recommended listening and reading mock sets.
 - Added a local dashboard study queue that consumes the overview API and surfaces
   recommended mock passages from the local question bank.
+- Wired `POST /api/practice/start` in `mock` mode to the frequency-weighted full-set
+  builder so real mock attempts use one selected passage per IELTS part instead
+  of taking the first sequential questions from the database.
 
 ## Verification Evidence
 
@@ -59,6 +62,14 @@
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because the dashboard did not render `Local study queue`.
     - Passed after adding the study overview panel and API loading hook.
+- Mock-start integration follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because a reading mock start included both a high-frequency
+      P1 and a low-frequency P1 from sequential question loading.
+    - Passed after routing mock starts through the frequency-weighted full-set
+      builder.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts src/test/testBuilder.test.ts src/test/studyRoutes.test.ts`
+    - Practice routes, test builder, and study overview tests passed together.
 - `npx pnpm@9.15.4 test`
   - Shared: 3 tests passed.
   - Server: 18 tests passed.

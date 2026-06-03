@@ -21,6 +21,7 @@ export interface BuildServerOptions {
   exportDir?: string;
   now?: string;
   sync?: SyncServiceOptions;
+  testBuilderRandom?: () => number;
 }
 
 export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
@@ -50,7 +51,9 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
   registerImportRoutes(server, db, {
     assetRoot: options.assetRoot ?? `${dataDir}/assets`
   });
-  registerPracticeRoutes(server, db, sync);
+  registerPracticeRoutes(server, db, sync, {
+    random: options.testBuilderRandom
+  });
   registerStudyRoutes(server, db);
   registerReportsRoutes(server, db, {
     exportDir: options.exportDir,

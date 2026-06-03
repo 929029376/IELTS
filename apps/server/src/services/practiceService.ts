@@ -9,6 +9,7 @@ import type { Subject } from "@ielts/shared";
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { createQuestionRepo } from "../db/questionRepo";
+import { buildFullListeningSet, buildFullReadingSet, type TestBuilderOptions } from "./testBuilder";
 
 export interface PracticeQuestionResponse {
   id: string;
@@ -21,7 +22,7 @@ export interface PracticeQuestionResponse {
   part: string;
 }
 
-export function createPracticeService(db: DatabaseHandle) {
+export function createPracticeService(db: DatabaseHandle, options: TestBuilderOptions = {}) {
   const attempts = createAttemptRepo(db);
   const questions = createQuestionRepo(db);
 
@@ -30,10 +31,24 @@ export function createPracticeService(db: DatabaseHandle) {
       mode: "practice" | "mock" | "intensive";
       subject: Subject;
     }): { attemptId: string; questions: PracticeQuestionResponse[] } {
-      const practiceQuestions = questions.listPracticeQuestions({
-        subject: input.subject,
-        limit: 40
-      });
+      const practiceQuestions =
+        input.mode === "mock"
+          ? (input.subject === "listening" ? buildFullListeningSet(db, options) : buildFullReadingSet(db, options))
+              .passages.flatMap((passage) => {
+                const loaded = questions.getPassageWithQuestions(passage.id);
+                return (
+                  loaded?.questions.map((question) => ({
+                    ...question,
+                    passageTitle: loaded.title,
+                    subject: loaded.subject,
+                    part: loaded.part
+                  })) ?? []
+                );
+              })
+          : questions.listPracticeQuestions({
+              subject: input.subject,
+              limit: 40
+            });
       const attempt = attempts.createAttempt({
         mode: input.mode,
         subject: input.subject,

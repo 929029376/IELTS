@@ -62,6 +62,8 @@
 - Added a Mac dashboard study queue backed by `/api/study/overview`, replacing
   another static entry point with live local question-bank readiness and
   high-frequency-first recommended mock sets.
+- Hardened mock start behavior so local mock attempts now use the frequency-weighted
+  full-set builder instead of sequential question loading.
 
 ## Verification Evidence
 
@@ -164,6 +166,13 @@
     - Passed after narrowing the test-only `server.db` type assertion.
   - `npx pnpm@9.15.4 test:e2e`
     - Passed with Playwright coverage for the study queue region.
+- Mac mock-start hardening follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because mock start loaded sequential questions and included
+      two P1 passages.
+    - Passed after mock start used the frequency-weighted full-set builder.
+  - `npx pnpm@9.15.4 build`
+    - Shared, server, and web production builds passed.
 
 ## Remaining V1 Gaps
 
