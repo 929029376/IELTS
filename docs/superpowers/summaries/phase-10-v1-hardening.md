@@ -66,6 +66,11 @@
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
   start reading or listening mock attempts through the local practice API.
+- Added frontend local mock completion controls so the active mock attempt can:
+  - render answer inputs for returned question-bank questions,
+  - save answers through the practice answer API,
+  - submit through the practice submit API,
+  - show the returned raw score and estimated band report.
 
 ## Verification Evidence
 
@@ -180,6 +185,12 @@
     - Passed after mock start used the frequency-weighted full-set builder.
   - `npx pnpm@9.15.4 build`
     - Shared, server, and web production builds passed.
+- Mac local mock completion follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the started local mock set rendered only a summary
+      and no answer field.
+    - Passed after wiring answer save, submit, and score report display to the
+      active local attempt.
 
 ## Remaining V1 Gaps
 

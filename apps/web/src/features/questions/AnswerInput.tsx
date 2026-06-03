@@ -5,15 +5,17 @@ export interface AnswerInputProps {
   questionType: QuestionType;
   value: string;
   onChange: (value: string) => void;
+  onBlur?: () => void;
 }
 
-export function AnswerInput({ questionId, questionType, value, onChange }: AnswerInputProps) {
+export function AnswerInput({ questionId, questionType, value, onBlur, onChange }: AnswerInputProps) {
   if (questionType === "single_choice" || questionType === "multiple_choice") {
     return (
       <textarea
         aria-label={`Answer for question ${questionId}`}
         className="answer-input"
         value={value}
+        onBlur={onBlur}
         onChange={(event) => onChange(event.target.value)}
         rows={3}
       />
@@ -26,6 +28,7 @@ export function AnswerInput({ questionId, questionType, value, onChange }: Answe
       className="answer-input"
       type="text"
       value={value}
+      onBlur={onBlur}
       onChange={(event) => onChange(event.target.value)}
     />
   );

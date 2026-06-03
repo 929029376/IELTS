@@ -164,7 +164,7 @@ describe("exam simulation components", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
 
     expect(await screen.findByText("Loaded local reading mock")).toBeInTheDocument();
-    expect(screen.getByText("Live Reading P1 High")).toBeInTheDocument();
+    expect(screen.getAllByText("Live Reading P1 High").length).toBeGreaterThan(0);
     expect(screen.getByText("What is the key answer?")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/practice/start",
@@ -172,6 +172,92 @@ describe("exam simulation components", () => {
         body: JSON.stringify({ mode: "mock", subject: "reading" }),
         method: "POST"
       })
+    );
+  });
+
+  it("saves local mock answers and submits for an estimated band report", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const path = String(input);
+      if (path === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-mock-2",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-2",
+                part: "P1",
+                passageId: "passage-2",
+                passageTitle: "Live Reading Submit Set",
+                prompt: "Which word completes the sentence?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-mock-2/answer") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-mock-2",
+            id: "answer-1",
+            isCorrect: true,
+            markedForReview: false,
+            normalizedAnswer: "routes",
+            questionId: "question-2",
+            rawAnswer: "routes",
+            timeSpentSeconds: 0
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-mock-2/submit") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-mock-2",
+            estimatedBand: 4,
+            rawScore: 1,
+            submittedAt: "2026-06-04T09:00:00.000Z"
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    const answer = await screen.findByRole("textbox", { name: "Answer for question question-2" });
+    fireEvent.change(answer, { target: { value: "routes" } });
+    fireEvent.blur(answer);
+    fireEvent.click(screen.getByRole("button", { name: "Submit local mock" }));
+
+    expect(await screen.findByRole("region", { name: "Score report" })).toBeInTheDocument();
+    expect(screen.getByText("1/40")).toBeInTheDocument();
+    expect(screen.getByText("4.0")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-mock-2/answer",
+      expect.objectContaining({
+        body: JSON.stringify({
+          markedForReview: false,
+          questionId: "question-2",
+          rawAnswer: "routes",
+          timeSpentSeconds: 0
+        }),
+        method: "POST"
+      })
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-mock-2/submit",
+      expect.objectContaining({ method: "POST" })
     );
   });
 });

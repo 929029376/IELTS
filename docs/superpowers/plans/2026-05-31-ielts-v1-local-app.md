@@ -285,6 +285,8 @@ Answer normalization:
 - [x] Add Playwright tests for desktop widths on Mac/Windows-like viewport sizes.
 - [x] Add dashboard controls that start reading and listening mock attempts from
   the local practice API.
+- [x] Connect started local mock attempts to answer saving, submission, and score
+  report rendering in the Mac dashboard exam UI.
 
 **Acceptance:** Listening and reading mock exams can be completed under strict mode, auto-submit on timeout, and produce a score report.
 

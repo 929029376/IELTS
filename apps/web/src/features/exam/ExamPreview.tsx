@@ -1,6 +1,8 @@
 import { useState } from "react";
+import type { QuestionType } from "@ielts/shared/questionTypes";
 import { AnswerInput } from "../questions/AnswerInput";
 import { ExamShell } from "./ExamShell";
+import { ListeningExamView } from "./ListeningExamView";
 import { ReadingExamView } from "./ReadingExamView";
 import { ScoreReport } from "./ScoreReport";
 
@@ -19,6 +21,13 @@ interface StartedMock {
   attemptId: string;
   questions: StartedMockQuestion[];
   subject: "listening" | "reading";
+}
+
+interface MockSubmitResult {
+  attemptId: string;
+  estimatedBand: number;
+  rawScore: number;
+  submittedAt: string;
 }
 
 async function startMock(subject: "listening" | "reading"): Promise<StartedMock> {
@@ -44,13 +53,20 @@ function subjectLabel(subject: "listening" | "reading") {
 
 export function ExamPreview() {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isStarting, setIsStarting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [scoreReport, setScoreReport] = useState<MockSubmitResult | null>(null);
   const [submittedReason, setSubmittedReason] = useState<string | null>(null);
 
   async function handleStartMock(subject: "listening" | "reading") {
     setIsStarting(true);
     setStartError(null);
+    setSubmitError(null);
+    setScoreReport(null);
+    setAnswers({});
     try {
       setActiveMock(await startMock(subject));
     } catch {
@@ -59,6 +75,75 @@ export function ExamPreview() {
       setIsStarting(false);
     }
   }
+
+  async function saveMockAnswer(questionId: string) {
+    if (!activeMock) {
+      return;
+    }
+
+    const rawAnswer = answers[questionId] ?? "";
+    await fetch(`/api/practice/${activeMock.attemptId}/answer`, {
+      body: JSON.stringify({
+        markedForReview: false,
+        questionId,
+        rawAnswer,
+        timeSpentSeconds: 0
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      },
+      method: "POST"
+    });
+  }
+
+  async function submitActiveMock() {
+    if (!activeMock || isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+    try {
+      const response = await fetch(`/api/practice/${activeMock.attemptId}/submit`, {
+        method: "POST"
+      });
+      if (!response.ok) {
+        throw new Error("Could not submit mock");
+      }
+      setScoreReport((await response.json()) as MockSubmitResult);
+    } catch {
+      setSubmitError("Could not submit the local mock attempt.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const activeQuestions = activeMock?.questions ?? [];
+  const mockQuestionStates = activeQuestions.map((question, index) => ({
+    questionNumber: question.questionNumber,
+    answered: Boolean((answers[question.id] ?? "").trim()),
+    markedForReview: false,
+    current: index === 0
+  }));
+  const mockQuestionList = (
+    <div className="local-mock-questions">
+      {activeQuestions.map((question) => (
+        <label className="local-mock-question-card" key={question.id}>
+          <span>{question.part}</span>
+          <strong>
+            {question.questionNumber}. {question.prompt}
+          </strong>
+          <AnswerInput
+            questionId={question.id}
+            questionType={question.questionType as QuestionType}
+            value={answers[question.id] ?? ""}
+            onBlur={() => void saveMockAnswer(question.id)}
+            onChange={(value) => setAnswers((current) => ({ ...current, [question.id]: value }))}
+          />
+        </label>
+      ))}
+    </div>
+  );
 
   return (
     <section className="exam-preview-band" aria-label="IELTS-style exam preview">
@@ -91,9 +176,46 @@ export function ExamPreview() {
               </li>
             ))}
           </ol>
+          <button disabled={isSubmitting || scoreReport !== null} onClick={() => void submitActiveMock()} type="button">
+            Submit local mock
+          </button>
         </section>
       ) : null}
       {startError ? <p className="mock-start-error">{startError}</p> : null}
+      {submitError ? <p className="mock-start-error">{submitError}</p> : null}
+      {activeMock && activeQuestions.length > 0 ? (
+        <ExamShell
+          title={`${activeMock.subject === "reading" ? "Reading" : "Listening"} Local Mock Test`}
+          durationSeconds={activeMock.subject === "reading" ? 3600 : 2400}
+          questions={mockQuestionStates}
+          onSubmit={() => void submitActiveMock()}
+        >
+          {activeMock.subject === "reading" ? (
+            <ReadingExamView
+              passageTitle={activeQuestions[0]?.passageTitle ?? "Reading passage"}
+              passageText="Use the imported local passage asset for close reading. Structured passage text will appear here when the source provides it."
+              highlightedText="Structured passage text"
+              questions={mockQuestionList}
+            />
+          ) : (
+            <ListeningExamView
+              mode="mock"
+              audioTitle={activeQuestions[0]?.passageTitle ?? "Listening section audio"}
+              sections={[
+                {
+                  id: "local-listening",
+                  title: activeQuestions[0]?.part ?? "Section",
+                  questions: mockQuestionList
+                }
+              ]}
+              finalReviewSeconds={120}
+            />
+          )}
+        </ExamShell>
+      ) : null}
+      {scoreReport && activeMock ? (
+        <ScoreReport subject={activeMock.subject} rawScore={scoreReport.rawScore} estimatedBand={scoreReport.estimatedBand} />
+      ) : null}
       <ExamShell
         title="Reading Mock Test"
         durationSeconds={3600}
