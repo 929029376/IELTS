@@ -75,6 +75,9 @@
   - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
   - the Mac dashboard renders correctness, user answer, accepted answer, answer
     sentence highlight, explanation, and synonym notes after submission.
+- Added report-export UI hardening:
+  - dashboard report buttons now call `POST /api/reports/export`,
+  - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
 
 ## Verification Evidence
 
@@ -205,6 +208,11 @@
     - Initially failed because submitting a local mock did not show a detailed
       review region.
     - Passed after rendering the submitted-mock review panel.
+- Mac report export follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because report export buttons were static.
+    - Passed after wiring them to the reports export API and rendering exported
+      local file paths.
 
 ## Remaining V1 Gaps
 

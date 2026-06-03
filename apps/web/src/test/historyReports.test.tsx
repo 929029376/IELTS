@@ -1,8 +1,13 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { HistoryReportsPreview } from "../features/reports/HistoryReportsPreview";
 
 describe("history and reports preview", () => {
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
   it("renders history, accuracy analytics, predictions, and recommended practice", () => {
     render(
       <HistoryReportsPreview
@@ -42,5 +47,39 @@ describe("history and reports preview", () => {
     expect(screen.getAllByText("matching")).toHaveLength(2);
     expect(screen.getByText("定位失败")).toBeInTheDocument();
     expect(screen.getByText("Export mock report")).toBeInTheDocument();
+  });
+
+  it("exports local report files through the reports API", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        mistakesCsv: "/Users/musheng/Desktop/IELTS/data/exports/mistakes-2026-06-04.csv",
+        mockCsv: "/Users/musheng/Desktop/IELTS/data/exports/mock-report-2026-06-04.csv",
+        mockJson: "/Users/musheng/Desktop/IELTS/data/exports/mock-report-2026-06-04.json"
+      })
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{ mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export mock report" }));
+
+    expect(await screen.findByRole("status")).toHaveTextContent("Reports exported");
+    expect(screen.getByText("/Users/musheng/Desktop/IELTS/data/exports/mock-report-2026-06-04.json")).toBeInTheDocument();
+    expect(screen.getByText("/Users/musheng/Desktop/IELTS/data/exports/mock-report-2026-06-04.csv")).toBeInTheDocument();
+    expect(screen.getByText("/Users/musheng/Desktop/IELTS/data/exports/mistakes-2026-06-04.csv")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/reports/export", expect.objectContaining({ method: "POST" }));
   });
 });

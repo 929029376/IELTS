@@ -381,6 +381,8 @@ Answer normalization:
   - `data/exports/mock-report-<date>.json`,
   - `data/exports/mock-report-<date>.csv`,
   - `data/exports/mistakes-<date>.csv`.
+- [x] Connect dashboard report export actions to `POST /api/reports/export` and
+  show generated local file paths in the Mac UI.
 - [x] Add dashboard cards:
   - latest mock score,
   - predicted listening score,

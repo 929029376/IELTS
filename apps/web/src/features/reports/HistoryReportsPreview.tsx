@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 export interface HistoryAttemptView {
   durationSeconds: number | null;
   estimatedBand: number | null;
@@ -36,6 +38,12 @@ export interface HistoryReportsPreviewProps {
   history: HistoryAttemptView[];
 }
 
+interface ExportedReportFiles {
+  mistakesCsv: string;
+  mockCsv: string;
+  mockJson: string;
+}
+
 function formatAccuracy(value: number) {
   return `${Math.round(value * 100)}%`;
 }
@@ -50,6 +58,26 @@ function formatDuration(seconds: number | null) {
 }
 
 export function HistoryReportsPreview({ analytics, dashboard, history }: HistoryReportsPreviewProps) {
+  const [exportedFiles, setExportedFiles] = useState<ExportedReportFiles | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  async function exportReports() {
+    setIsExporting(true);
+    setExportError(null);
+    try {
+      const response = await fetch("/api/reports/export", { method: "POST" });
+      if (!response.ok) {
+        throw new Error("Could not export reports");
+      }
+      setExportedFiles((await response.json()) as ExportedReportFiles);
+    } catch {
+      setExportError("Could not export local reports.");
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   return (
     <section className="history-reports-band" aria-label="History and reports preview">
       <div className="reports-header">
@@ -58,10 +86,25 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
           <h2>Reports</h2>
         </div>
         <div className="report-actions">
-          <button type="button">Export mock report</button>
-          <button type="button">Export mistakes</button>
+          <button disabled={isExporting} onClick={() => void exportReports()} type="button">
+            Export mock report
+          </button>
+          <button disabled={isExporting} onClick={() => void exportReports()} type="button">
+            Export mistakes
+          </button>
         </div>
       </div>
+      {exportedFiles ? (
+        <section className="report-export-status" role="status">
+          <h3>Reports exported</h3>
+          <ul>
+            <li>{exportedFiles.mockJson}</li>
+            <li>{exportedFiles.mockCsv}</li>
+            <li>{exportedFiles.mistakesCsv}</li>
+          </ul>
+        </section>
+      ) : null}
+      {exportError ? <p className="mock-start-error">{exportError}</p> : null}
 
       <div className="report-metrics" aria-label="Score prediction cards">
         <div>

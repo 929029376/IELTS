@@ -476,6 +476,41 @@ h1 {
   color: #20314a;
 }
 
+.report-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.report-export-status {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid #cddfd8;
+  border-radius: 8px;
+  background: #f5fbf8;
+}
+
+.report-export-status h3 {
+  margin: 0;
+  color: #1f6f60;
+  font-size: 15px;
+}
+
+.report-export-status ul {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.report-export-status li {
+  color: #405169;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
 .report-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
