@@ -202,4 +202,72 @@ describe("study overview routes", () => {
       synonyms: ["prove = support"]
     });
   });
+
+  it("creates listening cues and stores dictation attempts through intensive study routes", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-study-cue-routes-"));
+    const server = buildServer({ databasePath: join(tempDir, "ielts.db") });
+    servers.push(server);
+    const db = (server as typeof server & { db: DatabaseHandle }).db;
+    const questions = createQuestionRepo(db);
+    const source = questions.createSource({
+      checksum: "study-cue-route-source",
+      importStatus: "imported",
+      originalPath: "seed/study-cue-route.json",
+      sourceType: "seed",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P1",
+      sourceId: source.id,
+      subject: "listening",
+      title: "Cue Route Listening"
+    });
+
+    const emptyPreview = await server.inject({ method: "GET", url: "/api/study/intensive" });
+    expect(emptyPreview.json().listening).toMatchObject({
+      audioTitle: "Cue Route Listening",
+      cues: [],
+      passageId: passage.id
+    });
+
+    const cueResponse = await server.inject({
+      method: "POST",
+      payload: {
+        endSeconds: 4.2,
+        label: "Sentence 1",
+        passageId: passage.id,
+        startSeconds: 1.2,
+        transcript: "Green Park"
+      },
+      url: "/api/study/listening-cues"
+    });
+    const cue = cueResponse.json();
+
+    expect(cueResponse.statusCode).toBe(201);
+    expect(cue).toMatchObject({
+      endSeconds: 4.2,
+      label: "Sentence 1",
+      passageId: passage.id,
+      startSeconds: 1.2,
+      transcript: "Green Park"
+    });
+
+    const dictationResponse = await server.inject({
+      method: "POST",
+      payload: {
+        cueId: cue.id,
+        userText: " green park "
+      },
+      url: "/api/study/dictation-attempts"
+    });
+
+    expect(dictationResponse.statusCode).toBe(201);
+    expect(dictationResponse.json()).toMatchObject({
+      cueId: cue.id,
+      isCorrect: true,
+      normalizedText: "green park",
+      userText: " green park "
+    });
+  });
 });

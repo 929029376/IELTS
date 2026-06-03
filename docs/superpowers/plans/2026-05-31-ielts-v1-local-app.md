@@ -341,6 +341,9 @@ Answer normalization:
 - [x] Store dictation attempts and compare against transcript when available.
 - [x] Add a local intensive study API and Mac dashboard wiring so the intensive
   listening panel uses real passage cues when available.
+- [x] Connect the Mac cue editor and dictation submit actions to local study APIs
+  so newly created cues immediately enable sentence repeat and dictation results
+  are persisted.
 
 ### Reading Intensive Mode
 

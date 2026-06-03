@@ -65,6 +65,10 @@
 - Added a Mac intensive study preview backed by `/api/study/intensive`, replacing
   the dashboard's static intensive listening and close-reading content whenever
   local cue and answer-evidence data is available.
+- Added Mac intensive study write hardening:
+  - cue creation now posts to `POST /api/study/listening-cues`,
+  - dictation submit now posts to `POST /api/study/dictation-attempts`,
+  - newly saved cues immediately appear in sentence repeat controls.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -204,6 +208,16 @@
     - Passed after loading and rendering local listening cues and reading evidence.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the intensive live-data wiring, including Mac DMG packaging.
+- Mac intensive study write follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because cue creation and dictation write APIs did not exist,
+      and listening passages without cues were not returned for editing.
+    - Passed after adding the local write routes and editable listening preview.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the cue editor and dictation submit controls were
+      no-ops.
+    - Passed after wiring them to local APIs and rendering saved/correctness
+      status.
 - Mac mock-start hardening follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because mock start loaded sequential questions and included

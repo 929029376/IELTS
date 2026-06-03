@@ -39,6 +39,13 @@
     sentence, explanation, synonym, keyword, and passage text data when available,
   - the existing sample preview remains only as a fallback when no local data has
     been loaded yet.
+- Added local intensive study write APIs and Mac UI wiring:
+  - `POST /api/study/listening-cues` creates sentence cues for the active local
+    listening passage,
+  - `POST /api/study/dictation-attempts` persists dictation attempts and returns
+    correctness against the cue transcript,
+  - saving a cue in the Mac dashboard immediately enables sentence repeat, and
+    submitting dictation shows the saved/correctness result.
 - Added focused unit tests for intensive server persistence and web components.
 
 ## Verification Evidence
@@ -49,11 +56,20 @@
 - Fix evidence:
   - A build-time type mismatch in `updateListeningCue` exposed that update input should not require `passageId`; the repo API now accepts only editable cue fields.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
-  - 6 intensive component tests passed, including fallback labels for unnamed live
-    sentence cues.
+  - 7 intensive component tests passed, including fallback labels for unnamed live
+    sentence cues and local API wiring for cue save plus dictation submit.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
   - Initially failed with `404` because `/api/study/intensive` did not exist.
   - Passed after adding the intensive study preview API.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+  - Initially failed because `/api/study/intensive` did not return cue-editable
+    listening passages without existing cues.
+  - Passed after returning the listening `passageId` with empty cue lists and
+    adding cue/dictation write routes.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+  - Initially failed because the cue editor and dictation submit actions did not
+    call local APIs or render saved status.
+  - Passed after wiring the Mac intensive panel to cue and dictation APIs.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

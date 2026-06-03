@@ -31,6 +31,7 @@ export interface IntensiveStudyPreview {
       startSeconds: number;
       transcript: string | null;
     }>;
+    passageId: string;
   } | null;
   reading: {
     answerSentence: string | null;
@@ -116,11 +117,6 @@ function getListeningPreview(db: DatabaseHandle): IntensiveStudyPreview["listeni
         p.title
       FROM passages p
       WHERE p.subject = 'listening'
-        AND EXISTS (
-          SELECT 1
-          FROM listening_cues lc
-          WHERE lc.passage_id = p.id
-        )
       ORDER BY
         CASE p.frequency_class
           WHEN 'high' THEN 0
@@ -157,7 +153,8 @@ function getListeningPreview(db: DatabaseHandle): IntensiveStudyPreview["listeni
 
   return {
     audioTitle: passage.title,
-    cues
+    cues,
+    passageId: passage.id
   };
 }
 

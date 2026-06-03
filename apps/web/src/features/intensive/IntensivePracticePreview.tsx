@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { CloseReadingView } from "./CloseReadingView";
-import { CueEditor } from "./CueEditor";
+import { CueEditor, type CueDraft } from "./CueEditor";
 import { IntensiveListeningPlayer } from "./IntensiveListeningPlayer";
 
 export interface IntensiveStudyPreviewView {
@@ -12,6 +13,7 @@ export interface IntensiveStudyPreviewView {
       startSeconds: number;
       transcript: string | null;
     }>;
+    passageId?: string;
   } | null;
   reading: {
     answerSentence: string | null;
@@ -51,17 +53,80 @@ function normalizeCues(cues: NonNullable<IntensiveStudyPreviewView["listening"]>
   }));
 }
 
+async function postJson<T>(path: string, payload: Record<string, unknown>): Promise<T> {
+  const response = await fetch(path, {
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json"
+    },
+    method: "POST"
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return (await response.json()) as T;
+}
+
+interface DictationAttemptView {
+  isCorrect: boolean | null;
+}
+
 export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudyPreviewView }) {
+  const [cueStatus, setCueStatus] = useState<string | null>(null);
+  const [dictationStatus, setDictationStatus] = useState<string | null>(null);
+  const [savedCues, setSavedCues] = useState<NonNullable<IntensiveStudyPreviewView["listening"]>["cues"]>([]);
+
   const listening = preview?.listening
     ? {
         audioTitle: preview.listening.audioTitle,
-        cues: normalizeCues(preview.listening.cues)
+        cues: normalizeCues([...preview.listening.cues, ...savedCues]),
+        passageId: preview.listening.passageId
       }
     : {
         audioTitle: "Listening Part 1 Review",
-        cues: sampleCues
+        cues: normalizeCues([...sampleCues, ...savedCues]),
+        passageId: undefined
       };
   const reading = preview?.reading ?? sampleReading;
+
+  async function saveCue(cue: CueDraft) {
+    if (!listening.passageId) {
+      setCueStatus("Load a local listening passage before saving cues.");
+      return;
+    }
+
+    try {
+      const savedCue = await postJson<NonNullable<IntensiveStudyPreviewView["listening"]>["cues"][number]>(
+        "/api/study/listening-cues",
+        {
+          endSeconds: cue.endSeconds,
+          label: cue.label,
+          passageId: listening.passageId,
+          startSeconds: cue.startSeconds,
+          transcript: cue.transcript
+        }
+      );
+      setSavedCues((cues) => [...cues, savedCue]);
+      setCueStatus("Cue saved for sentence repeat.");
+    } catch {
+      setCueStatus("Could not save cue.");
+    }
+  }
+
+  async function submitDictation(input: { cueId: string; userText: string }) {
+    try {
+      const attempt = await postJson<DictationAttemptView>("/api/study/dictation-attempts", input);
+      if (attempt.isCorrect === null) {
+        setDictationStatus("Dictation saved.");
+      } else {
+        setDictationStatus(attempt.isCorrect ? "Dictation correct." : "Dictation needs review.");
+      }
+    } catch {
+      setDictationStatus("Could not save dictation.");
+    }
+  }
 
   return (
     <section className="intensive-preview-band" aria-label="Intensive practice preview">
@@ -70,9 +135,17 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
           <IntensiveListeningPlayer
             audioTitle={listening.audioTitle}
             cues={listening.cues}
-            onDictationSubmit={() => undefined}
+            onDictationSubmit={(input) => {
+              void submitDictation(input);
+            }}
           />
-          <CueEditor onSave={() => undefined} />
+          {dictationStatus ? <p className="import-status">{dictationStatus}</p> : null}
+          <CueEditor
+            onSave={(cue) => {
+              void saveCue(cue);
+            }}
+          />
+          {cueStatus ? <p className="import-status">{cueStatus}</p> : null}
         </div>
         <CloseReadingView
           passageText={reading.passageText}

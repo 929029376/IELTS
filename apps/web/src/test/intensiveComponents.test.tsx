@@ -8,6 +8,7 @@ import { IntensivePracticePreview } from "../features/intensive/IntensivePractic
 describe("intensive study components", () => {
   afterEach(() => {
     cleanup();
+    vi.unstubAllGlobals();
   });
 
   it("uses segment repeat when cues exist", () => {
@@ -87,6 +88,80 @@ describe("intensive study components", () => {
       endSeconds: 3.5,
       transcript: "Green Park"
     });
+  });
+
+  it("saves live listening cues and dictation attempts through the local study API", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          endSeconds: 3.5,
+          id: "cue-live-created",
+          label: "Sentence 1",
+          passageId: "passage-live-1",
+          startSeconds: 1.5,
+          transcript: "Green Park"
+        })
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          cueId: "cue-live-created",
+          id: "dictation-live-1",
+          isCorrect: true,
+          normalizedText: "green park",
+          userText: "green park"
+        })
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: {
+            audioTitle: "Live cue review",
+            cues: [],
+            passageId: "passage-live-1"
+          },
+          reading: null
+        }}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Cue label"), { target: { value: "Sentence 1" } });
+    fireEvent.change(screen.getByLabelText("Start time"), { target: { value: "1.5" } });
+    fireEvent.change(screen.getByLabelText("End time"), { target: { value: "3.5" } });
+    fireEvent.change(screen.getByLabelText("Transcript"), { target: { value: "Green Park" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save cue" }));
+
+    expect(await screen.findByText("Cue saved for sentence repeat.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Repeat Sentence 1" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/study/listening-cues",
+      expect.objectContaining({
+        body: JSON.stringify({
+          endSeconds: 3.5,
+          label: "Sentence 1",
+          passageId: "passage-live-1",
+          startSeconds: 1.5,
+          transcript: "Green Park"
+        }),
+        method: "POST"
+      })
+    );
+
+    fireEvent.change(screen.getByLabelText("Dictation input"), { target: { value: "green park" } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit dictation" }));
+
+    expect(await screen.findByText("Dictation correct.")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/study/dictation-attempts",
+      expect.objectContaining({
+        body: JSON.stringify({ cueId: "cue-live-created", userText: "green park" }),
+        method: "POST"
+      })
+    );
   });
 
   it("renders close reading evidence, manual answer sentence selection, and mistake labels", () => {
