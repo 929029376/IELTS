@@ -33,6 +33,17 @@
   - question type,
   - mistake label.
 - Added `addMistakeLabel` support to `attemptRepo` so mistake-label filters can use persisted history.
+- Added a Mac self-use study overview API:
+  - `GET /api/study/overview`.
+- The overview reports:
+  - listening and reading passage counts,
+  - question counts,
+  - listening cue counts,
+  - frequency distribution by subject,
+  - whether full listening and reading mock sets are currently buildable,
+  - high-frequency-first recommended listening and reading mock sets.
+- Added a local dashboard study queue that consumes the overview API and surfaces
+  recommended mock passages from the local question bank.
 
 ## Verification Evidence
 
@@ -41,6 +52,13 @@
 - `npx pnpm@9.15.4 --filter @ielts/server test`
   - 5 server test files passed.
   - 18 server tests passed.
+- Mac study overview follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts src/test/testBuilder.test.ts`
+    - Initially failed with `404` for `/api/study/overview`.
+    - Passed after adding the study overview route and service.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because the dashboard did not render `Local study queue`.
+    - Passed after adding the study overview panel and API loading hook.
 - `npx pnpm@9.15.4 test`
   - Shared: 3 tests passed.
   - Server: 18 tests passed.

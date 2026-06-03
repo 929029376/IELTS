@@ -9,6 +9,7 @@ import { registerHardeningRoutes } from "./routes/hardeningRoutes";
 import { registerImportRoutes } from "./routes/importRoutes";
 import { registerPracticeRoutes } from "./routes/practiceRoutes";
 import { registerReportsRoutes } from "./routes/reportsRoutes";
+import { registerStudyRoutes } from "./routes/studyRoutes";
 import { registerSyncRoutes } from "./routes/syncRoutes";
 import { createSyncService, type SyncServiceOptions } from "./sync/syncService";
 
@@ -29,6 +30,7 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
 
   const db = openDatabase(options.databasePath ?? process.env.IELTS_DB_PATH ?? ":memory:");
   migrate(db);
+  server.decorate("db", db);
 
   server.addHook("onClose", async () => {
     db.close();
@@ -49,6 +51,7 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
     assetRoot: options.assetRoot ?? `${dataDir}/assets`
   });
   registerPracticeRoutes(server, db, sync);
+  registerStudyRoutes(server, db);
   registerReportsRoutes(server, db, {
     exportDir: options.exportDir,
     now: options.now

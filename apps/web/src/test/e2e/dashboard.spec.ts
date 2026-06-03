@@ -11,6 +11,7 @@ test("renders the local IELTS dashboard and exam preview across desktop widths",
     await expect(page.getByRole("heading", { name: "IELTS Local Practice" })).toBeVisible();
     await expect(page.getByText("Mock Exam Center")).toBeVisible();
     await expect(page.getByText("Intensive Practice Center")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Local study queue" })).toBeVisible();
     await expect(page.getByRole("region", { name: "IELTS-style exam preview" })).toBeVisible();
     await expect(page.getByText("The History of Tea")).toBeVisible();
     await expect(page.getByText("60:00")).toBeVisible();
@@ -27,6 +28,7 @@ test("covers V1 dashboard, import, practice, history, and sync regression anchor
   await page.goto("/");
 
   await expect(page.getByRole("heading", { name: "IELTS Local Practice" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Local study queue" })).toContainText("Question-bank readiness");
   await expect(page.getByRole("region", { name: "Question bank import" })).toContainText("Local import and frequency updates");
   await expect(page.getByLabel("Listening directory path")).toHaveValue("/Users/musheng/Desktop/IELTS/listening");
   await expect(page.getByLabel("Reading PDF directory path")).toHaveValue("/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF");

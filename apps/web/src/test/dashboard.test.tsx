@@ -154,4 +154,63 @@ describe("dashboard shell", () => {
     expect(screen.getByText("Live Airport Enquiry")).toBeInTheDocument();
     expect(screen.queryByText("reading/broken.pdf")).not.toBeInTheDocument();
   });
+
+  it("loads local study overview and recommended mock sets from the local API", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/study/overview") {
+        return {
+          ok: true,
+          json: async () => ({
+            readiness: {
+              listeningFullMockReady: true,
+              readingFullMockReady: true
+            },
+            recommendedMockSets: {
+              listening: {
+                passages: [
+                  { frequencyClass: "high", id: "l-p1", part: "P1", selectionWeight: 5, subject: "listening", title: "Live Listening P1 High" },
+                  { frequencyClass: "high", id: "l-p2", part: "P2", selectionWeight: 5, subject: "listening", title: "Live Listening P2 High" }
+                ],
+                subject: "listening"
+              },
+              reading: {
+                passages: [
+                  { frequencyClass: "high", id: "r-p1", part: "P1", selectionWeight: 5, subject: "reading", title: "Live Reading P1 High" }
+                ],
+                subject: "reading"
+              }
+            },
+            subjects: {
+              listening: {
+                cueCount: 1,
+                frequency: { high: 3, low: 1, medium: 1, unknown: 0 },
+                passageCount: 5,
+                questionCount: 5
+              },
+              reading: {
+                cueCount: 0,
+                frequency: { high: 1, low: 1, medium: 1, unknown: 0 },
+                passageCount: 3,
+                questionCount: 3
+              }
+            }
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("Local study queue")).toBeInTheDocument();
+    expect(screen.getByText("Listening mock ready")).toBeInTheDocument();
+    expect(screen.getByText("5 passages / 5 questions / 1 cues")).toBeInTheDocument();
+    expect(screen.getByText("Live Listening P1 High")).toBeInTheDocument();
+    expect(screen.getByText("Live Reading P1 High")).toBeInTheDocument();
+  });
 });

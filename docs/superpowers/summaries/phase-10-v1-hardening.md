@@ -59,6 +59,9 @@
 - Updated Playwright configuration so the dashboard regression starts the root
   development command and waits for the local API health endpoint before testing
   the web app.
+- Added a Mac dashboard study queue backed by `/api/study/overview`, replacing
+  another static entry point with live local question-bank readiness and
+  high-frequency-first recommended mock sets.
 
 ## Verification Evidence
 
@@ -150,6 +153,17 @@
       wait on `http://127.0.0.1:5174/health`.
   - `npx pnpm@9.15.4 test:e2e`
     - Passed with the local API and web app running together.
+- Mac study queue follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts src/test/testBuilder.test.ts`
+    - Initially failed with `404` for `/api/study/overview`.
+    - Passed after adding the study overview API.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because the dashboard did not render `Local study queue`.
+    - Passed after adding the local study queue UI.
+  - `npx pnpm@9.15.4 build`
+    - Passed after narrowing the test-only `server.db` type assertion.
+  - `npx pnpm@9.15.4 test:e2e`
+    - Passed with Playwright coverage for the study queue region.
 
 ## Remaining V1 Gaps
 

@@ -10,6 +10,7 @@ import {
   type HistoryAttemptView,
   type ReportsAnalyticsView
 } from "../features/reports/HistoryReportsPreview";
+import { StudyOverviewPanel, type StudyOverviewView } from "../features/study/StudyOverviewPanel";
 import { SyncSettingsPreview } from "../features/sync/SyncSettingsPreview";
 import { useDesktopRuntimeStatus } from "../features/desktop/desktopRuntime";
 import "./app.css";
@@ -76,6 +77,31 @@ const emptyHardeningStatus: HardeningStatusView = {
     },
     passages: [],
     totalPassages: 0
+  }
+};
+
+const emptyStudyOverview: StudyOverviewView = {
+  readiness: {
+    listeningFullMockReady: false,
+    readingFullMockReady: false
+  },
+  recommendedMockSets: {
+    listening: null,
+    reading: null
+  },
+  subjects: {
+    listening: {
+      cueCount: 0,
+      frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+      passageCount: 0,
+      questionCount: 0
+    },
+    reading: {
+      cueCount: 0,
+      frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+      passageCount: 0,
+      questionCount: 0
+    }
   }
 };
 
@@ -242,8 +268,39 @@ function useDashboardData(): DashboardData {
   return data;
 }
 
+function useStudyOverview(): StudyOverviewView {
+  const [overview, setOverview] = useState<StudyOverviewView>(emptyStudyOverview);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (typeof fetch === "undefined") {
+      return;
+    }
+
+    void fetchJson<StudyOverviewView>("/api/study/overview")
+      .then((studyOverview) => {
+        if (mounted) {
+          setOverview(studyOverview);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setOverview(emptyStudyOverview);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return overview;
+}
+
 export function App() {
   const dashboardData = useDashboardData();
+  const studyOverview = useStudyOverview();
   const desktopRuntimeStatus = useDesktopRuntimeStatus();
 
   return (
@@ -299,6 +356,7 @@ export function App() {
           ))}
         </section>
 
+        <StudyOverviewPanel overview={studyOverview} />
         <ExamPreview />
         <QuestionBankImportPanel />
         <IntensivePracticePreview />

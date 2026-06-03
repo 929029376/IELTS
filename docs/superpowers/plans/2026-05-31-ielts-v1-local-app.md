@@ -303,6 +303,8 @@ Answer normalization:
 - [x] Build listening full set: one P1, one P2, one P3, one P4.
 - [x] Build reading full set: one P1, one P2, one P3.
 - [x] Add practice filters: subject, part, frequency class, question type, mistake label.
+- [x] Add a local study overview API and dashboard queue showing frequency
+  distribution, full-mock readiness, cue counts, and recommended mock sets.
 
 **Acceptance:** Generated sets prefer high-frequency items, contain the correct part distribution, and avoid excessive recent repetition.
 
