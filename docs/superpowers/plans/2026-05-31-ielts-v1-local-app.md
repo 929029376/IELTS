@@ -411,6 +411,8 @@ Answer normalization:
   - `devices.json`.
 - [x] Append events after local database writes.
 - [x] Import remote events on startup and on manual sync.
+- [x] Connect the Mac dashboard Manual sync action to `POST /api/sync/import`
+  and render imported, skipped, and conflict counts.
 - [x] Dedupe by `eventId`.
 - [x] Merge attempts and answers by `attemptId`, `questionId`, `deviceId`, and `createdAt`.
 - [x] Never overwrite a local answer with a remote answer for the same submitted attempt; store both and mark conflict in review.

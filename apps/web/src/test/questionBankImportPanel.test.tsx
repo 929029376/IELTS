@@ -31,6 +31,10 @@ describe("QuestionBankImportPanel", () => {
       );
     });
 
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Import reading directory" })).toBeEnabled();
+    });
+
     fireEvent.change(screen.getByLabelText("Reading PDF directory path"), {
       target: { value: "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF" }
     });
@@ -44,6 +48,10 @@ describe("QuestionBankImportPanel", () => {
           body: JSON.stringify({ rootDir: "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF" })
         })
       );
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Import corrected frequency rows" })).toBeEnabled();
     });
 
     fireEvent.change(screen.getByLabelText("Frequency source month"), {

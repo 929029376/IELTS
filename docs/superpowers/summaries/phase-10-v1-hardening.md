@@ -78,6 +78,12 @@
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
+- Added manual sync UI hardening:
+  - the dashboard Manual sync action now calls `POST /api/sync/import`,
+  - imported, skipped, and conflict counts are rendered after the sync completes.
+- Stabilized the question-bank import panel regression so sequential import
+  actions wait for the shared import lock to release before submitting the next
+  local import request.
 
 ## Verification Evidence
 
@@ -213,6 +219,17 @@
     - Initially failed because report export buttons were static.
     - Passed after wiring them to the reports export API and rendering exported
       local file paths.
+- Mac manual sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because the Manual sync button did not call the sync API or
+      show a completion status.
+    - Passed after wiring it to `POST /api/sync/import` and rendering imported,
+      skipped, and conflict counts.
+- Mac readiness follow-up:
+  - `node scripts/mac-readiness-check.mjs`
+    - Initially failed because the question-bank import panel regression clicked
+      the next import action before the shared import lock released.
+    - Passed after waiting for each sequential import action to become enabled.
 
 ## Remaining V1 Gaps
 

@@ -34,6 +34,8 @@
 - Added sync API:
   - `GET /api/sync/config`,
   - `POST /api/sync/import`.
+- Connected the Mac dashboard Manual sync action to `POST /api/sync/import`
+  and added local UI feedback for imported, skipped, and conflict counts.
 - Added manual backup service and API:
   - `POST /api/backups/export`,
   - `POST /api/backups/import`.
@@ -50,6 +52,10 @@
   - Sync folder, append, import, dedupe, merge, and conflict tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
   - Manual sync API and startup import tests passed.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+  - Initially failed because the Manual sync button did not call the sync API or
+    render a completion status.
+  - Passed after wiring the button to `POST /api/sync/import`.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupService.test.ts`
   - Manual backup export/import service test passed.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupRoutes.test.ts`

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FolderSync, RefreshCw } from "lucide-react";
 import { DesktopAssetVerifier } from "../desktop/DesktopAssetVerifier";
 import { DesktopRuntimeDiagnostics, type DesktopRuntimeStatus } from "../desktop/DesktopRuntimeDiagnostics";
@@ -10,6 +11,12 @@ export interface SyncSettingsPreviewProps {
   syncPath: string;
 }
 
+interface ManualSyncResult {
+  conflicts: number;
+  imported: number;
+  skipped: number;
+}
+
 export function SyncSettingsPreview({
   deviceName,
   lastSyncAt,
@@ -17,6 +24,26 @@ export function SyncSettingsPreview({
   syncFiles,
   syncPath
 }: SyncSettingsPreviewProps) {
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
+  const [syncResult, setSyncResult] = useState<ManualSyncResult | null>(null);
+
+  async function runManualSync() {
+    setIsSyncing(true);
+    setSyncError(null);
+    try {
+      const response = await fetch("/api/sync/import", { method: "POST" });
+      if (!response.ok) {
+        throw new Error("Could not import sync events");
+      }
+      setSyncResult((await response.json()) as ManualSyncResult);
+    } catch {
+      setSyncError("Could not complete manual sync.");
+    } finally {
+      setIsSyncing(false);
+    }
+  }
+
   return (
     <section className="sync-settings-band" aria-label="Sync settings">
       <div className="reports-header">
@@ -24,7 +51,7 @@ export function SyncSettingsPreview({
           <p className="eyebrow">Cross-device records</p>
           <h2>Baidu Cloud JSONL sync</h2>
         </div>
-        <button className="icon-command" type="button">
+        <button className="icon-command" disabled={isSyncing} onClick={() => void runManualSync()} type="button">
           <RefreshCw size={16} aria-hidden="true" />
           Manual sync
         </button>
@@ -58,6 +85,17 @@ export function SyncSettingsPreview({
           </div>
         </div>
       </div>
+      {syncResult ? (
+        <section className="sync-status-panel" role="status">
+          <h3>Manual sync complete</h3>
+          <div>
+            <span>{syncResult.imported} imported</span>
+            <span>{syncResult.skipped} skipped</span>
+            <span>{syncResult.conflicts} conflicts</span>
+          </div>
+        </section>
+      ) : null}
+      {syncError ? <p className="mock-start-error">{syncError}</p> : null}
       <DesktopRuntimeDiagnostics status={runtimeStatus} />
       <DesktopAssetVerifier />
     </section>
