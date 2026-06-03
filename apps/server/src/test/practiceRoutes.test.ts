@@ -161,6 +161,19 @@ describe("practice routes", () => {
             rawAnswer: " Answer 1 ",
             isCorrect: true
           })
+        ],
+        reviewItems: [
+          expect.objectContaining({
+            answerSentence: "The answer is answer 1.",
+            acceptedAnswers: ["answer 1"],
+            explanation: "Question 1 is answered directly in the sample text.",
+            isCorrect: true,
+            passageTitle: "Forty Question Practice Set",
+            prompt: "Question 1",
+            rawAnswer: " Answer 1 ",
+            synonyms: [],
+            questionId: firstQuestion.id
+          })
         ]
       });
     } finally {

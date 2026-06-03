@@ -41,6 +41,9 @@
   - saves answers through `POST /api/practice/:attemptId/answer`,
   - submits through `POST /api/practice/:attemptId/submit`,
   - displays the returned raw score and estimated band report.
+- Added a submitted-mock review panel that loads `GET /api/practice/:attemptId/review`
+  and renders correctness, user answer, accepted answers, answer-sentence
+  highlight, explanation, and synonym notes.
 - Added unit coverage for:
   - shell controls,
   - timer auto-submit,
@@ -76,6 +79,12 @@
     - Initially failed because the loaded local mock questions had no answer input.
     - Passed after adding answer persistence, local mock submission, and score
       report rendering for the active attempt.
+- Mac local mock review follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because submitting a local mock did not render a detailed
+      review region.
+    - Passed after loading the practice review endpoint and rendering answer
+      evidence, explanations, and synonym notes.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.
@@ -86,7 +95,9 @@
 ## Notes
 
 - This phase delivers the reusable exam UI shell and dashboard preview. The shell now sits on top of the Phase 3 practice engine for started local mock attempts.
-- A static sample remains below the live mock panel as a visual preview, while the Mock Exam Center can now start, answer, submit, and score a local mock attempt through the API.
+- A static sample remains below the live mock panel as a visual preview, while the
+  Mock Exam Center can now start, answer, submit, score, and review a local mock
+  attempt through the API.
 - The listening player intentionally does not expose native audio controls in mock mode. The visible pause, seek, and speed controls are disabled to make the restriction explicit.
 
 ## Next Phase

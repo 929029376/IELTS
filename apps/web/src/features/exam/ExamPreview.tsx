@@ -30,6 +30,25 @@ interface MockSubmitResult {
   submittedAt: string;
 }
 
+interface MockReviewItem {
+  acceptedAnswers: string[];
+  answerSentence: string | null;
+  explanation: string | null;
+  isCorrect: boolean;
+  part: string | null;
+  passageTitle: string | null;
+  prompt: string | null;
+  questionId: string;
+  questionNumber: number | null;
+  rawAnswer: string;
+  synonyms: string[];
+}
+
+interface MockReview {
+  id: string;
+  reviewItems: MockReviewItem[];
+}
+
 async function startMock(subject: "listening" | "reading"): Promise<StartedMock> {
   const response = await fetch("/api/practice/start", {
     body: JSON.stringify({ mode: "mock", subject }),
@@ -51,6 +70,14 @@ function subjectLabel(subject: "listening" | "reading") {
   return subject === "listening" ? "listening" : "reading";
 }
 
+function renderReviewEvidence(item: MockReviewItem) {
+  if (!item.answerSentence) {
+    return <p className="empty-state">No answer sentence recorded for this question.</p>;
+  }
+
+  return <mark className="ielts-highlight">{item.answerSentence}</mark>;
+}
+
 export function ExamPreview() {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -58,6 +85,7 @@ export function ExamPreview() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [mockReview, setMockReview] = useState<MockReview | null>(null);
   const [scoreReport, setScoreReport] = useState<MockSubmitResult | null>(null);
   const [submittedReason, setSubmittedReason] = useState<string | null>(null);
 
@@ -65,6 +93,7 @@ export function ExamPreview() {
     setIsStarting(true);
     setStartError(null);
     setSubmitError(null);
+    setMockReview(null);
     setScoreReport(null);
     setAnswers({});
     try {
@@ -111,6 +140,12 @@ export function ExamPreview() {
         throw new Error("Could not submit mock");
       }
       setScoreReport((await response.json()) as MockSubmitResult);
+      const reviewResponse = await fetch(`/api/practice/${activeMock.attemptId}/review`, {
+        method: "GET"
+      });
+      if (reviewResponse.ok) {
+        setMockReview((await reviewResponse.json()) as MockReview);
+      }
     } catch {
       setSubmitError("Could not submit the local mock attempt.");
     } finally {
@@ -214,7 +249,42 @@ export function ExamPreview() {
         </ExamShell>
       ) : null}
       {scoreReport && activeMock ? (
-        <ScoreReport subject={activeMock.subject} rawScore={scoreReport.rawScore} estimatedBand={scoreReport.estimatedBand} />
+        <ScoreReport
+          subject={activeMock.subject}
+          rawScore={scoreReport.rawScore}
+          estimatedBand={scoreReport.estimatedBand}
+        />
+      ) : null}
+      {mockReview?.reviewItems.length ? (
+        <section className="mock-review-panel" aria-label="Mock review details">
+          <div>
+            <p className="eyebrow">Review</p>
+            <h3>Answer evidence and explanations</h3>
+          </div>
+          <ol className="mock-review-list">
+            {mockReview.reviewItems.map((item) => (
+              <li key={item.questionId}>
+                <div className="mock-review-heading">
+                  <span>{item.isCorrect ? "Correct" : "Incorrect"}</span>
+                  <strong>
+                    {item.questionNumber ?? "Question"} {item.prompt ?? "Review question"}
+                  </strong>
+                </div>
+                <p>Your answer: {item.rawAnswer || "No answer"}</p>
+                <p>Accepted: {item.acceptedAnswers.join(", ") || "Not configured"}</p>
+                <div className="answer-sentence-preview">{renderReviewEvidence(item)}</div>
+                {item.explanation ? <p>{item.explanation}</p> : null}
+                {item.synonyms.length > 0 ? (
+                  <ul className="mock-review-synonyms">
+                    {item.synonyms.map((synonym) => (
+                      <li key={synonym}>{synonym}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        </section>
       ) : null}
       <ExamShell
         title="Reading Mock Test"

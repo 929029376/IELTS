@@ -260,4 +260,98 @@ describe("exam simulation components", () => {
       expect.objectContaining({ method: "POST" })
     );
   });
+
+  it("loads detailed review evidence after submitting a local mock", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const path = String(input);
+      if (path === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-review-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-review-1",
+                part: "P1",
+                passageId: "passage-review-1",
+                passageTitle: "Review Evidence Passage",
+                prompt: "What was the key route?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-review-1/answer") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (path === "/api/practice/attempt-reading-review-1/submit") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-review-1",
+            estimatedBand: 4,
+            rawScore: 0,
+            submittedAt: "2026-06-04T10:00:00.000Z"
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-review-1/review") {
+        return {
+          ok: true,
+          json: async () => ({
+            id: "attempt-reading-review-1",
+            reviewItems: [
+              {
+                acceptedAnswers: ["trade routes"],
+                answerSentence: "Tea moved through early trade routes.",
+                explanation: "The evidence sentence names the route directly.",
+                isCorrect: false,
+                markedForReview: false,
+                part: "P1",
+                passageTitle: "Review Evidence Passage",
+                prompt: "What was the key route?",
+                questionId: "question-review-1",
+                questionNumber: 1,
+                questionType: "fill_blank",
+                rawAnswer: "ships",
+                synonyms: ["moved through = travelled via"]
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    const answer = await screen.findByRole("textbox", { name: "Answer for question question-review-1" });
+    fireEvent.change(answer, { target: { value: "ships" } });
+    fireEvent.blur(answer);
+    fireEvent.click(screen.getByRole("button", { name: "Submit local mock" }));
+
+    expect(await screen.findByRole("region", { name: "Mock review details" })).toBeInTheDocument();
+    expect(screen.getByText("Incorrect")).toBeInTheDocument();
+    expect(screen.getByText("Your answer: ships")).toBeInTheDocument();
+    expect(screen.getByText("Accepted: trade routes")).toBeInTheDocument();
+    expect(screen.getByText("Tea moved through early trade routes.")).toHaveClass("ielts-highlight");
+    expect(screen.getByText("The evidence sentence names the route directly.")).toBeInTheDocument();
+    expect(screen.getByText("moved through = travelled via")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-review-1/review",
+      expect.objectContaining({ method: "GET" })
+    );
+  });
 });

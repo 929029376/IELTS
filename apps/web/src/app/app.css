@@ -348,6 +348,83 @@ h1 {
   line-height: 1.4;
 }
 
+.mock-review-panel {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0;
+  padding: 18px;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.mock-review-panel h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 18px;
+}
+
+.mock-review-list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.mock-review-list li {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #dde5ef;
+  border-radius: 8px;
+  background: #f9fbfd;
+}
+
+.mock-review-list p {
+  margin: 0;
+  color: #405169;
+  font-size: 14px;
+}
+
+.mock-review-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.mock-review-heading span {
+  justify-self: start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #edf7f5;
+  color: #1f6f60;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mock-review-heading strong {
+  color: #172033;
+  font-size: 14px;
+}
+
+.mock-review-synonyms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.mock-review-synonyms li {
+  padding: 4px 8px;
+  border: 1px solid #cfd9e6;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #405169;
+  font-size: 13px;
+}
+
 .question-bank-import-band {
   margin-top: 28px;
 }

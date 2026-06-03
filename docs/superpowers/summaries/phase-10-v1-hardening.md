@@ -71,6 +71,10 @@
   - save answers through the practice answer API,
   - submit through the practice submit API,
   - show the returned raw score and estimated band report.
+- Added submitted-mock review hardening:
+  - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
+  - the Mac dashboard renders correctness, user answer, accepted answer, answer
+    sentence highlight, explanation, and synonym notes after submission.
 
 ## Verification Evidence
 
@@ -191,6 +195,16 @@
       and no answer field.
     - Passed after wiring answer save, submit, and score report display to the
       active local attempt.
+- Mac detailed mock review follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because the review API did not include detailed review
+      items.
+    - Passed after returning answer key, answer sentence, explanation, synonym,
+      and correctness details.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because submitting a local mock did not show a detailed
+      review region.
+    - Passed after rendering the submitted-mock review panel.
 
 ## Remaining V1 Gaps
 

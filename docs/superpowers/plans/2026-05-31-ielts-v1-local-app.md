@@ -252,6 +252,8 @@ Answer normalization:
 - [x] Build reusable answer components in `apps/web/src/features/questions`.
 - [x] Add question navigation state: unanswered, answered, current, marked for review, correct, incorrect.
 - [x] Save every answer change locally through the API.
+- [x] Return detailed review items from the practice review API, including prompt,
+  accepted answers, answer sentence, explanation, synonyms, and correctness.
 
 **Acceptance:** A seeded set of 40 questions can be answered, submitted, reviewed, and reopened from history.
 
@@ -287,6 +289,8 @@ Answer normalization:
   the local practice API.
 - [x] Connect started local mock attempts to answer saving, submission, and score
   report rendering in the Mac dashboard exam UI.
+- [x] Load detailed review evidence after local mock submission and render answer
+  sentence highlights, accepted answers, explanations, and synonym notes.
 
 **Acceptance:** Listening and reading mock exams can be completed under strict mode, auto-submit on timeout, and produce a score report.
 

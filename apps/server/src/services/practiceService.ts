@@ -142,7 +142,27 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
         throw new Error("Attempt not found.");
       }
 
-      return attempt;
+      const reviewItems = attempt.answers.map((answer) => {
+        const question = questions.getQuestionWithAnswerKeys(answer.questionId);
+        const answerKeys = question?.answerKeys ?? [];
+        return {
+          answerSentence: answerKeys.find((answerKey) => answerKey.answerSentence)?.answerSentence ?? null,
+          acceptedAnswers: answerKeys.flatMap((answerKey) => answerKey.acceptedAnswers),
+          explanation: answerKeys.find((answerKey) => answerKey.explanation)?.explanation ?? null,
+          isCorrect: answer.isCorrect,
+          markedForReview: answer.markedForReview,
+          part: question?.part ?? null,
+          passageTitle: question?.passageTitle ?? null,
+          prompt: question?.prompt ?? null,
+          questionId: answer.questionId,
+          questionNumber: question?.questionNumber ?? null,
+          questionType: question?.questionType ?? null,
+          rawAnswer: answer.rawAnswer,
+          synonyms: answerKeys.flatMap((answerKey) => answerKey.synonyms)
+        };
+      });
+
+      return { ...attempt, reviewItems };
     }
   };
 }

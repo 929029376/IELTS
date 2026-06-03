@@ -19,6 +19,9 @@
   - `POST /api/practice/:attemptId/submit`
   - `GET /api/practice/:attemptId/review`
 - Added question-bank repository read helpers for 40-question practice sessions and answer-key lookup.
+- Expanded practice review responses with `reviewItems` so submitted attempts
+  include prompt, passage title, accepted answers, answer sentence, explanation,
+  synonyms, correctness, and the user's raw answer.
 - Added basic reusable web question components:
   - `AnswerInput`
   - `QuestionNavigator`
@@ -34,7 +37,7 @@
   - 40-question practice API flow,
   - answer persistence through the practice API,
   - submission scoring,
-  - review retrieval,
+  - detailed review retrieval,
   - reusable answer input and question navigation components.
 
 ## Verification Evidence
@@ -51,11 +54,18 @@
   - Migration command completed with `Database migrations applied.`
 - `npx pnpm@9.15.4 test:e2e`
   - Playwright Chromium dashboard smoke test passed.
+- Mac detailed-review follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because `GET /api/practice/:attemptId/review` did not
+      include detailed review items.
+    - Passed after adding prompt, answer key, answer sentence, explanation, and
+      correctness details to the review response.
 
 ## Notes
 
 - Phase 3 focuses on the practice engine and reusable question UI pieces, not the full IELTS-style exam screen. The exam shell, strict timer, bottom navigation polish, and split reading layout are Phase 4.
-- The practice route test seeds 40 questions and proves the API can start, answer, submit, review, and reload a practice attempt.
+- The practice route test seeds 40 questions and proves the API can start, answer,
+  submit, review with detailed explanations, and reload a practice attempt.
 - Rich per-question option models for choices, maps, and matching will be refined as real importers and exam UI land. The Phase 3 backend can already persist and score the V1 question type set through normalized answer keys.
 
 ## Next Phase
