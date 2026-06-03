@@ -6,4 +6,5 @@ export function registerStudyRoutes(server: FastifyInstance, db: DatabaseHandle)
   const study = createStudyService(db);
 
   server.get("/api/study/overview", async (_request, reply) => reply.send(study.getOverview()));
+  server.get("/api/study/intensive", async (_request, reply) => reply.send(study.getIntensivePreview()));
 }

@@ -32,6 +32,13 @@
   - manual answer-sentence selection action,
   - wrong-answer mistake labels.
 - Mounted the intensive practice preview on the main dashboard so the local app exposes the Phase 6 experience.
+- Added live local intensive study data loading:
+  - `GET /api/study/intensive` returns the highest-priority listening passage
+    with sentence cues and the highest-priority reading item with answer evidence,
+  - the Mac dashboard intensive panel now renders local cue, transcript, answer
+    sentence, explanation, synonym, keyword, and passage text data when available,
+  - the existing sample preview remains only as a fallback when no local data has
+    been loaded yet.
 - Added focused unit tests for intensive server persistence and web components.
 
 ## Verification Evidence
@@ -42,9 +49,30 @@
 - Fix evidence:
   - A build-time type mismatch in `updateListeningCue` exposed that update input should not require `passageId`; the repo API now accepts only editable cue fields.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
-  - 5 intensive component tests passed.
+  - 6 intensive component tests passed, including fallback labels for unnamed live
+    sentence cues.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+  - Initially failed with `404` because `/api/study/intensive` did not exist.
+  - Passed after adding the intensive study preview API.
+- `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+  - Initially failed because the dashboard still rendered static intensive sample
+    content instead of live local intensive data.
+  - Passed after wiring `IntensivePracticePreview` to `/api/study/intensive`.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx src/test/intensiveComponents.test.tsx`
   - Dashboard and intensive component integration checks passed.
+- `npx pnpm@9.15.4 test`
+  - Shared: 3 tests passed.
+  - Server: 44 tests passed.
+  - Web: 44 tests passed.
+- `npx pnpm@9.15.4 build`
+  - Initially failed because live cue labels can be `null` while the player
+    expects stable display labels.
+  - Passed after normalizing unnamed cues to `Sentence N`.
+- `npx pnpm@9.15.4 test:e2e`
+  - 2 Playwright Chromium dashboard regression tests passed.
+- `node scripts/mac-readiness-check.mjs`
+  - Passed, including unit/component tests, Playwright, production build,
+    desktop diagnostics, and Mac DMG packaging.
 - `npx pnpm@9.15.4 test`
   - Shared: 3 tests passed.
   - Server: 21 tests passed.

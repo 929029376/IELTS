@@ -123,4 +123,83 @@ describe("study overview routes", () => {
       ).count
     ).toBe(0);
   });
+
+  it("returns live intensive listening cues and reading evidence for the Mac intensive panel", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-study-intensive-"));
+    const server = buildServer({ databasePath: join(tempDir, "ielts.db") });
+    servers.push(server);
+    const db = (server as typeof server & { db: DatabaseHandle }).db;
+    const questions = createQuestionRepo(db);
+    const intensive = createIntensiveRepo(db);
+    const source = questions.createSource({
+      checksum: "study-intensive-source",
+      importStatus: "imported",
+      originalPath: "seed/study-intensive.json",
+      sourceType: "seed",
+      version: 1
+    });
+    const listeningPassage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P1",
+      sourceId: source.id,
+      subject: "listening",
+      title: "Live Listening Intensive"
+    });
+    intensive.createListeningCue({
+      endSeconds: 9.4,
+      label: "Sentence 2",
+      passageId: listeningPassage.id,
+      startSeconds: 5.2,
+      transcript: "The appointment is at nine thirty."
+    });
+    const readingPassage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P2",
+      sourceId: source.id,
+      subject: "reading",
+      title: "Live Reading Intensive"
+    });
+    questions.createSourceAsset({
+      assetKind: "html",
+      checksum: "reading-intensive-html",
+      filePath: null,
+      originalName: "reading.html",
+      sourceId: source.id,
+      textContent: "The key answer sentence proves the claim. The distractor sentence is nearby."
+    });
+    const readingQuestion = questions.createQuestion({
+      answerRules: {},
+      passageId: readingPassage.id,
+      prompt: "Find the evidence sentence.",
+      questionNumber: 1,
+      questionType: "matching"
+    });
+    questions.createAnswerKey({
+      acceptedAnswers: ["key answer sentence"],
+      answerSentence: "key answer sentence",
+      explanation: "This sentence directly proves the claim.",
+      questionId: readingQuestion.id,
+      synonyms: ["prove = support"]
+    });
+
+    const response = await server.inject({ method: "GET", url: "/api/study/intensive" });
+    const body = response.json();
+
+    expect(response.statusCode).toBe(200);
+    expect(body.listening).toMatchObject({
+      audioTitle: "Live Listening Intensive",
+      cues: [
+        expect.objectContaining({
+          label: "Sentence 2",
+          transcript: "The appointment is at nine thirty."
+        })
+      ]
+    });
+    expect(body.reading).toMatchObject({
+      answerSentence: "key answer sentence",
+      explanation: "This sentence directly proves the claim.",
+      passageText: "The key answer sentence proves the claim. The distractor sentence is nearby.",
+      synonyms: ["prove = support"]
+    });
+  });
 });

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CueEditor } from "../features/intensive/CueEditor";
 import { IntensiveListeningPlayer } from "../features/intensive/IntensiveListeningPlayer";
 import { CloseReadingView } from "../features/intensive/CloseReadingView";
+import { IntensivePracticePreview } from "../features/intensive/IntensivePracticePreview";
 
 describe("intensive study components", () => {
   afterEach(() => {
@@ -28,6 +29,22 @@ describe("intensive study components", () => {
 
     expect(screen.getByRole("button", { name: "Repeat Sentence 1" })).toBeInTheDocument();
     expect(screen.queryByText("No sentence cues yet. Use A-B repeat or create a cue.")).not.toBeInTheDocument();
+  });
+
+  it("uses stable sentence labels when live cue labels are missing", () => {
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: {
+            audioTitle: "Live cue review",
+            cues: [{ endSeconds: 4, id: "cue-without-label", label: null, startSeconds: 1, transcript: "Green Park" }]
+          },
+          reading: null
+        }}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Repeat Sentence 1" })).toBeInTheDocument();
   });
 
   it("falls back to A-B repeat and cue prompt when no cues exist", () => {

@@ -339,6 +339,8 @@ Answer normalization:
 - [x] If cues exist, enable single-sentence repeat.
 - [x] If cues do not exist, enable A-B repeat and show a cue creation prompt inside the player.
 - [x] Store dictation attempts and compare against transcript when available.
+- [x] Add a local intensive study API and Mac dashboard wiring so the intensive
+  listening panel uses real passage cues when available.
 
 ### Reading Intensive Mode
 
@@ -352,6 +354,9 @@ Answer normalization:
 - [x] Store answer sentence references in `answer_keys`.
 - [x] Support manual answer-sentence selection when imported PDFs do not provide structured answer locations.
 - [x] Add mistake label selection after each wrong answer.
+- [x] Add Mac dashboard wiring so the close-reading panel loads local answer
+  sentence, explanation, synonym, keyword, and passage text evidence when
+  available.
 
 **Acceptance:** Listening supports repeatable segments once cues are available, reading supports answer-sentence highlight and explanation review, and mistake labels are saved.
 

@@ -62,6 +62,9 @@
 - Added a Mac dashboard study queue backed by `/api/study/overview`, replacing
   another static entry point with live local question-bank readiness and
   high-frequency-first recommended mock sets.
+- Added a Mac intensive study preview backed by `/api/study/intensive`, replacing
+  the dashboard's static intensive listening and close-reading content whenever
+  local cue and answer-evidence data is available.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -191,6 +194,16 @@
     - Passed after narrowing the test-only `server.db` type assertion.
   - `npx pnpm@9.15.4 test:e2e`
     - Passed with Playwright coverage for the study queue region.
+- Mac intensive study live-data follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed with `404` because `/api/study/intensive` did not exist.
+    - Passed after adding the intensive study preview API.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because the dashboard did not render live intensive study
+      data from the local API.
+    - Passed after loading and rendering local listening cues and reading evidence.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the intensive live-data wiring, including Mac DMG packaging.
 - Mac mock-start hardening follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because mock start loaded sequential questions and included

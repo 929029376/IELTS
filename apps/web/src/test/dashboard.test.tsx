@@ -213,4 +213,53 @@ describe("dashboard shell", () => {
     expect(screen.getByText("Live Listening P1 High")).toBeInTheDocument();
     expect(screen.getByText("Live Reading P1 High")).toBeInTheDocument();
   });
+
+  it("loads live intensive listening and reading data from the local API", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/study/intensive") {
+        return {
+          ok: true,
+          json: async () => ({
+            listening: {
+              audioTitle: "Live Listening Intensive",
+              cues: [
+                {
+                  endSeconds: 9.4,
+                  id: "cue-live-1",
+                  label: "Sentence 2",
+                  startSeconds: 5.2,
+                  transcript: "The appointment is at nine thirty."
+                }
+              ]
+            },
+            reading: {
+              answerSentence: "key answer sentence",
+              explanation: "This sentence directly proves the claim.",
+              keywords: ["claim"],
+              passageText: "The key answer sentence proves the claim. The distractor sentence is nearby.",
+              passageTitle: "Live Reading Intensive",
+              questionPrompt: "Find the evidence sentence.",
+              synonyms: ["prove = support"]
+            }
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("Live Listening Intensive")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Repeat Sentence 2" })).toBeInTheDocument();
+    expect(screen.getByText("The appointment is at nine thirty.")).toBeInTheDocument();
+    expect(screen.getByText("Find the evidence sentence.")).toBeInTheDocument();
+    expect(screen.getByText("key answer sentence")).toHaveClass("ielts-highlight");
+    expect(screen.getByText("prove = support")).toBeInTheDocument();
+    expect(screen.getByText("This sentence directly proves the claim.")).toBeInTheDocument();
+  });
 });

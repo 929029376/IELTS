@@ -3,7 +3,7 @@ import { Activity, BookOpenCheck, Database, Headphones, LineChart, Timer } from 
 import { ExamPreview } from "../features/exam/ExamPreview";
 import { HardeningCenter, type HardeningStatusView } from "../features/hardening/HardeningCenter";
 import { QuestionBankImportPanel } from "../features/import/QuestionBankImportPanel";
-import { IntensivePracticePreview } from "../features/intensive/IntensivePracticePreview";
+import { IntensivePracticePreview, type IntensiveStudyPreviewView } from "../features/intensive/IntensivePracticePreview";
 import {
   HistoryReportsPreview,
   type DashboardReportView,
@@ -298,8 +298,39 @@ function useStudyOverview(): StudyOverviewView {
   return overview;
 }
 
+function useIntensiveStudyPreview(): IntensiveStudyPreviewView | undefined {
+  const [preview, setPreview] = useState<IntensiveStudyPreviewView | undefined>(undefined);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (typeof fetch === "undefined") {
+      return;
+    }
+
+    void fetchJson<IntensiveStudyPreviewView>("/api/study/intensive")
+      .then((studyPreview) => {
+        if (mounted) {
+          setPreview(studyPreview);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setPreview(undefined);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return preview;
+}
+
 export function App() {
   const dashboardData = useDashboardData();
+  const intensiveStudyPreview = useIntensiveStudyPreview();
   const studyOverview = useStudyOverview();
   const desktopRuntimeStatus = useDesktopRuntimeStatus();
 
@@ -359,7 +390,7 @@ export function App() {
         <StudyOverviewPanel overview={studyOverview} />
         <ExamPreview />
         <QuestionBankImportPanel />
-        <IntensivePracticePreview />
+        <IntensivePracticePreview preview={intensiveStudyPreview} />
         <HistoryReportsPreview
           analytics={dashboardData.analytics}
           dashboard={dashboardData.dashboard}
