@@ -9,10 +9,11 @@ test("renders the local IELTS dashboard and exam preview across desktop widths",
     await page.goto("/");
 
     await expect(page.getByRole("heading", { name: "IELTS Local Practice" })).toBeVisible();
-    await expect(page.getByText("Mock Exam Center")).toBeVisible();
-    await expect(page.getByText("Intensive Practice Center")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Mock Exam Center" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Intensive Practice Center" })).toBeVisible();
     await expect(page.getByRole("region", { name: "Local study queue" })).toBeVisible();
     await expect(page.getByRole("region", { name: "IELTS-style exam preview" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Start reading mock" })).toBeVisible();
     await expect(page.getByText("The History of Tea")).toBeVisible();
     await expect(page.getByText("60:00")).toBeVisible();
     await page.getByRole("button", { name: "Submit test" }).click();
@@ -37,6 +38,7 @@ test("covers V1 dashboard, import, practice, history, and sync regression anchor
   await expect(page.getByText("No completed attempts yet")).toBeVisible();
   await expect(page.getByRole("region", { name: "Intensive practice preview" })).toBeVisible();
   await expect(page.getByRole("region", { name: "IELTS-style exam preview" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Start listening mock" })).toBeVisible();
   await expect(page.getByRole("region", { name: "History and reports preview" })).toContainText("Reports");
   await expect(page.getByRole("region", { name: "Sync settings" })).toContainText("Baidu Cloud JSONL sync");
 });

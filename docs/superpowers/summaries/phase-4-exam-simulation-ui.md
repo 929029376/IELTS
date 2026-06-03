@@ -33,6 +33,9 @@
   - Raw score.
   - Estimated band.
 - Added `ExamPreview` to the dashboard so the local app renders an IELTS-style exam preview in the browser.
+- Added a Mock Exam Center starter that calls `POST /api/practice/start` with
+  `mode: "mock"` for reading or listening and renders the returned local attempt
+  questions from the question bank.
 - Added unit coverage for:
   - shell controls,
   - timer auto-submit,
@@ -59,6 +62,10 @@
   - Web: 10 tests passed.
 - `npx pnpm@9.15.4 test:e2e`
   - Playwright Chromium dashboard and exam preview test passed across two desktop viewport sizes.
+- Mac local mock-start follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because `Start reading mock` did not exist.
+    - Passed after adding the local mock starter and loaded question rendering.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.

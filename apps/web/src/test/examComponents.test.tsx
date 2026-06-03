@@ -1,6 +1,7 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ExamShell } from "../features/exam/ExamShell";
+import { ExamPreview } from "../features/exam/ExamPreview";
 import { ListeningExamView } from "../features/exam/ListeningExamView";
 import { ReadingExamView } from "../features/exam/ReadingExamView";
 import { ScoreReport } from "../features/exam/ScoreReport";
@@ -9,6 +10,12 @@ import { createQuestionNavItems } from "../features/exam/questionNav";
 describe("exam simulation components", () => {
   beforeEach(() => {
     vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
   });
 
   it("renders timer, help, settings, review marker, bottom nav, and submit warning", () => {
@@ -120,5 +127,51 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("region", { name: "Score report" })).toBeInTheDocument();
     expect(screen.getByText("32/40")).toBeInTheDocument();
     expect(screen.getByText("7.0")).toBeInTheDocument();
+  });
+
+  it("starts a local reading mock set through the practice API", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-mock-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-1",
+                part: "P1",
+                passageId: "passage-1",
+                passageTitle: "Live Reading P1 High",
+                prompt: "What is the key answer?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+
+    expect(await screen.findByText("Loaded local reading mock")).toBeInTheDocument();
+    expect(screen.getByText("Live Reading P1 High")).toBeInTheDocument();
+    expect(screen.getByText("What is the key answer?")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/start",
+      expect.objectContaining({
+        body: JSON.stringify({ mode: "mock", subject: "reading" }),
+        method: "POST"
+      })
+    );
   });
 });

@@ -64,6 +64,8 @@
   high-frequency-first recommended mock sets.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
+- Added frontend mock-start controls in the Mock Exam Center so the dashboard can
+  start reading or listening mock attempts through the local practice API.
 
 ## Verification Evidence
 
@@ -131,6 +133,11 @@
     - 2 Playwright Chromium tests passed with Question Bank import anchors.
   - `npx pnpm@9.15.4 build`
     - Shared, server, and web production builds passed.
+- Mac mock-start UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the dashboard exam preview had no `Start reading mock`
+      action.
+    - Passed after adding the local mock-start controls and loaded question list.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after adding the Question Bank import API and dashboard panel.
     - Shared: 3 tests passed.

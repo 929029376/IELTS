@@ -283,6 +283,8 @@ Answer normalization:
   - marked questions before submit,
   - time expired auto-submit.
 - [x] Add Playwright tests for desktop widths on Mac/Windows-like viewport sizes.
+- [x] Add dashboard controls that start reading and listening mock attempts from
+  the local practice API.
 
 **Acceptance:** Listening and reading mock exams can be completed under strict mode, auto-submit on timeout, and produce a score report.
 
