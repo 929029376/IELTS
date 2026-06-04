@@ -176,6 +176,11 @@
   - question-bank completeness rows now show question count and frequency class,
   - readiness checks make it easier to distinguish empty imported passages from
     high/medium/low/unknown frequency passages that need answer evidence.
+- Added Mac hardening-center completeness total-count hardening:
+  - question-bank completeness now shows how many local passages or sections were
+    checked,
+  - the panel distinguishes an empty question bank from imported data with no
+    remaining completeness gaps.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1230,6 +1235,12 @@
       subject, part, and source status.
     - Passed after rendering question count and frequency class in each
       incomplete-passage row.
+- Mac hardening-center completeness total count:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/hardeningCenter.test.tsx`
+    - Initially failed because question-bank completeness received
+      `totalPassages` from the API but did not render the checked-passage count.
+    - Passed after rendering a checked-passage count when local question-bank
+      data exists.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

@@ -72,6 +72,10 @@ function passageTitleLabel(value: string) {
   return value.trim() || "Untitled passage";
 }
 
+function passageCountLabel(count: number) {
+  return `${count} passage${count === 1 ? "" : "s"} checked`;
+}
+
 export function HardeningCenter({ status }: HardeningCenterProps) {
   const importStatusEntries = Object.entries(status.importFailures.byStatus);
   const issueEntries = Object.entries(status.questionBankCompleteness.issueCounts) as Array<
@@ -147,6 +151,11 @@ export function HardeningCenter({ status }: HardeningCenterProps) {
               </div>
             ))}
           </div>
+          {status.questionBankCompleteness.totalPassages > 0 ? (
+            <p className="readiness-caption">
+              {passageCountLabel(status.questionBankCompleteness.totalPassages)}
+            </p>
+          ) : null}
           {status.questionBankCompleteness.totalPassages === 0 ? (
             <p className="empty-state">No question bank data imported yet</p>
           ) : incompletePassages.length > 0 ? (

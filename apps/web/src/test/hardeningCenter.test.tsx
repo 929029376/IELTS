@@ -78,6 +78,9 @@ describe("V1 hardening center", () => {
       "Airport Enquiry"
     );
     expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
+      "1 passage checked"
+    );
+    expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
       "2 questions"
     );
     expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
