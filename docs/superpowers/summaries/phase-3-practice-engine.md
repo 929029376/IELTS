@@ -173,6 +173,12 @@
     - Passed after practice starts reused the same passage resource lookup, so
       free reading and listening practice can show imported passage/PDF/audio
       assets on Mac.
+- Mac practice error-copy follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because a failed free-practice save/submission still
+      surfaced `local mock attempt` copy in the Mac UI.
+    - Passed after exam preview save and submit errors use mode-specific
+      `mock` or `practice` wording.
 
 ## Notes
 

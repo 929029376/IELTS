@@ -901,6 +901,12 @@
     - Passed after practice starts return the same local passage resource
       metadata used by mock starts, keeping Mac free practice usable for
       reading pages and listening audio.
+- Mac practice error-copy hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because a free-practice save failure still told the user
+      that the local mock attempt could not be submitted.
+    - Passed after Mac exam preview error handling reports local practice
+      failures as practice failures and preserves mock wording for mock exams.
 
 ## Remaining V1 Gaps
 

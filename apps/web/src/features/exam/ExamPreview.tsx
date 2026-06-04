@@ -181,6 +181,10 @@ function groupLabel(group: MockQuestionGroup): string {
   return `${group.part} ${group.title}`;
 }
 
+function attemptModeLabel(mode: StartedMock["mode"]): string {
+  return mode === "mock" ? "mock" : "practice";
+}
+
 export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
   const [attemptStartedAtMs, setAttemptStartedAtMs] = useState<number | null>(null);
@@ -242,7 +246,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
       method: "POST"
     });
     if (!response.ok) {
-      throw new Error("Could not save mock answer");
+      throw new Error(`Could not save ${attemptModeLabel(activeMock.mode)} answer`);
     }
   }
 
@@ -270,7 +274,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
         setMockReview((await reviewResponse.json()) as MockReview);
       }
     } catch {
-      setSubmitError("Could not submit the local mock attempt.");
+      setSubmitError(`Could not submit the local ${attemptModeLabel(activeMock.mode)} attempt.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -330,7 +334,8 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
             value={answers[question.id] ?? ""}
             onBlur={() => {
               void saveMockAnswer(question.id).catch(() => {
-                setSubmitError("Could not save the local mock answer.");
+                const mode = activeMock?.mode ?? "mock";
+                setSubmitError(`Could not save the local ${attemptModeLabel(mode)} answer.`);
               });
             }}
             onChange={(value) => setAnswers((current) => ({ ...current, [question.id]: value }))}

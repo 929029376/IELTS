@@ -1030,6 +1030,69 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("shows practice-specific copy when saving current practice answers fails", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const path = String(input);
+      if (path === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-practice-save-fails",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-practice-save-fails",
+                part: "P1",
+                passageId: "passage-practice-save-fails",
+                passageTitle: "Practice Save Failure Set",
+                prompt: "Which word completes the practice sentence?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-practice-save-fails/answer") {
+        return {
+          ok: false,
+          json: async () => ({ message: "save failed" })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-practice-save-fails/submit") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-practice-save-fails",
+            estimatedBand: null,
+            rawScore: 0,
+            submittedAt: "2026-06-04T09:00:00.000Z"
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading practice" }));
+    const answer = await screen.findByRole("textbox", { name: "Answer for question question-practice-save-fails" });
+    fireEvent.change(answer, { target: { value: "routes" } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit local practice" }));
+
+    expect(await screen.findByText("Could not submit the local practice attempt.")).toBeInTheDocument();
+    expect(screen.queryByText("Could not submit the local mock attempt.")).not.toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-practice-save-fails/submit",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
   it("loads detailed review evidence after submitting a local mock", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
