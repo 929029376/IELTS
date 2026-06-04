@@ -1405,6 +1405,56 @@ describe("practice routes", () => {
     }
   });
 
+  it("does not estimate an IELTS band for incomplete mock sets", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-incomplete-mock-score-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedReadingMockCandidates(databasePath);
+
+    const server = buildServer({ databasePath, testBuilderRandom: () => 0.8 });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "mock", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string }>;
+      }>();
+      expect(started.questions).toHaveLength(3);
+
+      for (const question of started.questions) {
+        const answer = await server.inject({
+          method: "POST",
+          url: `/api/practice/${started.attemptId}/answer`,
+          payload: {
+            markedForReview: false,
+            questionId: question.id,
+            rawAnswer: "answer",
+            timeSpentSeconds: 20
+          }
+        });
+        expect(answer.statusCode).toBe(200);
+      }
+
+      const submit = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/submit`
+      });
+
+      expect(submit.statusCode).toBe(200);
+      expect(submit.json()).toMatchObject({
+        rawScore: 3,
+        estimatedBand: null
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("returns imported passage text and listening audio metadata with mock questions", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-mock-assets-"));
     const databasePath = join(tempDir, "ielts.db");

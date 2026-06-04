@@ -42,6 +42,8 @@ const wordLimitNumbers: Record<string, number> = {
   two: 2
 };
 
+const fullIeltsTestQuestionCount = 40;
+
 function parseWordLimit(value: string): number | undefined {
   const numericMatch = value.match(/\d+/);
   if (numericMatch) {
@@ -230,7 +232,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
 
       const rawScore = attempt.answers.filter((answer) => answer.isCorrect).length;
       const table = attempt.subject === "listening" ? listeningBandTable : academicReadingBandTable;
-      const shouldEstimateBand = attempt.mode === "mock" || attempt.answers.length >= 40;
+      const shouldEstimateBand = attempt.answers.length >= fullIeltsTestQuestionCount;
       const estimatedBand = shouldEstimateBand ? estimateBand(rawScore, table) : null;
       const submittedAt = new Date().toISOString();
 

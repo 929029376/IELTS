@@ -351,6 +351,12 @@
     `NG` now match the fixed UI choices,
   - these abbreviations are enabled only for IELTS judgment question types so
     ordinary fill-blank answers are not over-accepted.
+- Added Mac mock score-integrity hardening:
+  - local mock attempts with fewer than 40 saved question answers still return
+    raw score for review,
+  - incomplete local mock sets no longer return an IELTS band estimate that could
+    be mistaken for a full 40-question exam result,
+  - complete 40-question submissions remain eligible for estimated IELTS bands.
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
@@ -1752,6 +1758,16 @@
       `estimatedBand`, which could enter history-based prediction.
     - Passed after partial practice submissions return `estimatedBand: null`
       while preserving full mock band estimates.
+- Mac incomplete-mock score-integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "incomplete mock sets"`
+    - Initially failed because a three-question local reading mock submitted all
+      returned questions correctly and still received `estimatedBand: 0`, making
+      an incomplete set look like a real 40-question IELTS result.
+    - Passed after the practice service only estimates IELTS bands when a
+      submitted attempt has 40 saved question answers; incomplete mock sets keep
+      `rawScore` but return `estimatedBand: null`.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 19 practice route tests.
 - Mac practice local-resource hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because free practice attempts did not receive imported
