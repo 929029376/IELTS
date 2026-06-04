@@ -87,6 +87,11 @@
     and speed controls remain disabled,
   - audio source URLs are served through a local asset API instead of exposing
     raw filesystem paths as browser URLs.
+- Added Mac listening practice control hardening:
+  - practice mode Pause calls the local audio element's pause control,
+  - practice mode Seek advances the local audio by 10 seconds,
+  - practice mode Speed cycles visible playback speed through focused dictation
+    rates while mock mode keeps all three controls disabled.
 - Added Mac local reading PDF viewing:
   - reading mock attempts can render the first imported PDF asset when extracted
     passage text is missing,
@@ -318,6 +323,12 @@
     - Passed after the listening practice playback-controls follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac listening practice explicit-control follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the practice-mode Pause, Seek, and Speed buttons
+      were enabled but did not operate the local audio element.
+    - Passed after Pause calls `audio.pause()`, Seek advances current time, and
+      Speed updates playback rate.
 - Mac practice-vs-mock timer follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because `ExamShell` always rendered a `Time remaining`

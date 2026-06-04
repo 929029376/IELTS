@@ -306,6 +306,32 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("tab", { name: "Section 2" })).toBeInTheDocument();
   });
 
+  it("controls local listening practice audio with Pause, Seek, and Speed buttons", () => {
+    render(
+      <ListeningExamView
+        mode="practice"
+        audioTitle="Practice audio"
+        audioPath="/Users/musheng/Desktop/IELTS/listening/practice-p1.mp3"
+        sections={[{ id: "s1", title: "Section 1", questions: <p>Questions 1-10</p> }]}
+        finalReviewSeconds={0}
+      />
+    );
+    const audio = screen.getByLabelText("Local listening audio") as HTMLAudioElement;
+    const pauseSpy = vi.spyOn(audio, "pause").mockImplementation(() => undefined);
+    audio.currentTime = 20;
+    audio.playbackRate = 1;
+
+    fireEvent.click(screen.getByRole("button", { name: "Pause" }));
+    expect(pauseSpy).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Seek" }));
+    expect(audio.currentTime).toBe(30);
+
+    fireEvent.click(screen.getByRole("button", { name: "Speed" }));
+    expect(audio.playbackRate).toBe(1.25);
+    expect(screen.getByText("Speed: 1.25x")).toBeInTheDocument();
+  });
+
   it("maps answered and marked question data to nav states", () => {
     expect(
       createQuestionNavItems([

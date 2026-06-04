@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { formatTimer } from "./questionNav";
 
 export interface ListeningSection {
@@ -26,6 +26,16 @@ function localAssetUrl(path: string): string {
   return `/api/assets/local?path=${encodeURIComponent(path)}`;
 }
 
+function nextPlaybackRate(currentRate: number): number {
+  if (currentRate < 1.25) {
+    return 1.25;
+  }
+  if (currentRate < 1.5) {
+    return 1.5;
+  }
+  return 1;
+}
+
 export function ListeningExamView({
   audioDurationSeconds,
   audioPath,
@@ -36,13 +46,39 @@ export function ListeningExamView({
   finalReviewSeconds,
   onActiveSectionChange
 }: ListeningExamViewProps) {
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [internalActiveSectionId, setInternalActiveSectionId] = useState(sections[0]?.id);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const selectedSectionId = activeSectionId ?? internalActiveSectionId;
   const activeSection = sections.find((section) => section.id === selectedSectionId) ?? sections[0];
   const isMock = mode === "mock";
   const activeAudioTitle = activeSection?.audioTitle ?? audioTitle;
   const activeAudioPath = activeSection?.audioPath ?? audioPath;
   const activeAudioDurationSeconds = activeSection?.audioDurationSeconds ?? audioDurationSeconds;
+
+  function pausePracticeAudio() {
+    if (isMock) {
+      return;
+    }
+    audioRef.current?.pause();
+  }
+
+  function seekPracticeAudio() {
+    if (isMock || !audioRef.current) {
+      return;
+    }
+    audioRef.current.currentTime += 10;
+  }
+
+  function changePracticeAudioSpeed() {
+    if (isMock || !audioRef.current) {
+      return;
+    }
+
+    const nextRate = nextPlaybackRate(audioRef.current.playbackRate || playbackRate);
+    audioRef.current.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
+  }
 
   return (
     <section className="listening-exam-view" aria-label="Listening mock view">
@@ -55,6 +91,7 @@ export function ListeningExamView({
           <p>Final review time: {formatTimer(finalReviewSeconds)}</p>
           {activeAudioPath ? (
             <audio
+              ref={audioRef}
               aria-label="Local listening audio"
               autoPlay={isMock}
               controls={!isMock}
@@ -64,14 +101,29 @@ export function ListeningExamView({
           ) : null}
         </div>
         <div className="strict-controls">
-          <button type="button" disabled={isMock} aria-label={isMock ? "Pause disabled in mock mode" : "Pause"}>
+          <button
+            type="button"
+            disabled={isMock}
+            aria-label={isMock ? "Pause disabled in mock mode" : "Pause"}
+            onClick={pausePracticeAudio}
+          >
             Pause
           </button>
-          <button type="button" disabled={isMock} aria-label={isMock ? "Seek disabled in mock mode" : "Seek"}>
+          <button
+            type="button"
+            disabled={isMock}
+            aria-label={isMock ? "Seek disabled in mock mode" : "Seek"}
+            onClick={seekPracticeAudio}
+          >
             Seek
           </button>
-          <button type="button" disabled={isMock} aria-label={isMock ? "Speed disabled in mock mode" : "Speed"}>
-            Speed
+          <button
+            type="button"
+            disabled={isMock}
+            aria-label={isMock ? "Speed disabled in mock mode" : "Speed"}
+            onClick={changePracticeAudioSpeed}
+          >
+            Speed: {playbackRate.toFixed(2).replace(/\.00$/, "")}x
           </button>
         </div>
       </div>

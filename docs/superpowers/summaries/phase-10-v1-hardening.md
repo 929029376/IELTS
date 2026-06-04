@@ -169,6 +169,11 @@
     local asset API,
   - unsupported local file extensions are rejected so the route only serves
     expected media, PDF, and image assets.
+- Added Mac listening practice explicit-control hardening:
+  - practice-mode Pause calls the local audio element's pause control,
+  - practice-mode Seek advances local audio by 10 seconds,
+  - practice-mode Speed updates playback rate and shows the active speed while
+    mock mode keeps those controls disabled.
 - Added Mac reading PDF viewing hardening:
   - reading mock attempts use imported PDF assets when structured passage text is
     missing,
@@ -956,6 +961,11 @@
     - Passed after the listening practice playback-controls follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac listening practice explicit-control hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because enabled practice controls did not pause, seek, or
+      change speed on the local audio element.
+    - Passed after wiring those buttons directly to the audio element.
 - Mac reading PDF viewing hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the active reading mock pane ignored returned PDF
