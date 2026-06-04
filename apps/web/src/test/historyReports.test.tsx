@@ -251,6 +251,38 @@ describe("history and reports preview", () => {
     expect(await screen.findByText("snapshot-2")).toBeInTheDocument();
   });
 
+  it("shows clear fallbacks when saved analytics snapshot metadata is blank", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        createdAt: "   ",
+        id: "   ",
+        payloadJson: "{}",
+        snapshotType: "dashboard_report"
+      })
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Save analytics snapshot" }));
+
+    expect(await screen.findByText("Snapshot id unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Snapshot date unavailable")).toBeInTheDocument();
+  });
+
   it("copies exported report paths to the clipboard for local file lookup", async () => {
     const exportedFiles = {
       mistakesCsv: "/Users/musheng/Desktop/IELTS/data/exports/mistakes-2026-06-04.csv",

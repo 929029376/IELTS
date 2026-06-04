@@ -200,6 +200,14 @@ function formatExportedReportFiles(files: ExportedReportFiles): ExportedReportFi
   };
 }
 
+function formatSnapshotId(id: string) {
+  return id.trim() || "Snapshot id unavailable";
+}
+
+function formatSnapshotDate(createdAt: string) {
+  return createdAt.trim().slice(0, 10) || "Snapshot date unavailable";
+}
+
 function conflictsForQuestion(review: HistoryReview, questionId: string): HistoryReviewConflict[] {
   return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
 }
@@ -347,8 +355,8 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
       {savedSnapshot ? (
         <section className="report-export-status" role="status">
           <h3>Analytics snapshot saved.</h3>
-          <p>{savedSnapshot.id}</p>
-          <p>{savedSnapshot.createdAt.slice(0, 10)}</p>
+          <p>{formatSnapshotId(savedSnapshot.id)}</p>
+          <p>{formatSnapshotDate(savedSnapshot.createdAt)}</p>
         </section>
       ) : null}
       {snapshotError ? <p className="mock-start-error">{snapshotError}</p> : null}

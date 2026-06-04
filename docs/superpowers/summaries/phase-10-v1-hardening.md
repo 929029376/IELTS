@@ -513,6 +513,11 @@
     request is in flight,
   - the button remains disabled during save so duplicate snapshot writes are
     avoided from repeated clicks.
+- Added Mac report snapshot metadata fallback hardening:
+  - saved snapshot ids are trimmed before display and fall back to
+    `Snapshot id unavailable`,
+  - saved snapshot dates are trimmed before display and fall back to
+    `Snapshot date unavailable`.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -2132,6 +2137,22 @@
     - Passed TypeScript server build.
   - `npx pnpm@9.15.4 --filter @ielts/web test`
     - Passed with all 139 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
+- Mac report snapshot metadata fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "snapshot metadata is blank"`
+    - Initially failed because blank snapshot ids and dates rendered as empty
+      status paragraphs.
+    - Passed after snapshot metadata is trimmed and replaced with explicit
+      unavailable-state copy.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Passed with all 16 history/report component tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 103 server tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server build`
+    - Passed TypeScript server build.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 140 web tests.
   - `npx pnpm@9.15.4 --filter @ielts/web build`
     - Passed TypeScript and Vite production build.
 - Mac review-attempt integrity hardening:
