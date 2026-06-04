@@ -237,7 +237,7 @@ h1 {
 
 .mock-start-panel {
   align-items: center;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(320px, 1.2fr) auto;
 }
 
 .mock-start-panel h2,
@@ -249,7 +249,38 @@ h1 {
 
 .mock-start-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
+}
+
+.practice-filter-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+}
+
+.practice-filter-grid label {
+  display: grid;
+  gap: 6px;
+}
+
+.practice-filter-grid span {
+  color: #5d6c7f;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.practice-filter-grid input,
+.practice-filter-grid select {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cbd6e3;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #20314a;
+  font-size: 14px;
 }
 
 .mock-start-actions button {
@@ -1550,6 +1581,7 @@ h1 {
   }
 
   .intensive-preview-grid,
+  .practice-filter-grid,
   .study-overview-grid,
   .reports-grid,
   .question-bank-import-grid,

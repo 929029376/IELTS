@@ -1,11 +1,13 @@
 import {
   academicReadingBandTable,
   estimateBand,
+  type FrequencyClass,
   isAnswerCorrect,
   listeningBandTable,
   normalizeAnswer
 } from "@ielts/shared";
-import type { Subject } from "@ielts/shared";
+import type { Part, Subject } from "@ielts/shared";
+import type { QuestionType } from "@ielts/shared/questionTypes";
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { createQuestionRepo } from "../db/questionRepo";
@@ -16,6 +18,7 @@ export interface PracticeQuestionResponse {
   audioDurationSeconds: number | null;
   audioPath: string | null;
   id: string;
+  frequencyClass: FrequencyClass;
   passageId: string;
   passageText: string | null;
   passageTitle: string;
@@ -32,7 +35,11 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
 
   return {
     startPractice(input: {
+      frequencyClass?: FrequencyClass;
+      mistakeLabel?: string;
       mode: "practice" | "mock" | "intensive";
+      part?: Part;
+      questionType?: QuestionType;
       subject: Subject;
     }): { attemptId: string; questions: PracticeQuestionResponse[] } {
       const practiceQuestions: PracticeQuestionResponse[] =
@@ -49,6 +56,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
                     assetPaths,
                     audioDurationSeconds: audio?.durationSeconds ?? null,
                     audioPath: audio?.filePath ?? null,
+                    frequencyClass: loaded.frequencyClass,
                     id: question.id,
                     passageId: question.passageId,
                     passageText,
@@ -63,6 +71,10 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
               })
           : questions
               .listPracticeQuestions({
+                frequencyClass: input.frequencyClass,
+                mistakeLabel: input.mistakeLabel,
+                part: input.part,
+                questionType: input.questionType,
                 subject: input.subject,
                 limit: 40
               })
@@ -70,6 +82,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
                 assetPaths: [],
                 audioDurationSeconds: null,
                 audioPath: null,
+                frequencyClass: question.frequencyClass,
                 id: question.id,
                 passageId: question.passageId,
                 passageText: null,

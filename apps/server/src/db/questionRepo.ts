@@ -57,6 +57,7 @@ export interface PracticeQuestionRecord extends QuestionRecord {
   passageTitle: string;
   subject: Subject;
   part: Part;
+  frequencyClass: FrequencyClass;
   answerKeys: AnswerKeyRecord[];
 }
 
@@ -364,7 +365,36 @@ export function createQuestionRepo(db: DatabaseHandle) {
       return row ?? null;
     },
 
-    listPracticeQuestions(input: { subject: Subject; limit: number }): PracticeQuestionRecord[] {
+    listPracticeQuestions(input: {
+      frequencyClass?: FrequencyClass;
+      limit: number;
+      mistakeLabel?: string;
+      part?: Part;
+      questionType?: QuestionType;
+      subject: Subject;
+    }): PracticeQuestionRecord[] {
+      const filters = ["p.subject = @subject"];
+      if (input.part) {
+        filters.push("p.part = @part");
+      }
+      if (input.frequencyClass) {
+        filters.push("p.frequency_class = @frequencyClass");
+      }
+      if (input.questionType) {
+        filters.push("q.question_type = @questionType");
+      }
+      if (input.mistakeLabel) {
+        filters.push(`
+          EXISTS (
+            SELECT 1
+            FROM attempt_answers aa_filter
+            JOIN mistake_labels ml_filter ON ml_filter.attempt_answer_id = aa_filter.id
+            WHERE aa_filter.question_id = q.id
+              AND ml_filter.label = @mistakeLabel
+          )
+        `);
+      }
+
       const rows = db
         .prepare(
           `
@@ -377,15 +407,16 @@ export function createQuestionRepo(db: DatabaseHandle) {
             q.answer_rules_json AS answerRulesJson,
             p.title AS passageTitle,
             p.subject,
-            p.part
+            p.part,
+            p.frequency_class AS frequencyClass
           FROM questions q
           JOIN passages p ON p.id = q.passage_id
-          WHERE p.subject = ?
+          WHERE ${filters.join(" AND ")}
           ORDER BY p.part ASC, q.question_number ASC
-          LIMIT ?
+          LIMIT @limit
         `
         )
-        .all(input.subject, input.limit) as Array<
+        .all(input) as Array<
         Omit<PracticeQuestionRecord, "answerRules" | "answerKeys"> & { answerRulesJson: string }
       >;
 
@@ -399,6 +430,7 @@ export function createQuestionRepo(db: DatabaseHandle) {
         passageTitle: row.passageTitle,
         subject: row.subject,
         part: row.part,
+        frequencyClass: row.frequencyClass,
         answerKeys: listAnswerKeys(row.id)
       }));
     },
@@ -416,7 +448,8 @@ export function createQuestionRepo(db: DatabaseHandle) {
             q.answer_rules_json AS answerRulesJson,
             p.title AS passageTitle,
             p.subject,
-            p.part
+            p.part,
+            p.frequency_class AS frequencyClass
           FROM questions q
           JOIN passages p ON p.id = q.passage_id
           WHERE q.id = ?
@@ -440,6 +473,7 @@ export function createQuestionRepo(db: DatabaseHandle) {
         passageTitle: row.passageTitle,
         subject: row.subject,
         part: row.part,
+        frequencyClass: row.frequencyClass,
         answerKeys: listAnswerKeys(row.id)
       };
     },

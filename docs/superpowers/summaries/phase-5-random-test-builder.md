@@ -47,6 +47,14 @@
 - Wired `POST /api/practice/start` in `mock` mode to the frequency-weighted full-set
   builder so real mock attempts use one selected passage per IELTS part instead
   of taking the first sequential questions from the database.
+- Wired `POST /api/practice/start` in `practice` mode to the planned practice
+  filters:
+  - part,
+  - frequency class,
+  - question type,
+  - historical mistake label.
+- Added Mac dashboard practice filter controls for part, frequency, question
+  type, and mistake label before starting reading or listening practice.
 
 ## Verification Evidence
 
@@ -70,6 +78,21 @@
       builder.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts src/test/testBuilder.test.ts src/test/studyRoutes.test.ts`
     - Practice routes, test builder, and study overview tests passed together.
+- Practice-filter API and UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because practice starts returned all subject questions
+      even when part, frequency-class, question-type, or mistake-label filters
+      were supplied.
+    - Passed after filtering practice questions in the question repository and
+      route/service layers.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the Mac dashboard did not expose the practice
+      filters.
+    - Passed after adding filter controls and sending selected filters only when
+      starting `practice` mode.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the practice-filter follow-up, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - `npx pnpm@9.15.4 test`
   - Shared: 3 tests passed.
   - Server: 18 tests passed.

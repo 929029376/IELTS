@@ -4,8 +4,60 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { openDatabase } from "../db/database";
 import { migrate } from "../db/migrate";
+import { createAttemptRepo } from "../db/attemptRepo";
 import { createQuestionRepo } from "../db/questionRepo";
 import { buildServer } from "../server";
+
+function seedPracticeFilterCandidates(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  function createCandidate(input: {
+    frequencyClass: "high" | "low" | "medium";
+    part: "P1" | "P2";
+    questionType: "fill_blank" | "single_choice";
+    title: string;
+  }) {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: `seed/${input.title}.json`,
+      checksum: `practice-filter-${input.title}`,
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "reading",
+      part: input.part,
+      title: input.title,
+      frequencyClass: input.frequencyClass
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: input.questionType,
+      prompt: `${input.title} prompt`,
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["answer"],
+      answerSentence: `${input.title} evidence.`,
+      explanation: `${input.title} explanation.`,
+      synonyms: []
+    });
+  }
+
+  try {
+    createCandidate({ frequencyClass: "high", part: "P1", questionType: "single_choice", title: "Wrong Part" });
+    createCandidate({ frequencyClass: "medium", part: "P2", questionType: "single_choice", title: "Wrong Frequency" });
+    createCandidate({ frequencyClass: "high", part: "P2", questionType: "fill_blank", title: "Wrong Type" });
+    createCandidate({ frequencyClass: "high", part: "P2", questionType: "single_choice", title: "Target Practice" });
+  } finally {
+    db.close();
+  }
+}
 
 function seedFortyQuestions(databasePath: string) {
   const db = openDatabase(databasePath);
@@ -44,6 +96,67 @@ function seedFortyQuestions(databasePath: string) {
         synonyms: []
       });
     }
+  } finally {
+    db.close();
+  }
+}
+
+function seedPracticeMistakeLabelCandidates(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+  const attempts = createAttemptRepo(db);
+
+  function createCandidate(title: string) {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: `seed/${title}.json`,
+      checksum: `mistake-filter-${title}`,
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "reading",
+      part: "P2",
+      title,
+      frequencyClass: "high"
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "fill_blank",
+      prompt: `${title} prompt`,
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["answer"],
+      answerSentence: `${title} evidence.`,
+      explanation: `${title} explanation.`,
+      synonyms: []
+    });
+    return question;
+  }
+
+  try {
+    const targetQuestion = createCandidate("Target Mistake Label Practice");
+    createCandidate("Unlabelled Practice");
+    const attempt = attempts.createAttempt({
+      mode: "practice",
+      subject: "reading",
+      startedAt: "2026-06-04T08:00:00.000Z"
+    });
+    const answer = attempts.saveAnswer({
+      attemptId: attempt.id,
+      isCorrect: false,
+      markedForReview: false,
+      normalizedAnswer: "wrong",
+      questionId: targetQuestion.id,
+      rawAnswer: "wrong",
+      timeSpentSeconds: 15
+    });
+    attempts.addMistakeLabel({ attemptAnswerId: answer.id, label: "定位失败" });
   } finally {
     db.close();
   }
@@ -186,6 +299,73 @@ function seedMockCandidatesWithAssets(databasePath: string) {
 }
 
 describe("practice routes", () => {
+  it("filters practice starts by part, frequency class, and question type", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-filter-routes-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedPracticeFilterCandidates(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: {
+          frequencyClass: "high",
+          mode: "practice",
+          part: "P2",
+          questionType: "single_choice",
+          subject: "reading"
+        }
+      });
+      expect(start.statusCode).toBe(200);
+      expect(start.json()).toMatchObject({
+        questions: [
+          expect.objectContaining({
+            frequencyClass: "high",
+            part: "P2",
+            passageTitle: "Target Practice",
+            questionType: "single_choice"
+          })
+        ]
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("filters practice starts by historical mistake label", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-mistake-filter-routes-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedPracticeMistakeLabelCandidates(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: {
+          mistakeLabel: "定位失败",
+          mode: "practice",
+          subject: "reading"
+        }
+      });
+      expect(start.statusCode).toBe(200);
+      expect(start.json()).toMatchObject({
+        questions: [
+          expect.objectContaining({
+            passageTitle: "Target Mistake Label Practice"
+          })
+        ]
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("starts, answers, submits, reviews, and reloads a 40-question practice attempt", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-routes-"));
     const databasePath = join(tempDir, "ielts.db");

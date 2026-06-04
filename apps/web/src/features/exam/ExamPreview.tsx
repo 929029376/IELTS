@@ -58,9 +58,54 @@ interface ExamPreviewProps {
   onMockSubmitted?: () => void;
 }
 
-async function startAttempt(mode: "mock" | "practice", subject: "listening" | "reading"): Promise<StartedMock> {
+interface PracticeFilters {
+  frequencyClass: "all" | "high" | "medium" | "low" | "unknown";
+  mistakeLabel: string;
+  part: "all" | "P1" | "P2" | "P3" | "P4";
+  questionType: "all" | QuestionType;
+}
+
+const defaultPracticeFilters: PracticeFilters = {
+  frequencyClass: "all",
+  mistakeLabel: "",
+  part: "all",
+  questionType: "all"
+};
+
+function buildStartPayload(
+  mode: "mock" | "practice",
+  subject: "listening" | "reading",
+  filters: PracticeFilters
+) {
+  if (mode === "mock") {
+    return { mode, subject };
+  }
+
+  const payload: Record<string, string> = {};
+  if (filters.frequencyClass !== "all") {
+    payload.frequencyClass = filters.frequencyClass;
+  }
+  if (filters.mistakeLabel.trim()) {
+    payload.mistakeLabel = filters.mistakeLabel.trim();
+  }
+  payload.mode = mode;
+  if (filters.part !== "all") {
+    payload.part = filters.part;
+  }
+  if (filters.questionType !== "all") {
+    payload.questionType = filters.questionType;
+  }
+  payload.subject = subject;
+  return payload;
+}
+
+async function startAttempt(
+  mode: "mock" | "practice",
+  subject: "listening" | "reading",
+  filters: PracticeFilters
+): Promise<StartedMock> {
   const response = await fetch("/api/practice/start", {
-    body: JSON.stringify({ mode, subject }),
+    body: JSON.stringify(buildStartPayload(mode, subject, filters)),
     headers: {
       "Content-Type": "application/json"
     },
@@ -90,6 +135,7 @@ function renderReviewEvidence(item: MockReviewItem) {
 export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [practiceFilters, setPracticeFilters] = useState<PracticeFilters>(defaultPracticeFilters);
   const [isStarting, setIsStarting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
@@ -106,7 +152,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setScoreReport(null);
     setAnswers({});
     try {
-      setActiveMock(await startAttempt(mode, subject));
+      setActiveMock(await startAttempt(mode, subject, practiceFilters));
     } catch {
       setStartError(`Could not start ${subjectLabel(subject)} ${mode} from the local question bank.`);
     } finally {
@@ -204,6 +250,80 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
         <div>
           <p className="eyebrow">Mock exam center</p>
           <h2>Start from local question bank</h2>
+        </div>
+        <div className="practice-filter-grid" aria-label="Practice filters">
+          <label>
+            <span>Practice part</span>
+            <select
+              aria-label="Practice part"
+              onChange={(event) =>
+                setPracticeFilters((current) => ({ ...current, part: event.target.value as PracticeFilters["part"] }))
+              }
+              value={practiceFilters.part}
+            >
+              <option value="all">All parts</option>
+              <option value="P1">P1</option>
+              <option value="P2">P2</option>
+              <option value="P3">P3</option>
+              <option value="P4">P4</option>
+            </select>
+          </label>
+          <label>
+            <span>Practice frequency</span>
+            <select
+              aria-label="Practice frequency"
+              onChange={(event) =>
+                setPracticeFilters((current) => ({
+                  ...current,
+                  frequencyClass: event.target.value as PracticeFilters["frequencyClass"]
+                }))
+              }
+              value={practiceFilters.frequencyClass}
+            >
+              <option value="all">All frequencies</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </label>
+          <label>
+            <span>Practice question type</span>
+            <select
+              aria-label="Practice question type"
+              onChange={(event) =>
+                setPracticeFilters((current) => ({
+                  ...current,
+                  questionType: event.target.value as PracticeFilters["questionType"]
+                }))
+              }
+              value={practiceFilters.questionType}
+            >
+              <option value="all">All question types</option>
+              <option value="fill_blank">Fill blank</option>
+              <option value="single_choice">Single choice</option>
+              <option value="multiple_choice">Multiple choice</option>
+              <option value="matching">Matching</option>
+              <option value="true_false_not_given">True/false/not given</option>
+              <option value="yes_no_not_given">Yes/no/not given</option>
+              <option value="short_answer">Short answer</option>
+              <option value="table_completion">Table completion</option>
+              <option value="form_completion">Form completion</option>
+              <option value="flow_completion">Flow completion</option>
+              <option value="map_label">Map label</option>
+            </select>
+          </label>
+          <label>
+            <span>Practice mistake label</span>
+            <input
+              aria-label="Practice mistake label"
+              onChange={(event) =>
+                setPracticeFilters((current) => ({ ...current, mistakeLabel: event.target.value }))
+              }
+              placeholder="定位失败"
+              value={practiceFilters.mistakeLabel}
+            />
+          </label>
         </div>
         <div className="mock-start-actions">
           <button disabled={isStarting} onClick={() => void handleStartAttempt("mock", "reading")} type="button">

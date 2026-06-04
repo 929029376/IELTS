@@ -87,6 +87,11 @@
 - Added frontend free-practice controls in the Mock Exam Center so the dashboard
   can start reading or listening practice attempts through the same local
   practice API without entering mock mode.
+- Added Mac practice-filter hardening:
+  - practice starts can filter by part, frequency class, question type, and
+    historical mistake label,
+  - the dashboard exposes those filters before starting reading or listening
+    practice.
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
@@ -272,6 +277,20 @@
       shell with `Submit practice`.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the free-practice UI follow-up, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Mac practice-filter follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because supplied practice filters were ignored by the
+      practice start API.
+    - Passed after adding part, frequency-class, question-type, and mistake-label
+      filtering to practice starts.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the Mac dashboard had no filter controls for free
+      practice starts.
+    - Passed after adding part, frequency, question-type, and mistake-label
+      controls to the dashboard practice starter.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the practice-filter follow-up, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - Browser verification:
   - Opened `http://127.0.0.1:5173/` in the in-app browser.

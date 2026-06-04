@@ -209,6 +209,10 @@ describe("exam simulation components", () => {
 
     render(<ExamPreview />);
 
+    fireEvent.change(screen.getByLabelText("Practice part"), { target: { value: "P2" } });
+    fireEvent.change(screen.getByLabelText("Practice frequency"), { target: { value: "high" } });
+    fireEvent.change(screen.getByLabelText("Practice question type"), { target: { value: "single_choice" } });
+    fireEvent.change(screen.getByLabelText("Practice mistake label"), { target: { value: "定位失败" } });
     fireEvent.click(screen.getByRole("button", { name: "Start reading practice" }));
 
     expect(await screen.findByText("Loaded local reading practice")).toBeInTheDocument();
@@ -219,7 +223,14 @@ describe("exam simulation components", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/practice/start",
       expect.objectContaining({
-        body: JSON.stringify({ mode: "practice", subject: "reading" }),
+        body: JSON.stringify({
+          frequencyClass: "high",
+          mistakeLabel: "定位失败",
+          mode: "practice",
+          part: "P2",
+          questionType: "single_choice",
+          subject: "reading"
+        }),
         method: "POST"
       })
     );

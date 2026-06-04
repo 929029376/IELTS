@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { frequencyClassSchema, partSchema, questionTypeSchema } from "@ielts/shared";
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { createPracticeService } from "../services/practiceService";
@@ -7,7 +8,11 @@ import type { TestBuilderOptions } from "../services/testBuilder";
 import type { SyncService } from "../sync/syncService";
 
 const startPracticeSchema = z.object({
+  frequencyClass: frequencyClassSchema.optional(),
+  mistakeLabel: z.string().min(1).optional(),
   mode: z.enum(["practice", "mock", "intensive"]),
+  part: partSchema.optional(),
+  questionType: questionTypeSchema.optional(),
   subject: z.enum(["listening", "reading"])
 });
 

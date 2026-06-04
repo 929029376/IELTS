@@ -31,6 +31,11 @@
   - listening practice starts through `POST /api/practice/start` with
     `mode: "practice"`,
   - loaded practice attempts are labelled separately from mock exams in the UI.
+- Added practice-start filtering:
+  - part,
+  - frequency class,
+  - question type,
+  - historical mistake label.
 - Added question navigation states:
   - unanswered,
   - answered,
@@ -75,6 +80,20 @@
       practice.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the Mac free-practice UI follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
+- Mac practice-filter follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because `POST /api/practice/start` ignored part,
+      frequency-class, question-type, and mistake-label practice filters.
+    - Passed after wiring those filters through the route schema, practice
+      service, and question repository.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the dashboard had no practice filter controls.
+    - Passed after adding Mac dashboard controls for part, frequency, question
+      type, and mistake label and sending those filters with practice starts.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the Mac practice-filter follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
 
