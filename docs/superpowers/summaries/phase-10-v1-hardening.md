@@ -167,6 +167,11 @@
   - mistake chips with whitespace-only labels now render as `Unlabeled mistake`,
   - the weakest-question-type field falls back to `No data` when report data is
     blank.
+- Added Mac report export path fallback hardening:
+  - exported mock JSON, mock CSV, and mistakes CSV paths are trimmed before
+    rendering,
+  - whitespace-only exported paths now show explicit unavailable-path messages,
+  - copying report paths uses the same fallback strings instead of blank lines.
 - Added Mac study queue title fallback hardening:
   - recommended mock passages with whitespace-only imported titles now render as
     `Untitled passage`,
@@ -1275,6 +1280,12 @@
       weakest-type labels rendered as blank report content.
     - Passed after trimming report analytics labels and falling back to
       `Unknown accuracy group`, `Unlabeled mistake`, and `No data`.
+- Mac report export path fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "exported report paths are blank"`
+    - Initially failed because whitespace-only exported file paths rendered as
+      empty report rows and copied as blank clipboard lines.
+    - Passed after trimming exported report paths and falling back to explicit
+      unavailable-path messages for rendering and copy.
 - Mac study queue title fallback hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/studyOverviewPanel.test.tsx`
     - Initially failed because whitespace-only recommended mock passage titles

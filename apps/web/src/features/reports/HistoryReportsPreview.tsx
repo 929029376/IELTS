@@ -159,6 +159,14 @@ function formatWeakestQuestionType(value: string) {
   return value.trim() || "No data";
 }
 
+function formatExportedReportFiles(files: ExportedReportFiles): ExportedReportFiles {
+  return {
+    mistakesCsv: files.mistakesCsv.trim() || "Mistakes CSV path unavailable",
+    mockCsv: files.mockCsv.trim() || "Mock CSV path unavailable",
+    mockJson: files.mockJson.trim() || "Mock JSON path unavailable"
+  };
+}
+
 function conflictsForQuestion(review: HistoryReview, questionId: string): HistoryReviewConflict[] {
   return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
 }
@@ -237,7 +245,8 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
       if (!navigator.clipboard) {
         throw new Error("Clipboard unavailable");
       }
-      await navigator.clipboard.writeText([exportedFiles.mockJson, exportedFiles.mockCsv, exportedFiles.mistakesCsv].join("\n"));
+      const files = formatExportedReportFiles(exportedFiles);
+      await navigator.clipboard.writeText([files.mockJson, files.mockCsv, files.mistakesCsv].join("\n"));
       setCopyStatus("Report paths copied.");
     } catch {
       setExportError("Could not copy report paths.");
@@ -281,9 +290,9 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
         <section className="report-export-status" role="status">
           <h3>Reports exported</h3>
           <ul>
-            <li>{exportedFiles.mockJson}</li>
-            <li>{exportedFiles.mockCsv}</li>
-            <li>{exportedFiles.mistakesCsv}</li>
+            <li>{formatExportedReportFiles(exportedFiles).mockJson}</li>
+            <li>{formatExportedReportFiles(exportedFiles).mockCsv}</li>
+            <li>{formatExportedReportFiles(exportedFiles).mistakesCsv}</li>
           </ul>
           <div className="report-export-actions">
             <button onClick={() => void copyReportPaths()} type="button">

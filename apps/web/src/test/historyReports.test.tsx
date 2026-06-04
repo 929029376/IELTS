@@ -182,6 +182,49 @@ describe("history and reports preview", () => {
     expect(await screen.findByText("Report paths copied.")).toBeInTheDocument();
   });
 
+  it("shows clear fallbacks when exported report paths are blank", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        mistakesCsv: "   ",
+        mockCsv: "",
+        mockJson: "   "
+      })
+    }));
+    const writeTextMock = vi.fn(async () => undefined);
+    vi.stubGlobal("fetch", fetchMock);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: writeTextMock }
+    });
+
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export mock report" }));
+
+    expect(await screen.findByText("Mock JSON path unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Mock CSV path unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Mistakes CSV path unavailable")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy report paths" }));
+
+    expect(writeTextMock).toHaveBeenCalledWith(
+      ["Mock JSON path unavailable", "Mock CSV path unavailable", "Mistakes CSV path unavailable"].join("\n")
+    );
+  });
+
   it("reopens a completed attempt from history and renders detailed review evidence", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/practice/attempt-1/review") {
