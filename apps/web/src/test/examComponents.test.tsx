@@ -64,6 +64,11 @@ describe("exam simulation components", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Submit test" }));
+    fireEvent.click(screen.getByRole("button", { name: "Return to test" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Submit test" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit anyway" }));
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });

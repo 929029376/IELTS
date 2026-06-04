@@ -232,6 +232,9 @@
     review buttons,
   - selecting a warning question jumps back to that question and closes the
     warning so the answer can be fixed before submission.
+- Added Mac exam submit-warning cancel hardening:
+  - submit confirmation now has a `Return to test` action,
+  - returning to the test closes the warning without submitting the attempt.
 - Added submitted-mock review hardening:
   - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
   - the Mac dashboard renders correctness, user answer, accepted answer, answer
@@ -1353,6 +1356,12 @@
       plain text and could not return the user to the matching question.
     - Passed after rendering actionable warning question buttons that call the
       existing question-selection handler and close the warning.
+- Mac exam submit-warning cancel hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "renders timer"`
+    - Initially failed because the submit warning had no non-submit action for
+      returning to the exam after opening the confirmation.
+    - Passed after adding `Return to test`, which closes the warning without
+      calling the submit handler.
 
 ## Remaining V1 Gaps
 

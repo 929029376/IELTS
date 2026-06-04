@@ -203,6 +203,9 @@ export function ExamShell({
               ))}
             </p>
           ) : null}
+          <button type="button" onClick={() => setShowWarning(false)}>
+            Return to test
+          </button>
           <button type="button" onClick={() => submit("manual")}>
             Submit anyway
           </button>
