@@ -103,6 +103,8 @@
 - Added frontend free-practice controls in the Mock Exam Center so the dashboard
   can start reading or listening practice attempts through the same local
   practice API without entering mock mode.
+- Removed the Mock Exam Center's old static sample exam so the main dashboard no
+  longer shows fixed sample content before a real local attempt is started.
 - Added Mac listening practice playback hardening so listening practice passes
   the active practice mode into the player, keeping Pause, Seek, Speed, and the
   native local audio controls available for self-paced work.

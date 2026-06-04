@@ -96,6 +96,9 @@
     practice attempt,
   - user highlights render separately from answer-sentence evidence highlights,
   - highlights can be cleared from the reading toolbar.
+- Removed the static sample exam from the dashboard Mock Exam Center so the
+  primary exam surface only renders real local attempts started from the question
+  bank.
 - Added unit coverage for:
   - shell controls,
   - timer auto-submit,
@@ -271,6 +274,17 @@
       countdown, even for free practice mode.
     - Passed after adding a timer mode so mock exams keep strict countdown and
       practice sessions show elapsed time without automatic timeout submission.
+- Mac static-sample removal follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because `ExamPreview` rendered the fixed
+      `The History of Tea` sample exam before any local attempt had been started.
+    - Passed after removing the static sample exam and keeping the Mock Exam
+      Center focused on local question-bank attempts.
+  - `npx pnpm@9.15.4 --filter @ielts/web exec playwright test -g "renders the local IELTS dashboard"`
+    - Initially failed because the Playwright dashboard anchor still expected
+      the removed static sample exam and its fixed submit flow.
+    - Passed after updating the e2e anchor to verify the real starter-only
+      initial state.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.
@@ -280,10 +294,9 @@
 
 ## Notes
 
-- This phase delivers the reusable exam UI shell and dashboard preview. The shell now sits on top of the Phase 3 practice engine for started local mock attempts.
-- A static sample remains below the live mock panel as a visual preview, while the
-  Mock Exam Center can now start, answer, submit, score, and review a local mock
-  attempt through the API.
+- This phase delivers the reusable exam UI shell. The dashboard Mock Exam Center
+  now renders that shell only for started local mock or practice attempts backed
+  by the Phase 3 practice engine.
 - The listening player intentionally does not expose native audio controls in mock mode. The visible pause, seek, and speed controls are disabled to make the restriction explicit.
 
 ## Next Phase

@@ -14,13 +14,9 @@ test("renders the local IELTS dashboard and exam preview across desktop widths",
     await expect(page.getByRole("region", { name: "Local study queue" })).toBeVisible();
     await expect(page.getByRole("region", { name: "IELTS-style exam preview" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Start reading mock" })).toBeVisible();
-    await expect(page.getByText("The History of Tea")).toBeVisible();
-    await expect(page.getByText("60:00")).toBeVisible();
-    await page.getByRole("button", { name: "Submit test" }).click();
-    await page.getByRole("button", { name: "Submit anyway" }).click();
-    const scoreReport = page.getByRole("region", { name: "Score report" });
-    await expect(scoreReport).toBeVisible();
-    await expect(scoreReport.getByText("1/40", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Mock exam starter")).toBeVisible();
+    await expect(page.getByText("The History of Tea")).not.toBeVisible();
+    await expect(page.getByRole("button", { name: "Submit test" })).not.toBeVisible();
   }
 });
 

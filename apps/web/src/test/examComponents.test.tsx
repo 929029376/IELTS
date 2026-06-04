@@ -191,6 +191,14 @@ describe("exam simulation components", () => {
     expect(screen.getByText(/IELTS band scores are estimates/i)).toBeInTheDocument();
   });
 
+  it("does not render a static sample exam before a local attempt is started", () => {
+    render(<ExamPreview />);
+
+    expect(screen.getByLabelText("Mock exam starter")).toBeInTheDocument();
+    expect(screen.queryByText("The History of Tea")).not.toBeInTheDocument();
+    expect(screen.queryByText("Reading Mock Test")).not.toBeInTheDocument();
+  });
+
   it("renders practice accuracy without an IELTS band estimate", () => {
     render(<ScoreReport mode="practice" subject="reading" rawScore={3} estimatedBand={4} totalQuestions={4} />);
 
