@@ -97,6 +97,13 @@
   - Result: listening P4, high frequency, title `Underwater Archaeological Sites`, `needs_review`.
   - Imported `reading/ReadingPractice/PDF/167. P3 - Sign, Baby, Sign! 美国手语.pdf`.
   - Result: reading P3, English title `Sign, Baby, Sign!`, Chinese title `美国手语`, `needs_review`.
+- Mac import refresh follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because a successful Question Bank import updated only
+      the import status text; the local study queue and intensive preview stayed
+      on their pre-import data.
+    - Passed after successful imports notify the dashboard to refresh local
+      study overview and intensive study preview data.
 
 ## Notes
 

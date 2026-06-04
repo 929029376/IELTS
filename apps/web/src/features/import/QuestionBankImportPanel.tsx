@@ -41,7 +41,7 @@ function toFrequencyPayload(row: FrequencyCorrectionRow) {
   };
 }
 
-export function QuestionBankImportPanel() {
+export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete?: () => void }) {
   const [listeningDir, setListeningDir] = useState("/Users/musheng/Desktop/IELTS/listening");
   const [readingDir, setReadingDir] = useState("/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF");
   const [frequencyFilePath, setFrequencyFilePath] = useState("");
@@ -55,6 +55,7 @@ export function QuestionBankImportPanel() {
     try {
       const result = await postImport(endpoint, payload);
       setStatus(`Imported ${result.importedCount} item into the local question bank.`);
+      onImportComplete?.();
     } catch (error) {
       setStatus(error instanceof Error ? error.message : `Importing ${label} failed.`);
     } finally {

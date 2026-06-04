@@ -264,6 +264,140 @@ describe("dashboard shell", () => {
     expect(screen.getByText("This sentence directly proves the claim.")).toBeInTheDocument();
   });
 
+  it("refreshes local study overview and intensive preview after importing question-bank material", async () => {
+    let imported = false;
+    let overviewCalls = 0;
+    let intensiveCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/reports/history") {
+        return { ok: true, json: async () => [] };
+      }
+      if (url === "/api/reports/analytics") {
+        return { ok: true, json: async () => ({ byPart: {}, byQuestionType: {}, mistakeLabels: [] }) };
+      }
+      if (url === "/api/reports/dashboard") {
+        return {
+          ok: true,
+          json: async () => ({
+            latestMockScore: null,
+            predictedListening: "Need history",
+            predictedReading: "Need history",
+            recommendedNextPractice: "Import a set to begin",
+            weakestQuestionType: null
+          })
+        };
+      }
+      if (url === "/api/hardening/status") {
+        return {
+          ok: true,
+          json: async () => ({
+            backupReminder: { latestBackupAt: null, reason: null, shouldRemind: false, submittedAttemptCount: 0 },
+            importFailures: { byStatus: {}, sources: [], totalUnresolved: 0 },
+            questionBankCompleteness: {
+              issueCounts: {
+                missingAnswerKey: 0,
+                missingAnswerSentence: 0,
+                missingAudio: 0,
+                missingExplanation: 0,
+                missingFrequencyEntry: 0,
+                missingListeningCues: 0,
+                missingTranscript: 0
+              },
+              passages: [],
+              totalPassages: 0
+            }
+          })
+        };
+      }
+      if (url === "/api/study/overview") {
+        overviewCalls += 1;
+        return {
+          ok: true,
+          json: async () => ({
+            readiness: { listeningFullMockReady: false, readingFullMockReady: imported },
+            recommendedMockSets: {
+              listening: null,
+              reading: imported
+                ? {
+                    passages: [
+                      {
+                        frequencyClass: "high",
+                        id: "reading-imported-1",
+                        part: "P2",
+                        selectionWeight: 5,
+                        subject: "reading",
+                        title: "Imported Reading Refresh"
+                      }
+                    ],
+                    subject: "reading"
+                  }
+                : null
+            },
+            subjects: {
+              listening: {
+                cueCount: 0,
+                frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: 0,
+                questionCount: 0
+              },
+              reading: {
+                cueCount: 0,
+                frequency: { high: imported ? 1 : 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: imported ? 1 : 0,
+                questionCount: imported ? 1 : 0
+              }
+            }
+          })
+        };
+      }
+      if (url === "/api/study/intensive") {
+        intensiveCalls += 1;
+        return {
+          ok: true,
+          json: async () =>
+            imported
+              ? {
+                  listening: null,
+                  reading: {
+                    answerSentence: "Imported Evidence Sentence",
+                    explanation: "Imported evidence supports the answer.",
+                    keywords: ["evidence"],
+                    passageText: "Imported Evidence Sentence supports the answer.",
+                    passageTitle: "Imported Reading Refresh",
+                    questionPrompt: "Find the imported evidence.",
+                    synonyms: ["supports = proves"]
+                  }
+                }
+              : { listening: null, reading: null }
+        };
+      }
+      if (url === "/api/import/reading-directory") {
+        imported = true;
+        return {
+          ok: true,
+          json: async () => ({ importedCount: 1 })
+        };
+      }
+      return { ok: false, json: async () => ({}) };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("No local reading passage")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Import reading directory" }));
+
+    expect(await screen.findByText("Imported 1 item into the local question bank.")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(overviewCalls).toBe(2);
+      expect(intensiveCalls).toBe(2);
+    });
+    expect(screen.getByText("Imported Reading Refresh")).toBeInTheDocument();
+    expect(screen.getByText("Find the imported evidence.")).toBeInTheDocument();
+    expect(screen.getByText("Imported Evidence Sentence")).toHaveClass("ielts-highlight");
+  });
+
   it("refreshes dashboard history and prediction after submitting a local mock", async () => {
     let dashboardCalls = 0;
     let mockSubmitted = false;

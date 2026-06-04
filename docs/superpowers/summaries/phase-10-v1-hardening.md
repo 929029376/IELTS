@@ -600,6 +600,12 @@
       did not highlight imported passage text such as `Answer Sentence`.
     - Passed after the close-reading highlighter started matching answer
       sentence and keyword targets without requiring identical casing.
+- Mac post-import dashboard refresh hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because imported question-bank material did not refresh
+      the Mac study overview or intensive preview without a page reload.
+    - Passed after the import panel notifies the dashboard after successful
+      imports and the intensive preview refetches with the same refresh signal.
 
 ## Remaining V1 Gaps
 

@@ -169,6 +169,13 @@
       exact casing between imported passage text and stored evidence strings.
     - Passed after matching highlight targets case-insensitively while rendering
       the original passage text.
+- Mac import-to-intensive refresh follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because `/api/study/intensive` was fetched only once, so
+      newly imported reading material did not appear in close reading until a
+      page reload.
+    - Passed after intensive preview refetches whenever dashboard local data is
+      refreshed.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

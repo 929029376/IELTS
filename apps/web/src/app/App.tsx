@@ -299,7 +299,7 @@ function useStudyOverview(refreshVersion: number): StudyOverviewView {
   return overview;
 }
 
-function useIntensiveStudyPreview(): IntensiveStudyPreviewView | undefined {
+function useIntensiveStudyPreview(refreshVersion: number): IntensiveStudyPreviewView | undefined {
   const [preview, setPreview] = useState<IntensiveStudyPreviewView | undefined>(undefined);
 
   useEffect(() => {
@@ -324,7 +324,7 @@ function useIntensiveStudyPreview(): IntensiveStudyPreviewView | undefined {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [refreshVersion]);
 
   return preview;
 }
@@ -332,7 +332,7 @@ function useIntensiveStudyPreview(): IntensiveStudyPreviewView | undefined {
 export function App() {
   const [dataRefreshVersion, setDataRefreshVersion] = useState(0);
   const dashboardData = useDashboardData(dataRefreshVersion);
-  const intensiveStudyPreview = useIntensiveStudyPreview();
+  const intensiveStudyPreview = useIntensiveStudyPreview(dataRefreshVersion);
   const studyOverview = useStudyOverview(dataRefreshVersion);
   const desktopRuntimeStatus = useDesktopRuntimeStatus();
 
@@ -391,7 +391,7 @@ export function App() {
 
         <StudyOverviewPanel overview={studyOverview} />
         <ExamPreview onMockSubmitted={() => setDataRefreshVersion((version) => version + 1)} />
-        <QuestionBankImportPanel />
+        <QuestionBankImportPanel onImportComplete={() => setDataRefreshVersion((version) => version + 1)} />
         <IntensivePracticePreview preview={intensiveStudyPreview} />
         <HistoryReportsPreview
           analytics={dashboardData.analytics}
