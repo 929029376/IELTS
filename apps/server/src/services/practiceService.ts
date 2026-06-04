@@ -12,8 +12,12 @@ import { createQuestionRepo } from "../db/questionRepo";
 import { buildFullListeningSet, buildFullReadingSet, type TestBuilderOptions } from "./testBuilder";
 
 export interface PracticeQuestionResponse {
+  assetPaths: string[];
+  audioDurationSeconds: number | null;
+  audioPath: string | null;
   id: string;
   passageId: string;
+  passageText: string | null;
   passageTitle: string;
   questionNumber: number;
   questionType: string;
@@ -31,24 +35,51 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
       mode: "practice" | "mock" | "intensive";
       subject: Subject;
     }): { attemptId: string; questions: PracticeQuestionResponse[] } {
-      const practiceQuestions =
+      const practiceQuestions: PracticeQuestionResponse[] =
         input.mode === "mock"
           ? (input.subject === "listening" ? buildFullListeningSet(db, options) : buildFullReadingSet(db, options))
               .passages.flatMap((passage) => {
                 const loaded = questions.getPassageWithQuestions(passage.id);
+                const assets = loaded ? questions.listSourceAssets(loaded.sourceId) : [];
+                const audio = loaded ? questions.getFirstListeningAudio(loaded.id) : null;
+                const passageText = assets.find((asset) => asset.textContent)?.textContent ?? null;
+                const assetPaths = assets.flatMap((asset) => (asset.filePath ? [asset.filePath] : []));
                 return (
-                  loaded?.questions.map((question) => ({
-                    ...question,
+                  loaded?.questions.map((question): PracticeQuestionResponse => ({
+                    assetPaths,
+                    audioDurationSeconds: audio?.durationSeconds ?? null,
+                    audioPath: audio?.filePath ?? null,
+                    id: question.id,
+                    passageId: question.passageId,
+                    passageText,
                     passageTitle: loaded.title,
-                    subject: loaded.subject,
+                    questionNumber: question.questionNumber,
+                    questionType: question.questionType,
+                    prompt: question.prompt,
+                    answerRules: question.answerRules,
                     part: loaded.part
                   })) ?? []
                 );
               })
-          : questions.listPracticeQuestions({
-              subject: input.subject,
-              limit: 40
-            });
+          : questions
+              .listPracticeQuestions({
+                subject: input.subject,
+                limit: 40
+              })
+              .map((question): PracticeQuestionResponse => ({
+                assetPaths: [],
+                audioDurationSeconds: null,
+                audioPath: null,
+                id: question.id,
+                passageId: question.passageId,
+                passageText: null,
+                passageTitle: question.passageTitle,
+                questionNumber: question.questionNumber,
+                questionType: question.questionType,
+                prompt: question.prompt,
+                answerRules: question.answerRules,
+                part: question.part
+              }));
       const attempt = attempts.createAttempt({
         mode: input.mode,
         subject: input.subject,
@@ -57,16 +88,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
 
       return {
         attemptId: attempt.id,
-        questions: practiceQuestions.map((question) => ({
-          id: question.id,
-          passageId: question.passageId,
-          passageTitle: question.passageTitle,
-          questionNumber: question.questionNumber,
-          questionType: question.questionType,
-          prompt: question.prompt,
-          answerRules: question.answerRules,
-          part: question.part
-        }))
+        questions: practiceQuestions
       };
     },
 

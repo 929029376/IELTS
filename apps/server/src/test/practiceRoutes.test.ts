@@ -99,6 +99,92 @@ function seedReadingMockCandidates(databasePath: string) {
   }
 }
 
+function seedMockCandidatesWithAssets(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  function createPassage(input: {
+    audioPath?: string;
+    frequencyClass: "high" | "low" | "medium";
+    part: "P1" | "P2" | "P3" | "P4";
+    subject: "listening" | "reading";
+    textContent?: string;
+    title: string;
+  }) {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: `seed/${input.title}.json`,
+      checksum: `asset-checksum-${input.title}`,
+      importStatus: "imported",
+      version: 1
+    });
+    if (input.textContent) {
+      questions.createSourceAsset({
+        assetKind: input.subject === "reading" ? "pdf" : "html",
+        checksum: `text-${input.title}`,
+        filePath: `assets/${input.title}.pdf`,
+        originalName: `${input.title}.pdf`,
+        sourceId: source.id,
+        textContent: input.textContent
+      });
+    }
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: input.subject,
+      part: input.part,
+      title: input.title,
+      frequencyClass: input.frequencyClass
+    });
+    if (input.audioPath) {
+      questions.createListeningAudio({
+        checksum: `audio-${input.title}`,
+        durationSeconds: 320,
+        filePath: input.audioPath,
+        passageId: passage.id
+      });
+    }
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "fill_blank",
+      prompt: `${input.title} question`,
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["answer"],
+      answerSentence: "The answer appears in the imported passage.",
+      explanation: "Use the imported resource.",
+      synonyms: []
+    });
+  }
+
+  try {
+    createPassage({
+      frequencyClass: "high",
+      part: "P1",
+      subject: "reading",
+      textContent: "Imported reading passage text appears in the exam pane.",
+      title: "Reading Asset P1"
+    });
+    createPassage({ frequencyClass: "medium", part: "P2", subject: "reading", title: "Reading Asset P2" });
+    createPassage({ frequencyClass: "low", part: "P3", subject: "reading", title: "Reading Asset P3" });
+    createPassage({
+      audioPath: "/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3",
+      frequencyClass: "high",
+      part: "P1",
+      subject: "listening",
+      title: "Listening Asset P1"
+    });
+    createPassage({ frequencyClass: "medium", part: "P2", subject: "listening", title: "Listening Asset P2" });
+    createPassage({ frequencyClass: "medium", part: "P3", subject: "listening", title: "Listening Asset P3" });
+    createPassage({ frequencyClass: "low", part: "P4", subject: "listening", title: "Listening Asset P4" });
+  } finally {
+    db.close();
+  }
+}
+
 describe("practice routes", () => {
   it("starts, answers, submits, reviews, and reloads a 40-question practice attempt", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-routes-"));
@@ -209,6 +295,51 @@ describe("practice routes", () => {
       expect(started.questions).not.toEqual(
         expect.arrayContaining([expect.objectContaining({ passageTitle: "Z Low Frequency P1" })])
       );
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("returns imported passage text and listening audio metadata with mock questions", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-mock-assets-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedMockCandidatesWithAssets(databasePath);
+
+    const server = buildServer({ databasePath, testBuilderRandom: () => 0.1 });
+
+    try {
+      const readingStart = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "mock", subject: "reading" }
+      });
+      expect(readingStart.statusCode).toBe(200);
+      expect(readingStart.json()).toMatchObject({
+        questions: expect.arrayContaining([
+          expect.objectContaining({
+            assetPaths: ["assets/Reading Asset P1.pdf"],
+            passageText: "Imported reading passage text appears in the exam pane.",
+            passageTitle: "Reading Asset P1"
+          })
+        ])
+      });
+
+      const listeningStart = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "mock", subject: "listening" }
+      });
+      expect(listeningStart.statusCode).toBe(200);
+      expect(listeningStart.json()).toMatchObject({
+        questions: expect.arrayContaining([
+          expect.objectContaining({
+            audioPath: "/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3",
+            audioDurationSeconds: 320,
+            passageTitle: "Listening Asset P1"
+          })
+        ])
+      });
     } finally {
       await server.close();
       rmSync(tempDir, { recursive: true, force: true });

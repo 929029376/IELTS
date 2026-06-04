@@ -9,6 +9,8 @@ export interface ListeningSection {
 }
 
 export interface ListeningExamViewProps {
+  audioDurationSeconds?: number | null;
+  audioPath?: string | null;
   mode: "mock" | "practice";
   audioTitle: string;
   sections: ListeningSection[];
@@ -16,6 +18,8 @@ export interface ListeningExamViewProps {
 }
 
 export function ListeningExamView({
+  audioDurationSeconds,
+  audioPath,
   mode,
   audioTitle,
   sections,
@@ -31,6 +35,8 @@ export function ListeningExamView({
         <div>
           <p className="player-label">Audio</p>
           <h3>{audioTitle}</h3>
+          {audioPath ? <p className="audio-resource-path">{audioPath}</p> : null}
+          {audioDurationSeconds ? <p>Duration: {formatTimer(audioDurationSeconds)}</p> : null}
           <p>Final review time: {formatTimer(finalReviewSeconds)}</p>
         </div>
         <div className="strict-controls">

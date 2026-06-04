@@ -208,7 +208,7 @@ describe("dashboard shell", () => {
     render(<App />);
 
     expect(await screen.findByText("Local study queue")).toBeInTheDocument();
-    expect(screen.getByText("Listening mock ready")).toBeInTheDocument();
+    expect(await screen.findByText("Listening mock ready")).toBeInTheDocument();
     expect(screen.getByText("5 passages / 5 questions / 1 cues")).toBeInTheDocument();
     expect(screen.getByText("Live Listening P1 High")).toBeInTheDocument();
     expect(screen.getByText("Live Reading P1 High")).toBeInTheDocument();

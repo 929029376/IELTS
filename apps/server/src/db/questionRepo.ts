@@ -230,6 +230,27 @@ export function createQuestionRepo(db: DatabaseHandle) {
       return record;
     },
 
+    getFirstListeningAudio(passageId: string): ListeningAudioRecord | null {
+      const row = db
+        .prepare(
+          `
+          SELECT
+            id,
+            passage_id AS passageId,
+            file_path AS filePath,
+            duration_seconds AS durationSeconds,
+            checksum
+          FROM listening_audio
+          WHERE passage_id = ?
+          ORDER BY created_at ASC
+          LIMIT 1
+        `
+        )
+        .get(passageId) as ListeningAudioRecord | undefined;
+
+      return row ?? null;
+    },
+
     getPassageWithQuestions(passageId: string): PassageWithQuestions | null {
       const passage = db
         .prepare(

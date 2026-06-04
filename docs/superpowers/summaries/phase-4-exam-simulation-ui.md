@@ -44,6 +44,14 @@
 - Added a submitted-mock review panel that loads `GET /api/practice/:attemptId/review`
   and renders correctness, user answer, accepted answers, answer-sentence
   highlight, explanation, and synonym notes.
+- Added local mock resource loading:
+  - started mock questions now include imported passage text when a source asset
+    has extracted text,
+  - started listening mock questions include local audio path and duration metadata,
+  - the Mac reading mock pane uses real imported passage text instead of the
+    placeholder when available,
+  - the Mac listening player shows the selected local audio resource path and
+    duration metadata.
 - Added unit coverage for:
   - shell controls,
   - timer auto-submit,
@@ -85,6 +93,15 @@
       review region.
     - Passed after loading the practice review endpoint and rendering answer
       evidence, explanations, and synonym notes.
+- Mac local mock resource follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because `POST /api/practice/start` did not return imported
+      passage text, source asset paths, or listening audio metadata.
+    - Passed after adding resource metadata to started mock questions.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the Mac exam UI still rendered placeholder reading
+      text and hid local listening audio metadata.
+    - Passed after rendering returned passage text, audio path, and audio duration.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.

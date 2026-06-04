@@ -8,9 +8,13 @@ import { ScoreReport } from "./ScoreReport";
 
 interface StartedMockQuestion {
   answerRules: Record<string, unknown>;
+  assetPaths?: string[];
+  audioDurationSeconds?: number | null;
+  audioPath?: string | null;
   id: string;
   part: string;
   passageId: string;
+  passageText?: string | null;
   passageTitle: string;
   prompt: string;
   questionNumber: number;
@@ -228,13 +232,18 @@ export function ExamPreview() {
           {activeMock.subject === "reading" ? (
             <ReadingExamView
               passageTitle={activeQuestions[0]?.passageTitle ?? "Reading passage"}
-              passageText="Use the imported local passage asset for close reading. Structured passage text will appear here when the source provides it."
-              highlightedText="Structured passage text"
+              passageText={
+                activeQuestions[0]?.passageText ??
+                "Use the imported local passage asset for close reading. Structured passage text will appear here when the source provides it."
+              }
+              highlightedText={activeQuestions[0]?.passageText ? undefined : "Structured passage text"}
               questions={mockQuestionList}
             />
           ) : (
             <ListeningExamView
               mode="mock"
+              audioDurationSeconds={activeQuestions[0]?.audioDurationSeconds}
+              audioPath={activeQuestions[0]?.audioPath}
               audioTitle={activeQuestions[0]?.passageTitle ?? "Listening section audio"}
               sections={[
                 {

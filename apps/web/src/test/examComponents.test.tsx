@@ -143,6 +143,7 @@ describe("exam simulation components", () => {
                 id: "question-1",
                 part: "P1",
                 passageId: "passage-1",
+                passageText: "Live imported reading text should replace the placeholder passage.",
                 passageTitle: "Live Reading P1 High",
                 prompt: "What is the key answer?",
                 questionNumber: 1,
@@ -165,6 +166,7 @@ describe("exam simulation components", () => {
 
     expect(await screen.findByText("Loaded local reading mock")).toBeInTheDocument();
     expect(screen.getAllByText("Live Reading P1 High").length).toBeGreaterThan(0);
+    expect(screen.getByText("Live imported reading text should replace the placeholder passage.")).toBeInTheDocument();
     expect(screen.getByText("What is the key answer?")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/practice/start",
@@ -173,6 +175,49 @@ describe("exam simulation components", () => {
         method: "POST"
       })
     );
+  });
+
+  it("shows local listening audio metadata returned by the practice API", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-listening-mock-1",
+            questions: [
+              {
+                answerRules: {},
+                assetPaths: [],
+                audioDurationSeconds: 320,
+                audioPath: "/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3",
+                id: "listening-question-1",
+                part: "P1",
+                passageId: "listening-passage-1",
+                passageText: null,
+                passageTitle: "Live Listening P1 High",
+                prompt: "Which number did the speaker mention?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start listening mock" }));
+
+    expect(await screen.findByText("Loaded local listening mock")).toBeInTheDocument();
+    expect(screen.getByText("/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3")).toBeInTheDocument();
+    expect(screen.getByText("Duration: 05:20")).toBeInTheDocument();
   });
 
   it("saves local mock answers and submits for an estimated band report", async () => {

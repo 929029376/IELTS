@@ -82,6 +82,12 @@
   - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
   - the Mac dashboard renders correctness, user answer, accepted answer, answer
     sentence highlight, explanation, and synonym notes after submission.
+- Added local mock resource hardening:
+  - `POST /api/practice/start` now returns imported passage text, source asset
+    paths, and listening audio metadata with started mock questions,
+  - the Mac reading mock pane renders imported passage text when available,
+  - the Mac listening mock player displays the selected local audio path and
+    duration metadata.
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
@@ -241,6 +247,15 @@
     - Initially failed because submitting a local mock did not show a detailed
       review region.
     - Passed after rendering the submitted-mock review panel.
+- Mac local mock resource follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because started mock questions did not include imported
+      passage text, asset paths, or listening audio metadata.
+    - Passed after extending the practice service response.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the Mac exam UI still used placeholder passage text
+      and did not show the local listening audio resource.
+    - Passed after rendering API-provided passage text, audio path, and duration.
 - Mac report export follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
     - Initially failed because report export buttons were static.

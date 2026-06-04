@@ -291,6 +291,9 @@ Answer normalization:
   report rendering in the Mac dashboard exam UI.
 - [x] Load detailed review evidence after local mock submission and render answer
   sentence highlights, accepted answers, explanations, and synonym notes.
+- [x] Load imported passage text, source asset paths, and listening audio metadata
+  into started local mock attempts so the Mac exam UI no longer depends on
+  placeholder passage/audio content when local resources are available.
 
 **Acceptance:** Listening and reading mock exams can be completed under strict mode, auto-submit on timeout, and produce a score report.
 
