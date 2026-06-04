@@ -164,6 +164,46 @@ describe("intensive study components", () => {
     );
   });
 
+  it("saves close-reading mistake labels through the local study API", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        id: "mistake-label-1",
+        label: "定位失败"
+      })
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: null,
+          reading: {
+            answerSentence: "answer sentence",
+            attemptAnswerId: "attempt-answer-1",
+            explanation: "The sentence directly supports the answer.",
+            keywords: ["trade routes"],
+            passageText: "Tea travelled along trade routes. The answer sentence identifies the key evidence.",
+            passageTitle: "Reading intensive review",
+            questionPrompt: "Question 1: Choose the best evidence.",
+            synonyms: ["evidence", "proof"]
+          }
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "定位失败" }));
+
+    expect(await screen.findByText("Mistake label saved: 定位失败.")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/study/mistake-labels",
+      expect.objectContaining({
+        body: JSON.stringify({ attemptAnswerId: "attempt-answer-1", label: "定位失败" }),
+        method: "POST"
+      })
+    );
+  });
+
   it("renders close reading evidence, manual answer sentence selection, and mistake labels", () => {
     const onSelectAnswerSentence = vi.fn();
     const onMistakeLabel = vi.fn();

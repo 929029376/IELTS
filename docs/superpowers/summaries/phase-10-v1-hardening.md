@@ -69,6 +69,11 @@
   - cue creation now posts to `POST /api/study/listening-cues`,
   - dictation submit now posts to `POST /api/study/dictation-attempts`,
   - newly saved cues immediately appear in sentence repeat controls.
+- Added Mac close-reading mistake-label hardening:
+  - intensive reading preview now exposes the latest wrong reading answer id,
+  - mistake-label buttons persist through `POST /api/study/mistake-labels`,
+  - saved labels can be appended to Baidu Cloud `mistakes.jsonl` when sync is
+    configured.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -224,6 +229,15 @@
       no-ops.
     - Passed after wiring them to local APIs and rendering saved/correctness
       status.
+- Mac close-reading mistake-label follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts src/test/syncRoutes.test.ts`
+    - Initially failed because the intensive reading preview did not return the
+      latest wrong answer id needed for labeling.
+    - Passed after adding the preview id and mistake-label write route.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx src/test/dashboard.test.tsx`
+    - Initially failed because close-reading mistake-label buttons were still
+      no-ops.
+    - Passed after wiring the buttons to local persistence and saved-status UI.
 - Mac mock-start hardening follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because mock start loaded sequential questions and included

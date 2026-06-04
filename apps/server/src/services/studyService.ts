@@ -34,6 +34,7 @@ export interface IntensiveStudyPreview {
     passageId: string;
   } | null;
   reading: {
+    attemptAnswerId: string | null;
     answerSentence: string | null;
     explanation: string | null;
     keywords: string[];
@@ -163,6 +164,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
     .prepare(
       `
       SELECT
+        aa.id AS attemptAnswerId,
         p.title AS passageTitle,
         q.prompt AS questionPrompt,
         ak.answer_sentence AS answerSentence,
@@ -172,6 +174,8 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
       FROM questions q
       JOIN passages p ON p.id = q.passage_id
       JOIN answer_keys ak ON ak.question_id = q.id
+      LEFT JOIN attempt_answers aa ON aa.question_id = q.id
+        AND aa.is_correct = 0
       LEFT JOIN source_assets sa ON sa.source_id = p.source_id
         AND sa.asset_kind IN ('html', 'docx', 'pdf')
         AND sa.text_content IS NOT NULL
@@ -182,6 +186,8 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
           OR (ak.explanation IS NOT NULL AND TRIM(ak.explanation) != '')
         )
       ORDER BY
+        CASE WHEN aa.id IS NOT NULL THEN 0 ELSE 1 END,
+        aa.updated_at DESC,
         CASE p.frequency_class
           WHEN 'high' THEN 0
           WHEN 'medium' THEN 1
@@ -195,6 +201,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
     )
     .get() as
     | {
+        attemptAnswerId: string | null;
         answerSentence: string | null;
         explanation: string | null;
         passageText: string;
@@ -209,6 +216,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
   }
 
   return {
+    attemptAnswerId: row.attemptAnswerId,
     answerSentence: row.answerSentence,
     explanation: row.explanation,
     keywords: [],

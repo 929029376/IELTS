@@ -46,6 +46,13 @@
     correctness against the cue transcript,
   - saving a cue in the Mac dashboard immediately enables sentence repeat, and
     submitting dictation shows the saved/correctness result.
+- Added Mac close-reading mistake-label persistence:
+  - `/api/study/intensive` now returns the latest wrong reading
+    `attemptAnswerId` when available,
+  - `POST /api/study/mistake-labels` stores the selected mistake reason against
+    that answer,
+  - clicking a close-reading mistake-label button in the Mac dashboard shows a
+    saved status instead of being a no-op.
 - Added focused unit tests for intensive server persistence and web components.
 
 ## Verification Evidence
@@ -70,6 +77,17 @@
   - Initially failed because the cue editor and dictation submit actions did not
     call local APIs or render saved status.
   - Passed after wiring the Mac intensive panel to cue and dictation APIs.
+- Mac close-reading mistake-label follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because the intensive reading preview did not expose an
+      `attemptAnswerId` for the latest wrong reading answer.
+    - Passed after returning that identifier and adding the mistake-label write
+      route.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because close-reading mistake-label buttons were still
+      no-ops in the dashboard preview.
+    - Passed after posting selected labels to the local study API and rendering
+      saved status.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

@@ -363,6 +363,8 @@ Answer normalization:
 - [x] Add Mac dashboard wiring so the close-reading panel loads local answer
   sentence, explanation, synonym, keyword, and passage text evidence when
   available.
+- [x] Connect Mac close-reading mistake-label buttons to local persistence and
+  Baidu Cloud mistake JSONL sync events for the latest wrong reading answer.
 
 **Acceptance:** Listening supports repeatable segments once cues are available, reading supports answer-sentence highlight and explanation review, and mistake labels are saved.
 

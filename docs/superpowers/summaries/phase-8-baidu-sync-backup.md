@@ -21,7 +21,8 @@
 - Added append-only JSONL sync events for practice writes:
   - attempt creation,
   - answer saving,
-  - attempt submission.
+  - attempt submission,
+  - close-reading mistake-label selection.
 - Added remote JSONL import:
   - on server startup when sync is configured,
   - through `POST /api/sync/import`.
@@ -52,6 +53,9 @@
   - Sync folder, append, import, dedupe, merge, and conflict tests passed.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
   - Manual sync API and startup import tests passed.
+- `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts src/test/syncRoutes.test.ts`
+  - Passed after the Mac close-reading mistake-label route was wired to local
+    persistence and optional `mistake.added` JSONL sync events.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
   - Initially failed because the Manual sync button did not call the sync API or
     render a completion status.

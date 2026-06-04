@@ -16,6 +16,7 @@ export interface IntensiveStudyPreviewView {
     passageId?: string;
   } | null;
   reading: {
+    attemptAnswerId?: string | null;
     answerSentence: string | null;
     explanation: string | null;
     keywords: string[];
@@ -37,6 +38,7 @@ const sampleCues = [
 ];
 
 const sampleReading = {
+  attemptAnswerId: null,
   answerSentence: "answer sentence",
   explanation: "The sentence directly supports the answer.",
   keywords: ["trade routes"],
@@ -76,6 +78,7 @@ interface DictationAttemptView {
 export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudyPreviewView }) {
   const [cueStatus, setCueStatus] = useState<string | null>(null);
   const [dictationStatus, setDictationStatus] = useState<string | null>(null);
+  const [mistakeStatus, setMistakeStatus] = useState<string | null>(null);
   const [savedCues, setSavedCues] = useState<NonNullable<IntensiveStudyPreviewView["listening"]>["cues"]>([]);
 
   const listening = preview?.listening
@@ -128,6 +131,23 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
     }
   }
 
+  async function saveMistakeLabel(label: string) {
+    if (!reading.attemptAnswerId) {
+      setMistakeStatus("Load a wrong local answer before saving mistake labels.");
+      return;
+    }
+
+    try {
+      await postJson<{ label: string }>("/api/study/mistake-labels", {
+        attemptAnswerId: reading.attemptAnswerId,
+        label
+      });
+      setMistakeStatus(`Mistake label saved: ${label}.`);
+    } catch {
+      setMistakeStatus("Could not save mistake label.");
+    }
+  }
+
   return (
     <section className="intensive-preview-band" aria-label="Intensive practice preview">
       <div className="intensive-preview-grid">
@@ -156,8 +176,11 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
           question={<p>{reading.questionPrompt}</p>}
           isWrongAnswer
           onSelectAnswerSentence={() => undefined}
-          onMistakeLabel={() => undefined}
+          onMistakeLabel={(label) => {
+            void saveMistakeLabel(label);
+          }}
         />
+        {mistakeStatus ? <p className="import-status">{mistakeStatus}</p> : null}
       </div>
     </section>
   );

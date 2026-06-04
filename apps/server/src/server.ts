@@ -54,7 +54,7 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
   registerPracticeRoutes(server, db, sync, {
     random: options.testBuilderRandom
   });
-  registerStudyRoutes(server, db);
+  registerStudyRoutes(server, db, sync);
   registerReportsRoutes(server, db, {
     exportDir: options.exportDir,
     now: options.now

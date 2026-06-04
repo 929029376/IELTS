@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { buildServer } from "../server";
+import { createAttemptRepo } from "../db/attemptRepo";
 import { createIntensiveRepo } from "../db/intensiveRepo";
 import type { DatabaseHandle } from "../db/database";
 import { createQuestionRepo } from "../db/questionRepo";
@@ -269,5 +270,87 @@ describe("study overview routes", () => {
       normalizedText: "green park",
       userText: " green park "
     });
+  });
+
+  it("returns the latest wrong reading answer for mistake labeling and stores the selected label", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-study-mistake-labels-"));
+    const server = buildServer({ databasePath: join(tempDir, "ielts.db") });
+    servers.push(server);
+    const db = (server as typeof server & { db: DatabaseHandle }).db;
+    const questions = createQuestionRepo(db);
+    const attempts = createAttemptRepo(db);
+    const source = questions.createSource({
+      checksum: "study-mistake-label-source",
+      importStatus: "imported",
+      originalPath: "seed/study-mistake-label.json",
+      sourceType: "seed",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P2",
+      sourceId: source.id,
+      subject: "reading",
+      title: "Mistake Label Reading"
+    });
+    questions.createSourceAsset({
+      assetKind: "html",
+      checksum: "study-mistake-label-html",
+      filePath: null,
+      originalName: "mistake-label.html",
+      sourceId: source.id,
+      textContent: "The answer sentence identifies the evidence. A distractor appears later."
+    });
+    const question = questions.createQuestion({
+      answerRules: {},
+      passageId: passage.id,
+      prompt: "Which sentence gives the answer?",
+      questionNumber: 1,
+      questionType: "matching"
+    });
+    questions.createAnswerKey({
+      acceptedAnswers: ["answer sentence"],
+      answerSentence: "answer sentence",
+      explanation: "The answer sentence identifies the evidence.",
+      questionId: question.id,
+      synonyms: ["identifies = shows"]
+    });
+    const attempt = attempts.createAttempt({
+      mode: "practice",
+      startedAt: "2026-06-04T08:00:00.000Z",
+      subject: "reading"
+    });
+    const answer = attempts.saveAnswer({
+      attemptId: attempt.id,
+      isCorrect: false,
+      markedForReview: false,
+      normalizedAnswer: "distractor",
+      questionId: question.id,
+      rawAnswer: "distractor",
+      timeSpentSeconds: 42
+    });
+
+    const preview = await server.inject({ method: "GET", url: "/api/study/intensive" });
+    expect(preview.statusCode).toBe(200);
+    expect(preview.json().reading).toMatchObject({
+      attemptAnswerId: answer.id,
+      answerSentence: "answer sentence",
+      questionPrompt: "Which sentence gives the answer?"
+    });
+
+    const labelResponse = await server.inject({
+      method: "POST",
+      payload: {
+        attemptAnswerId: answer.id,
+        label: "定位失败"
+      },
+      url: "/api/study/mistake-labels"
+    });
+
+    expect(labelResponse.statusCode).toBe(201);
+    expect(labelResponse.json()).toMatchObject({
+      label: "定位失败"
+    });
+    expect(attempts.listMistakeLabels(answer.id)).toEqual(["定位失败"]);
   });
 });
