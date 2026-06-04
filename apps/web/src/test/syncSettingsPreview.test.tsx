@@ -5,10 +5,13 @@ import { SyncSettingsPreview } from "../features/sync/SyncSettingsPreview";
 describe("SyncSettingsPreview", () => {
   afterEach(() => {
     cleanup();
+    vi.useRealTimers();
     vi.unstubAllGlobals();
   });
 
   it("runs a manual sync import and shows the imported, skipped, and conflict counts", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.setSystemTime(new Date("2026-06-04T10:15:00.000Z"));
     const fetchMock = vi.fn(async () => ({
       ok: true,
       json: async () => ({
@@ -31,6 +34,8 @@ describe("SyncSettingsPreview", () => {
     fireEvent.click(screen.getByRole("button", { name: "Manual sync" }));
 
     expect(await screen.findByRole("status")).toHaveTextContent("Manual sync complete");
+    expect(screen.getByText("2026-06-04 10:15")).toBeInTheDocument();
+    expect(screen.queryByText("Not synced yet")).not.toBeInTheDocument();
     expect(screen.getByText("3 imported")).toBeInTheDocument();
     expect(screen.getByText("2 skipped")).toBeInTheDocument();
     expect(screen.getByText("1 conflicts")).toBeInTheDocument();

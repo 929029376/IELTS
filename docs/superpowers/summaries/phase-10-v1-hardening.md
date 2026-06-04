@@ -187,6 +187,11 @@
 - Added Mac manual sync dashboard refresh hardening:
   - successful manual sync import refreshes report history, score prediction
     cards, hardening status, and local study overview.
+- Added Mac manual sync timestamp hardening:
+  - successful manual sync import now updates the Sync settings panel's Last sync
+    value immediately,
+  - the panel no longer stays on `Not synced yet` after showing completion
+    counts.
 - Added manual backup hardening for intensive listening:
   - backup export/import now includes `dictation_attempts`,
   - restore order keeps `dictation_attempts` after `listening_cues` so cue
@@ -595,6 +600,16 @@
     - Passed after the manual sync dashboard-refresh follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac manual sync timestamp follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because the Manual sync completion counts rendered while
+      Last sync stayed `Not synced yet`.
+    - Passed after the Sync settings panel stores and displays the successful
+      manual-sync completion timestamp.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual sync timestamp follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - Mac manual backup intensive-listening follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupService.test.ts`
     - Initially failed because manual backup JSON did not include

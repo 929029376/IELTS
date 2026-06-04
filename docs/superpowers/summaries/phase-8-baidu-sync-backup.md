@@ -79,6 +79,10 @@
   - a successful Mac manual sync import refreshes report history, score
     prediction cards, hardening status, and the local study overview without
     requiring a page reload.
+- Added manual sync timestamp refresh behavior:
+  - a successful Mac manual sync import now updates the Sync settings panel's
+    Last sync value immediately,
+  - the panel no longer stays on `Not synced yet` after a successful local import.
 - Added manual backup service and API:
   - `POST /api/backups/export`,
   - `POST /api/backups/import`.
@@ -216,6 +220,16 @@
     - Passed after the manual sync dashboard-refresh follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac manual sync timestamp follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because the Manual sync completion panel showed imported,
+      skipped, and conflict counts while Last sync stayed `Not synced yet`.
+    - Passed after the Sync settings panel stores and renders the successful
+      manual-sync completion time.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual sync timestamp follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - Mac review conflict visibility follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because review responses with `conflicts` did not render

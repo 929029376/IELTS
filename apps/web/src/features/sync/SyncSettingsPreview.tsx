@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, FolderSync, RefreshCw, Upload } from "lucide-react";
 import { DesktopAssetVerifier } from "../desktop/DesktopAssetVerifier";
 import { DesktopRuntimeDiagnostics, type DesktopRuntimeStatus } from "../desktop/DesktopRuntimeDiagnostics";
@@ -41,11 +41,16 @@ export function SyncSettingsPreview({
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncResult, setSyncResult] = useState<ManualSyncResult | null>(null);
+  const [displayedLastSyncAt, setDisplayedLastSyncAt] = useState(lastSyncAt);
   const [backupError, setBackupError] = useState<string | null>(null);
   const [backupFilePath, setBackupFilePath] = useState("");
   const [backupImportResult, setBackupImportResult] = useState<BackupResult | null>(null);
   const [backupExportResult, setBackupExportResult] = useState<BackupResult | null>(null);
   const [isBackingUp, setIsBackingUp] = useState(false);
+
+  useEffect(() => {
+    setDisplayedLastSyncAt(lastSyncAt);
+  }, [lastSyncAt]);
 
   async function runManualSync() {
     setIsSyncing(true);
@@ -57,6 +62,7 @@ export function SyncSettingsPreview({
       }
       const result = (await response.json()) as ManualSyncResult;
       setSyncResult(result);
+      setDisplayedLastSyncAt(new Date().toISOString());
       onSyncComplete?.();
     } catch {
       setSyncError("Could not complete manual sync.");
@@ -139,7 +145,7 @@ export function SyncSettingsPreview({
             </div>
             <div>
               <dt>Last sync</dt>
-              <dd>{lastSyncAt ? lastSyncAt.slice(0, 16).replace("T", " ") : "Not synced yet"}</dd>
+              <dd>{displayedLastSyncAt ? displayedLastSyncAt.slice(0, 16).replace("T", " ") : "Not synced yet"}</dd>
             </div>
           </dl>
         </div>
