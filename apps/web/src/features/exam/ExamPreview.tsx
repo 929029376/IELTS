@@ -31,7 +31,7 @@ interface StartedMock {
 
 interface MockSubmitResult {
   attemptId: string;
-  estimatedBand: number;
+  estimatedBand: number | null;
   rawScore: number;
   submittedAt: string;
 }

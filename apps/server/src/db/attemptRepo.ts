@@ -110,7 +110,7 @@ export function createAttemptRepo(db: DatabaseHandle) {
       attemptId: string;
       submittedAt: string;
       rawScore: number;
-      estimatedBand: number;
+      estimatedBand: number | null;
     }): void {
       db.prepare(`
         UPDATE attempts

@@ -887,6 +887,12 @@
       estimated band for partial practice sets.
     - Passed after practice reports show practice accuracy and reserve estimated
       IELTS bands for full mock reports.
+- Mac partial-practice prediction hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because short practice submissions still produced an
+      `estimatedBand`, which could enter history-based prediction.
+    - Passed after partial practice submissions return `estimatedBand: null`
+      while preserving full mock band estimates.
 
 ## Remaining V1 Gaps
 

@@ -216,7 +216,8 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
 
       const rawScore = attempt.answers.filter((answer) => answer.isCorrect).length;
       const table = attempt.subject === "listening" ? listeningBandTable : academicReadingBandTable;
-      const estimatedBand = estimateBand(rawScore, table);
+      const shouldEstimateBand = attempt.mode === "mock" || attempt.answers.length >= 40;
+      const estimatedBand = shouldEstimateBand ? estimateBand(rawScore, table) : null;
       const submittedAt = new Date().toISOString();
 
       attempts.submitAttempt({

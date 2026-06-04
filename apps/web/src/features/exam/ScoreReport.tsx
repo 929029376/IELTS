@@ -1,7 +1,7 @@
 export interface ScoreReportProps {
   subject: "listening" | "reading";
   rawScore: number;
-  estimatedBand: number;
+  estimatedBand: number | null;
   mode?: "mock" | "practice";
   totalQuestions?: number;
 }
@@ -31,7 +31,7 @@ export function ScoreReport({ subject, rawScore, estimatedBand, mode = "mock", t
         ) : (
           <div>
             <dt>Estimated band</dt>
-            <dd>{estimatedBand.toFixed(1)}</dd>
+            <dd>{estimatedBand === null ? "-" : estimatedBand.toFixed(1)}</dd>
           </div>
         )}
       </dl>

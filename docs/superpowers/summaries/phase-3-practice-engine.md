@@ -136,6 +136,12 @@
       mock results.
     - Passed after practice reports show local practice accuracy while full mock
       reports continue to show estimated IELTS bands.
+- Mac partial-practice band-suppression follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because partial practice submissions still persisted an
+      `estimatedBand`, allowing short drills to pollute prediction history.
+    - Passed after partial practice submissions keep raw score while returning
+      `estimatedBand: null`; mock submissions still produce IELTS band estimates.
 - Mac word-limit alias scoring follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because practice scoring only honored

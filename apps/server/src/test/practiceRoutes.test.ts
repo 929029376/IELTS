@@ -489,7 +489,7 @@ describe("practice routes", () => {
       expect(submit.statusCode).toBe(200);
       expect(submit.json()).toMatchObject({
         rawScore: 1,
-        estimatedBand: 0
+        estimatedBand: null
       });
 
       const review = await server.inject({
