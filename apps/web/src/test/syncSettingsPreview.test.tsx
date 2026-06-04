@@ -319,6 +319,44 @@ describe("SyncSettingsPreview", () => {
     expect(screen.queryByText("16 tables")).not.toBeInTheDocument();
   });
 
+  it("clears stale backup import feedback when the restore path changes", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        importedTables: 16,
+        rowCounts: {
+          attempt_answers: 40,
+          attempts: 1
+        }
+      })
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Backup file path"), {
+      target: { value: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-2026-06-04.json" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Import backup" }));
+
+    expect(await screen.findByText("Backup imported")).toBeInTheDocument();
+    expect(screen.getByText("16 tables")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Backup file path"), {
+      target: { value: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-next.json" }
+    });
+
+    expect(screen.queryByText("Backup imported")).not.toBeInTheDocument();
+    expect(screen.queryByText("16 tables")).not.toBeInTheDocument();
+  });
+
   it("saves an edited Baidu sync folder path", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/sync/config") {
@@ -363,6 +401,49 @@ describe("SyncSettingsPreview", () => {
         method: "PUT"
       })
     );
+  });
+
+  it("clears stale sync-folder saved feedback when a later save fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          deviceId: "macbook",
+          deviceName: "MacBook",
+          platform: "darwin",
+          syncFolderPath: "/Users/musheng/Desktop/同步空间"
+        })
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({})
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Sync folder path"), {
+      target: { value: "/Users/musheng/Desktop/同步空间" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save sync folder" }));
+
+    expect(await screen.findByText("Sync folder saved")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Sync folder path"), {
+      target: { value: "/Users/musheng/Desktop/同步空间-失败" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save sync folder" }));
+
+    expect(await screen.findByText("Could not save sync folder.")).toBeInTheDocument();
+    expect(screen.queryByText("Sync folder saved")).not.toBeInTheDocument();
   });
 
   it("fills the sync folder path from a selected JSONL sync file", () => {

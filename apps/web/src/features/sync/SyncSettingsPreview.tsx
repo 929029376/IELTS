@@ -199,10 +199,15 @@ export function SyncSettingsPreview({
     }
   }
 
+  function updateBackupFilePath(filePath: string) {
+    setBackupFilePath(filePath);
+    setBackupImportResult(null);
+  }
+
   function fillBackupPathFromSelectedFile(file: File | null) {
     const localPath = getLocalFilePath(file);
     if (localPath.length > 0) {
-      setBackupFilePath(localPath);
+      updateBackupFilePath(localPath);
       setBackupError(null);
       return;
     }
@@ -325,7 +330,7 @@ export function SyncSettingsPreview({
           <span>Backup file path</span>
           <input
             aria-label="Backup file path"
-            onChange={(event) => setBackupFilePath(event.target.value)}
+            onChange={(event) => updateBackupFilePath(event.target.value)}
             placeholder="/Users/musheng/Desktop/IELTS/data/backups/ielts-backup.json"
             value={backupFilePath}
           />

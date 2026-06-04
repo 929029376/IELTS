@@ -519,6 +519,10 @@
   - starting a new backup import clears previously imported restore feedback,
   - a failed later backup import no longer leaves stale old restore counts
     visible in the manual backup panel.
+- Added Mac backup restore-path change hardening:
+  - editing the backup restore path clears previous backup-import feedback,
+  - selecting another backup JSON file also clears previous backup-import
+    feedback before a new restore attempt.
 - Added Mac backup export failure-state hardening:
   - starting a new backup export clears previously exported backup feedback,
   - a failed later backup export no longer leaves stale old backup paths visible
@@ -1064,6 +1068,25 @@
     - Shared: 4 tests passed.
     - Server: 73 tests passed.
     - Web: 128 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed, including Rust runtime diagnostics.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
+- Mac backup restore-path change hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "restore path changes"`
+    - Initially failed because changing the backup restore path after a
+      successful import left the old restore feedback visible.
+    - Passed after backup path changes clear backup import result state.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - 14 tests passed.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Web TypeScript and Vite production build passed.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed on macOS while Windows evidence remains intentionally deferred.
+    - Shared: 4 tests passed.
+    - Server: 73 tests passed.
+    - Web: 131 tests passed.
     - Playwright Chromium: 2 tests passed.
     - Production build passed.
     - `desktop:check` passed, including Rust runtime diagnostics.
