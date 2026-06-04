@@ -154,6 +154,11 @@
     and weakest question type are treated as missing,
   - dashboard report cards now keep clear empty-state copy instead of rendering
     blank values.
+- Added Mac study queue title fallback hardening:
+  - recommended mock passages with whitespace-only imported titles now render as
+    `Untitled passage`,
+  - the local study queue no longer shows blank recommendation rows when source
+    metadata is incomplete.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1160,6 +1165,12 @@
       report cards.
     - Passed after trimming dashboard report strings before applying fallback
       copy.
+- Mac study queue title fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/studyOverviewPanel.test.tsx`
+    - Initially failed because whitespace-only recommended mock passage titles
+      rendered as blank rows.
+    - Passed after trimming study queue passage titles and using
+      `Untitled passage` as the fallback.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

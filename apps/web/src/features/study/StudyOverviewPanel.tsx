@@ -41,6 +41,10 @@ function subjectMetric(subject: StudySubjectOverviewView) {
   return `${subject.passageCount} passages / ${subject.questionCount} questions / ${subject.cueCount} cues`;
 }
 
+function passageTitle(title: string) {
+  return title.trim() || "Untitled passage";
+}
+
 function FrequencyStrip({ subject }: { subject: StudySubjectOverviewView }) {
   return (
     <div className="study-frequency-strip" aria-label="Frequency distribution">
@@ -62,7 +66,7 @@ function MockSetList({ passages }: { passages: StudyPassageView[] }) {
       {passages.map((passage) => (
         <li key={passage.id}>
           <span>{passage.part}</span>
-          <strong>{passage.title}</strong>
+          <strong>{passageTitle(passage.title)}</strong>
           <small>{passage.frequencyClass}</small>
         </li>
       ))}

@@ -47,6 +47,11 @@
   frequency weights and recency penalties are applied.
 - Added a local dashboard study queue that consumes the overview API and surfaces
   recommended mock passages from the local question bank.
+- Added Mac study queue title fallback hardening:
+  - recommended mock passages with whitespace-only imported titles now render as
+    `Untitled passage`,
+  - the local study queue no longer shows blank recommendation rows when source
+    metadata is incomplete.
 - Wired `POST /api/practice/start` in `mock` mode to the frequency-weighted full-set
   builder so real mock attempts use one selected passage per IELTS part instead
   of taking the first sequential questions from the database.
@@ -85,6 +90,12 @@
     - Passed after the recency-recommendation follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac study queue title fallback follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/studyOverviewPanel.test.tsx`
+    - Initially failed because a recommended mock passage with a whitespace-only
+      title rendered as a blank row in the study queue.
+    - Passed after trimming recommended passage titles and falling back to
+      `Untitled passage`.
 - Mock-start integration follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because a reading mock start included both a high-frequency
