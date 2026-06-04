@@ -129,6 +129,13 @@
       `/40`, the same as a full mock test.
     - Passed after practice score reports use the loaded practice question count
       as the denominator while full mock reports keep `/40`.
+- Mac practice accuracy-report follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because local practice score reports still displayed an
+      IELTS `Estimated band`, which made partial practice sets look like full
+      mock results.
+    - Passed after practice reports show local practice accuracy while full mock
+      reports continue to show estimated IELTS bands.
 - Mac word-limit alias scoring follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because practice scoring only honored

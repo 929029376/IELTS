@@ -881,6 +881,12 @@
       full IELTS mock scores.
     - Passed after practice reports use the current practice set size while mock
       reports continue to use the 40-question IELTS denominator.
+- Mac practice accuracy-report hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because local practice reports still exposed an IELTS
+      estimated band for partial practice sets.
+    - Passed after practice reports show practice accuracy and reserve estimated
+      IELTS bands for full mock reports.
 
 ## Remaining V1 Gaps
 

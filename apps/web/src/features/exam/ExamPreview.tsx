@@ -546,6 +546,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
       ) : null}
       {scoreReport && activeMock ? (
         <ScoreReport
+          mode={activeMock.mode}
           subject={activeMock.subject}
           rawScore={scoreReport.rawScore}
           estimatedBand={scoreReport.estimatedBand}

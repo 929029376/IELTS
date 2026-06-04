@@ -165,8 +165,21 @@ describe("exam simulation components", () => {
 
     expect(screen.getByRole("region", { name: "Score report" })).toBeInTheDocument();
     expect(screen.getByText("32/40")).toBeInTheDocument();
+    expect(screen.getByText("Estimated band")).toBeInTheDocument();
     expect(screen.getByText("7.0")).toBeInTheDocument();
     expect(screen.getByText(/IELTS band scores are estimates/i)).toBeInTheDocument();
+  });
+
+  it("renders practice accuracy without an IELTS band estimate", () => {
+    render(<ScoreReport mode="practice" subject="reading" rawScore={3} estimatedBand={4} totalQuestions={4} />);
+
+    const report = screen.getByRole("region", { name: "Score report" });
+
+    expect(within(report).getByText("3/4")).toBeInTheDocument();
+    expect(within(report).getByText("Practice accuracy")).toBeInTheDocument();
+    expect(within(report).getByText("75%")).toBeInTheDocument();
+    expect(within(report).queryByText("Estimated band")).not.toBeInTheDocument();
+    expect(screen.getByText(/Practice accuracy is based on this local set/i)).toBeInTheDocument();
   });
 
   it("starts a local reading mock set through the practice API", async () => {
@@ -491,6 +504,8 @@ describe("exam simulation components", () => {
 
     expect(await screen.findByRole("region", { name: "Score report" })).toBeInTheDocument();
     expect(screen.getByText("1/1")).toBeInTheDocument();
+    expect(screen.getByText("Practice accuracy")).toBeInTheDocument();
+    expect(screen.queryByText("Estimated band")).not.toBeInTheDocument();
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/practice/attempt-reading-practice-timed/answer",
