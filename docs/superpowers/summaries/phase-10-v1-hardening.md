@@ -151,6 +151,9 @@
   - intensive reading previews now parse `answer_rules_json.keywords`,
   - imported or manually curated reading keywords can appear in the Mac
     close-reading highlight flow.
+- Added close-reading multiple-keyword highlight hardening:
+  - the Mac close-reading view now highlights every supplied keyword,
+  - overlapping answer-sentence evidence remains the primary highlight.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -445,6 +448,15 @@
     - Passed after the close-reading keyword evidence hardening follow-up,
       including unit/component tests, Playwright, production build, desktop
       diagnostics, and Mac DMG packaging.
+- Close-reading multiple-keyword highlight follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the second reading keyword was rendered as plain
+      text.
+    - Passed after mapping all supplied reading keywords into highlight targets.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the close-reading multiple-keyword highlight hardening
+      follow-up, including unit/component tests, Playwright, production build,
+      desktop diagnostics, and Mac DMG packaging.
 - Mac readiness follow-up:
   - `node scripts/mac-readiness-check.mjs`
     - Initially failed because the question-bank import panel regression clicked

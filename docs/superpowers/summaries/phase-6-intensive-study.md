@@ -64,6 +64,9 @@
     `questions.answer_rules_json.keywords`,
   - the Mac close-reading panel can highlight imported or manually curated
     keyword evidence instead of relying only on fallback sample data.
+- Added Mac close-reading multiple-keyword highlight support:
+  - `CloseReadingView` now renders every supplied keyword highlight,
+  - answer-sentence highlights remain first priority when highlight spans overlap.
 - Added focused unit tests for intensive server persistence and web components.
 
 ## Verification Evidence
@@ -122,6 +125,15 @@
       reading preview.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the close-reading keyword evidence follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac close-reading multiple-keyword highlight follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because `CloseReadingView` highlighted only the first
+      keyword in the supplied `keywords` array.
+    - Passed after rendering all non-overlapping keyword highlights.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the multiple-keyword highlight follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`

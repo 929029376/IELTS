@@ -77,7 +77,7 @@ export function CloseReadingView({
   onSelectAnswerSentence,
   onMistakeLabel
 }: CloseReadingViewProps) {
-  const keyword = keywords[0];
+  const keywordHighlights = keywords.map((target) => ({ className: "keyword-highlight", target }));
 
   return (
     <section className="close-reading-view" aria-label="Close reading view">
@@ -86,7 +86,7 @@ export function CloseReadingView({
         <p>
           {renderHighlightedText(passageText, [
             { className: "ielts-highlight", target: answerSentence },
-            { className: "keyword-highlight", target: keyword ?? "" }
+            ...keywordHighlights
           ])}
         </p>
       </article>
