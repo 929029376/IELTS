@@ -67,6 +67,11 @@
 - Added Mac close-reading multiple-keyword highlight support:
   - `CloseReadingView` now renders every supplied keyword highlight,
   - answer-sentence highlights remain first priority when highlight spans overlap.
+- Added repeated keyword highlight support:
+  - repeated occurrences of the same reading keyword are highlighted throughout
+    the passage,
+  - overlap handling still preserves answer-sentence evidence as the primary
+    highlight.
 - Added focused unit tests for intensive server persistence and web components.
 
 ## Verification Evidence
@@ -134,6 +139,15 @@
     - Passed after rendering all non-overlapping keyword highlights.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the multiple-keyword highlight follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac repeated keyword highlight follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because repeated occurrences of the same keyword only
+      highlighted the first match.
+    - Passed after scanning each highlight target through the whole passage.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the repeated keyword highlight follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`

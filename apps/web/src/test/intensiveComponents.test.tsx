@@ -258,7 +258,7 @@ describe("intensive study components", () => {
 
     render(
       <CloseReadingView
-        passageText="Tea travelled along trade routes. The answer sentence identifies the key evidence for early tea."
+        passageText="Tea travelled along trade routes. The answer sentence identifies trade routes as the key evidence for early tea."
         answerSentence="answer sentence"
         keywords={["trade routes", "early tea"]}
         synonyms={["evidence", "proof"]}
@@ -271,7 +271,9 @@ describe("intensive study components", () => {
     );
 
     expect(screen.getByText("answer sentence")).toHaveClass("ielts-highlight");
-    expect(screen.getByText("trade routes")).toHaveClass("keyword-highlight");
+    expect(screen.getAllByText("trade routes")).toHaveLength(2);
+    expect(screen.getAllByText("trade routes")[0]).toHaveClass("keyword-highlight");
+    expect(screen.getAllByText("trade routes")[1]).toHaveClass("keyword-highlight");
     expect(screen.getByText("early tea")).toHaveClass("keyword-highlight");
     expect(screen.getByText("evidence")).toBeInTheDocument();
     expect(screen.getByText("The sentence directly supports the answer.")).toBeInTheDocument();

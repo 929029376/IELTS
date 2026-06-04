@@ -26,15 +26,15 @@ function buildHighlightTokens(text: string, highlights: Array<{ className: strin
       continue;
     }
 
-    const start = text.indexOf(highlight.target);
-    if (start === -1) {
-      continue;
-    }
+    let start = text.indexOf(highlight.target);
 
-    const end = start + highlight.target.length;
-    const overlapsExistingToken = tokens.some((token) => start < token.end && end > token.start);
-    if (!overlapsExistingToken) {
-      tokens.push({ className: highlight.className, end, start });
+    while (start !== -1) {
+      const end = start + highlight.target.length;
+      const overlapsExistingToken = tokens.some((token) => start < token.end && end > token.start);
+      if (!overlapsExistingToken) {
+        tokens.push({ className: highlight.className, end, start });
+      }
+      start = text.indexOf(highlight.target, end);
     }
   }
 
