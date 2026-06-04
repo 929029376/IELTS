@@ -513,6 +513,35 @@ describe("exam simulation components", () => {
     expect(screen.queryByText("First attempt passage text.")).not.toBeInTheDocument();
   });
 
+  it("does not load an empty local attempt when the question bank has no matching questions", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-empty-question-bank",
+            questions: []
+          })
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+
+    expect(await screen.findByText("Could not start reading mock from the local question bank.")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Loaded local mock set" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Submit local mock" })).not.toBeInTheDocument();
+  });
+
   it("renders a local reading PDF asset when structured passage text is unavailable", async () => {
     vi.useRealTimers();
     const pdfPath = "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/P1-history-of-tea.pdf";

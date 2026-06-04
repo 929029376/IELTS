@@ -136,6 +136,9 @@ async function startAttempt(
   }
 
   const started = (await response.json()) as Omit<StartedMock, "mode" | "subject">;
+  if (!Array.isArray(started.questions) || started.questions.length === 0) {
+    throw new Error(`Could not start ${subject} ${mode}`);
+  }
   return { ...started, mode, subject };
 }
 

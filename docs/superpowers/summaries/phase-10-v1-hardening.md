@@ -228,6 +228,11 @@
     attempt before loading the new one,
   - a failed start no longer leaves the prior test visible with reset answer
     state.
+- Added Mac empty-attempt start hardening:
+  - successful practice-start API responses with no returned questions are
+    treated as start failures,
+  - the Mac mock/practice UI no longer shows a submit-ready empty attempt when
+    the local question bank or selected filters produce no matching questions.
 - Added Mac exam submit-warning navigation hardening:
   - submit confirmation now lists unanswered question numbers,
   - submit confirmation now lists marked-for-review question numbers,
@@ -1388,6 +1393,12 @@
       loaded local mock visible.
     - Passed after clearing the active local attempt before requesting another
       mock or practice set.
+- Mac empty-attempt start hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "empty local attempt"`
+    - Initially failed because an empty successful practice-start response still
+      rendered a loaded local mock set with a submit button.
+    - Passed after treating zero-question starts as local question-bank start
+      failures.
 - Mac submitted-mock review empty-state hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "blank submitted mock review"`
     - Initially failed because whitespace-only submitted review answers rendered
