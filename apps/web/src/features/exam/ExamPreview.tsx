@@ -137,6 +137,7 @@ export function ExamPreview() {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
+      await Promise.all(activeQuestions.map((question) => saveMockAnswer(question.id)));
       const response = await fetch(`/api/practice/${activeMock.attemptId}/submit`, {
         method: "POST"
       });

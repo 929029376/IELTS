@@ -220,7 +220,7 @@ describe("exam simulation components", () => {
     expect(screen.getByText("Duration: 05:20")).toBeInTheDocument();
   });
 
-  it("saves local mock answers and submits for an estimated band report", async () => {
+  it("saves current local mock answers before submitting for an estimated band report", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const path = String(input);
@@ -282,7 +282,6 @@ describe("exam simulation components", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
     const answer = await screen.findByRole("textbox", { name: "Answer for question question-2" });
     fireEvent.change(answer, { target: { value: "routes" } });
-    fireEvent.blur(answer);
     fireEvent.click(screen.getByRole("button", { name: "Submit local mock" }));
 
     expect(await screen.findByRole("region", { name: "Score report" })).toBeInTheDocument();

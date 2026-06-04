@@ -39,6 +39,7 @@
 - Connected the loaded local mock attempt to the exam UI:
   - renders returned local questions as answer inputs,
   - saves answers through `POST /api/practice/:attemptId/answer`,
+  - saves current answer input state again before local mock submission,
   - submits through `POST /api/practice/:attemptId/submit`,
   - displays the returned raw score and estimated band report.
 - Added a submitted-mock review panel that loads `GET /api/practice/:attemptId/review`
@@ -87,6 +88,16 @@
     - Initially failed because the loaded local mock questions had no answer input.
     - Passed after adding answer persistence, local mock submission, and score
       report rendering for the active attempt.
+- Mac local mock submit-save follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because typing an answer and clicking Submit without
+      blurring the field skipped the answer-save request.
+    - Passed after saving current mock answer state before calling the submit
+      endpoint.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the local mock submit-save follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac local mock review follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because submitting a local mock did not render a detailed

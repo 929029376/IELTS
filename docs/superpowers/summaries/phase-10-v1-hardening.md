@@ -87,6 +87,7 @@
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
+  - save current answer field state immediately before submit,
   - submit through the practice submit API,
   - show the returned raw score and estimated band report.
 - Added submitted-mock review hardening:
@@ -323,6 +324,15 @@
       and no answer field.
     - Passed after wiring answer save, submit, and score report display to the
       active local attempt.
+- Mac local mock submit-save follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because submitting immediately after typing skipped the
+      answer-save request when the field had not blurred.
+    - Passed after saving all active mock answers before submission.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the Mac local mock submit-save hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac detailed mock review follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because the review API did not include detailed review
