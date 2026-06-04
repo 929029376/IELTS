@@ -48,6 +48,9 @@
   - reflects marked questions in the bottom question navigation and submit warning,
   - supports clicking bottom question navigation items to jump to the matching
     local mock passage or listening section,
+  - keeps the listening section tabs, visible questions, and selected local audio
+    metadata synchronized when bottom question navigation jumps to another
+    listening section,
   - persists the marked-for-review flag with the saved answer payload,
   - saves current answer input state again before local mock submission,
   - stops submission and shows an error when pre-submit answer saving fails,
@@ -159,6 +162,14 @@
     - Passed after adding question-select callbacks through `QuestionNavigator`
       and `ExamShell`, then mapping selected question numbers back to the
       correct local mock passage or section.
+- Mac listening bottom-navigation section jump follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because clicking `Question 11` in the bottom navigator
+      selected the question but left the listening player, section tab, and
+      visible questions on section one.
+    - Passed after making `ListeningExamView` accept the active section from the
+      parent exam state and passing the active local mock group id from
+      `ExamPreview`.
 - Mac local mock save-failure follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because a failed pre-submit answer save still allowed the

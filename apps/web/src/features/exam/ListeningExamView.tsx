@@ -14,6 +14,7 @@ export interface ListeningSection {
 export interface ListeningExamViewProps {
   audioDurationSeconds?: number | null;
   audioPath?: string | null;
+  activeSectionId?: string | null;
   mode: "mock" | "practice";
   audioTitle: string;
   sections: ListeningSection[];
@@ -28,14 +29,16 @@ function localAssetUrl(path: string): string {
 export function ListeningExamView({
   audioDurationSeconds,
   audioPath,
+  activeSectionId,
   mode,
   audioTitle,
   sections,
   finalReviewSeconds,
   onActiveSectionChange
 }: ListeningExamViewProps) {
-  const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id);
-  const activeSection = sections.find((section) => section.id === activeSectionId) ?? sections[0];
+  const [internalActiveSectionId, setInternalActiveSectionId] = useState(sections[0]?.id);
+  const selectedSectionId = activeSectionId ?? internalActiveSectionId;
+  const activeSection = sections.find((section) => section.id === selectedSectionId) ?? sections[0];
   const isMock = mode === "mock";
   const activeAudioTitle = activeSection?.audioTitle ?? audioTitle;
   const activeAudioPath = activeSection?.audioPath ?? audioPath;
@@ -76,10 +79,10 @@ export function ListeningExamView({
       <div className="section-tabs" role="tablist" aria-label="Listening sections">
         {sections.map((section) => (
           <button
-            aria-selected={section.id === activeSectionId}
+            aria-selected={section.id === selectedSectionId}
             key={section.id}
             onClick={() => {
-              setActiveSectionId(section.id);
+              setInternalActiveSectionId(section.id);
               onActiveSectionChange?.(section.id);
             }}
             role="tab"

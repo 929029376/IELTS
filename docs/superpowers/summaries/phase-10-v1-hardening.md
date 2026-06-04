@@ -105,6 +105,9 @@
     question navigation,
   - jump from bottom question navigation items to the matching passage or
     listening section,
+  - keep the listening section tabs, visible questions, and active audio metadata
+    synchronized when bottom question navigation jumps to another listening
+    section,
   - persist the marked-for-review flag with answer-save requests,
   - save current answer field state immediately before submit,
   - stop submission when the pre-submit answer save fails,
@@ -335,6 +338,17 @@
       the active local mock passage/section.
     - Passed after adding a navigator selection callback and mapping clicked
       question numbers to their local passage or listening section.
+- Mac listening bottom-navigation section jump follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because clicking a later listening question in the bottom
+      navigator updated the current question state but left the visible section,
+      tab selection, and audio metadata on the first listening section.
+    - Passed after making the listening exam view accept the active section from
+      the parent local mock state.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the listening bottom-navigation section jump follow-up,
+      including unit/component tests, Playwright, production build, desktop
+      diagnostics, and Mac DMG packaging.
 - Mac practice-filter follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because supplied practice filters were ignored by the

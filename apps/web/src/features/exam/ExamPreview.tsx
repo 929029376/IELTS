@@ -502,6 +502,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           ) : (
             <ListeningExamView
               mode="mock"
+              activeSectionId={activeGroup?.id}
               audioDurationSeconds={activeGroupQuestions[0]?.audioDurationSeconds}
               audioPath={activeGroupQuestions[0]?.audioPath}
               audioTitle={activeGroupQuestions[0]?.passageTitle ?? "Listening section audio"}

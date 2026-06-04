@@ -499,6 +499,71 @@ describe("exam simulation components", () => {
     expect(screen.getByLabelText("Question 11, current")).toBeInTheDocument();
   });
 
+  it("switches local listening mock sections from the bottom question navigator", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-listening-nav-switch-1",
+            questions: [
+              {
+                answerRules: {},
+                assetPaths: [],
+                audioDurationSeconds: 130,
+                audioPath: "/Users/musheng/Desktop/IELTS/listening/nav-p1.mp3",
+                id: "listening-nav-p1-q1",
+                part: "P1",
+                passageId: "listening-nav-p1",
+                passageText: null,
+                passageTitle: "Navigator Listening One",
+                prompt: "What is in listening section one?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              },
+              {
+                answerRules: {},
+                assetPaths: [],
+                audioDurationSeconds: 260,
+                audioPath: "/Users/musheng/Desktop/IELTS/listening/nav-p2.mp3",
+                id: "listening-nav-p2-q11",
+                part: "P2",
+                passageId: "listening-nav-p2",
+                passageText: null,
+                passageTitle: "Navigator Listening Two",
+                prompt: "What is in listening section two?",
+                questionNumber: 11,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start listening mock" }));
+
+    expect(await screen.findByRole("heading", { name: "Navigator Listening One" })).toBeInTheDocument();
+    const listeningView = screen.getByLabelText("Listening mock view");
+    expect(screen.getByText("Duration: 02:10")).toBeInTheDocument();
+    expect(within(listeningView).queryByText(/listening section two/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Question 11, unanswered" }));
+
+    expect(screen.getByRole("heading", { name: "Navigator Listening Two" })).toBeInTheDocument();
+    expect(screen.getByText("Duration: 04:20")).toBeInTheDocument();
+    expect(within(listeningView).getByText(/listening section two/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Question 11, current")).toBeInTheDocument();
+  });
+
   it("renders a real local audio element while keeping mock controls strict", () => {
     const audioPath = "/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3";
     const { container } = render(
