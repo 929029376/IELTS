@@ -250,6 +250,8 @@
     `(the) green park` now match both `green park` and `the green park`,
   - accepted answers with multiple optional segments such as
     `(the) green park(s)` now expand all combinations,
+  - accepted answers imported with full-width optional markers such as
+    `（the） green park（s）` now expand the same way,
   - unrelated alternatives such as `a green park` still fail,
   - practice and mock scoring can handle imported answer-key notation that marks
     articles or short words as optional.
@@ -280,6 +282,8 @@
   - copied user answers such as `(green park)` now match answer keys such as
     `green park`,
   - imported answer keys wrapped as `(green park)` also match typed answers,
+  - full-width wrappers such as `（green park）` normalize through the same
+    parentheses handling,
   - existing optional-answer notation such as `(the) green park` still expands
     correctly instead of being treated as a whole-answer wrapper.
 - Added Mac imported-answer numbering-prefix hardening:
@@ -1930,14 +1934,20 @@
       user answer `green park`.
     - A follow-up red run also failed because `(the) green park(s)` only
       expanded the first optional segment and still left `green park` incorrect.
+    - A later red run failed because full-width optional markers such as
+      `（the） green park` and `（the） green park（s）` were not recognized as
+      parenthesized optional segments.
     - Passed after expanding accepted answers with one parenthesized optional
       segment into with-optional and without-optional variants, then after
-      recursively expanding all parenthesized optional segments.
+      recursively expanding all parenthesized optional segments, and finally
+      normalizing full-width parentheses to ASCII parentheses.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "optional parenthesized"`
     - Initially failed because the practice API marked `green park` incorrect
       against accepted answer `(the) green park`.
     - A follow-up red run also failed against accepted answer
       `(the) green park(s)`.
+    - A later red run failed against accepted answer
+      `（the） green park（s）`.
     - Passed after the shared optional-answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`

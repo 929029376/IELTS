@@ -42,6 +42,8 @@ export function normalizeAnswer(answer: string): string {
     .trim()
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, "\"")
+    .replace(/[（]/g, "(")
+    .replace(/[）]/g, ")")
     .replace(/^['"]+|['"]+$/g, "")
     .replace(/^\(([^()]+)\)$/g, "$1")
     .replace(/^[.,;:：!?，。！？；]+|[.,;:：!?，。！？；]+$/g, "")
