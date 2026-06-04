@@ -94,16 +94,22 @@ function unorderedChoiceMatch(rawAnswer: string, acceptedAnswer: string): boolea
 }
 
 function acceptedAnswerVariants(acceptedAnswer: string): string[] {
-  const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
   const optionalPattern = /\(([^()]+)\)/;
-  const match = normalizedAcceptedAnswer.match(optionalPattern);
-  if (!match) {
-    return [normalizedAcceptedAnswer];
+  const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
+  const variants = [normalizedAcceptedAnswer];
+
+  for (let index = 0; index < variants.length; index += 1) {
+    const variant = variants[index];
+    const match = variant.match(optionalPattern);
+    if (!match) {
+      continue;
+    }
+
+    variants.push(normalizeAnswer(variant.replace(optionalPattern, " ")));
+    variants.push(normalizeAnswer(variant.replace(optionalPattern, match[1])));
   }
 
-  const withoutOptional = normalizeAnswer(normalizedAcceptedAnswer.replace(optionalPattern, " "));
-  const withOptional = normalizeAnswer(normalizedAcceptedAnswer.replace(optionalPattern, match[1]));
-  return Array.from(new Set([withoutOptional, withOptional]));
+  return Array.from(new Set(variants.filter((variant) => !optionalPattern.test(variant))));
 }
 
 export function isAnswerCorrect(

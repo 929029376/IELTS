@@ -16,6 +16,8 @@ describe("answer scoring", () => {
   it("expands optional parenthesized words in accepted answers", () => {
     expect(isAnswerCorrect("green park", ["(the) green park"])).toBe(true);
     expect(isAnswerCorrect("the green park", ["(the) green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["(the) green park(s)"])).toBe(true);
+    expect(isAnswerCorrect("the green parks", ["(the) green park(s)"])).toBe(true);
     expect(isAnswerCorrect("a green park", ["(the) green park"])).toBe(false);
   });
 

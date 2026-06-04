@@ -246,6 +246,8 @@
 - Added Mac optional-answer-word scoring hardening:
   - accepted answers with optional parenthesized words such as
     `(the) green park` now match both `green park` and `the green park`,
+  - accepted answers with multiple optional segments such as
+    `(the) green park(s)` now expand all combinations,
   - unrelated alternatives such as `a green park` still fail,
   - practice and mock scoring can handle imported answer-key notation that marks
     articles or short words as optional.
@@ -1851,11 +1853,16 @@
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "optional parenthesized"`
     - Initially failed because accepted answer `(the) green park` did not match
       user answer `green park`.
+    - A follow-up red run also failed because `(the) green park(s)` only
+      expanded the first optional segment and still left `green park` incorrect.
     - Passed after expanding accepted answers with one parenthesized optional
-      segment into with-optional and without-optional variants.
+      segment into with-optional and without-optional variants, then after
+      recursively expanding all parenthesized optional segments.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "optional parenthesized"`
     - Initially failed because the practice API marked `green park` incorrect
       against accepted answer `(the) green park`.
+    - A follow-up red run also failed against accepted answer
+      `(the) green park(s)`.
     - Passed after the shared optional-answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`

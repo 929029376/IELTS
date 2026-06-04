@@ -208,9 +208,9 @@ function seedOptionalAnswerWordQuestion(databasePath: string) {
     });
     questions.createAnswerKey({
       questionId: question.id,
-      acceptedAnswers: ["(the) green park"],
-      answerSentence: "The speaker says the green park.",
-      explanation: "The article is optional in the answer key.",
+      acceptedAnswers: ["(the) green park(s)"],
+      answerSentence: "The speaker says the green parks.",
+      explanation: "The article and plural marker are optional in the answer key.",
       synonyms: []
     });
   } finally {
