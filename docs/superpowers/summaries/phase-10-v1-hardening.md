@@ -536,6 +536,10 @@
   - starting a new backup export clears previously exported backup feedback,
   - a failed later backup export no longer leaves stale old backup paths visible
     in the manual backup panel.
+- Added Mac backup export/import cross-feedback hardening:
+  - starting a new backup export clears previously imported restore feedback,
+  - exporting a fresh safety copy no longer leaves stale `Backup imported`
+    counts visible beside the new export result.
 - Added Mac backup export path fallback hardening:
   - whitespace-only backup export paths are trimmed before they fill the restore
     path input,
@@ -1087,8 +1091,14 @@
       export's old backup path visible in the manual backup panel.
     - Passed after clearing backup export result state at the start of each new
       backup export attempt.
+- Mac backup export/import cross-feedback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "clears stale backup import feedback when exporting"`
+    - Initially failed because exporting a new backup after a successful restore
+      left the old `Backup imported` heading and imported-table count visible.
+    - Passed after clearing backup import result state at the start of each new
+      backup export attempt.
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
-    - 11 tests passed.
+    - 16 tests passed.
   - `npx pnpm@9.15.4 --filter @ielts/web build`
     - Web TypeScript and Vite production build passed.
   - `node scripts/mac-readiness-check.mjs`

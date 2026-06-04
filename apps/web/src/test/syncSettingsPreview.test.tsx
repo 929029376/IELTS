@@ -357,6 +357,66 @@ describe("SyncSettingsPreview", () => {
     expect(screen.queryByText("16 tables")).not.toBeInTheDocument();
   });
 
+  it("clears stale backup import feedback when exporting a new backup", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const path = String(input);
+      if (path === "/api/backups/import") {
+        return {
+          ok: true,
+          json: async () => ({
+            importedTables: 16,
+            rowCounts: {
+              attempt_answers: 40,
+              attempts: 1
+            }
+          })
+        };
+      }
+      if (path === "/api/backups/export") {
+        return {
+          ok: true,
+          json: async () => ({
+            filePath: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-after-restore.json",
+            rowCounts: {
+              attempt_answers: 41,
+              attempts: 2,
+              dictation_attempts: 0,
+              listening_cues: 0
+            }
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Backup file path"), {
+      target: { value: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-before-export.json" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Import backup" }));
+
+    expect(await screen.findByText("Backup imported")).toBeInTheDocument();
+    expect(screen.getByText("16 tables")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Export backup" }));
+
+    expect(await screen.findByText("Backup exported")).toBeInTheDocument();
+    expect(screen.queryByText("Backup imported")).not.toBeInTheDocument();
+    expect(screen.queryByText("16 tables")).not.toBeInTheDocument();
+  });
+
   it("saves an edited Baidu sync folder path", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/sync/config") {
