@@ -96,6 +96,13 @@ export function registerPracticeRoutes(
 
   server.get("/api/practice/:attemptId/review", async (request, reply) => {
     const params = z.object({ attemptId: z.string().min(1) }).parse(request.params);
-    return reply.send(practice.reviewPractice(params.attemptId));
+    try {
+      return reply.send(practice.reviewPractice(params.attemptId));
+    } catch (error) {
+      if (error instanceof PracticeAttemptNotFoundError) {
+        return reply.code(404).send({ error: error.message });
+      }
+      throw error;
+    }
   });
 }

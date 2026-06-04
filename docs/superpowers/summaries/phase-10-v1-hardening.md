@@ -410,6 +410,11 @@
   - submit requests for missing attempt ids now return `404`,
   - invalid submit requests no longer surface as server errors,
   - no submitted-attempt sync event is appended for a missing attempt.
+- Added Mac review-attempt integrity hardening:
+  - review requests for missing attempt ids now return `404`,
+  - invalid history/review links no longer surface as server errors,
+  - existing submitted-attempt reviews still return answer evidence and detailed
+    explanations.
 - Added Mac local exam metadata fallback hardening:
   - blank imported passage titles now render as `Untitled passage` in loaded
     mock/practice lists, reading passage headers, and listening section labels,
@@ -1824,6 +1829,13 @@
       practice route maps it to `404`.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 23 practice route tests.
+- Mac review-attempt integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
+    - Initially failed because reviewing a missing attempt id returned `500`.
+    - Passed after review uses the same typed attempt-not-found error and the
+      practice route maps it to `404`.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 24 practice route tests.
 - Mac practice local-resource hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because free practice attempts did not receive imported

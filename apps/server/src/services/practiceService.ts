@@ -278,7 +278,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
     reviewPractice(attemptId: string) {
       const attempt = attempts.getAttemptWithAnswers(attemptId);
       if (!attempt) {
-        throw new Error("Attempt not found.");
+        throw new PracticeAttemptNotFoundError();
       }
 
       const reviewItems = attempt.answers.map((answer) => {

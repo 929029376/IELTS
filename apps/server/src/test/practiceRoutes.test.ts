@@ -1046,6 +1046,29 @@ describe("practice routes", () => {
     }
   });
 
+  it("returns not found when reviewing a missing attempt", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-review-missing-attempt-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const review = await server.inject({
+        method: "GET",
+        url: "/api/practice/missing-attempt-id/review"
+      });
+
+      expect(review.statusCode).toBe(404);
+      expect(review.json()).toMatchObject({
+        error: "Attempt not found."
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("applies common word-limit aliases before marking a matched answer correct", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-word-limit-alias-"));
     const databasePath = join(tempDir, "ielts.db");
