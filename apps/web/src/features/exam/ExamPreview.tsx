@@ -154,6 +154,10 @@ function questionPromptLabel(question: Pick<StartedMockQuestion, "prompt">) {
   return question.prompt.trim() || "Question text unavailable";
 }
 
+function reviewPromptLabel(value?: string | null) {
+  return value?.trim() || "Review question";
+}
+
 function formatReviewUserAnswer(rawAnswer: string) {
   return rawAnswer.trim() || "No answer";
 }
@@ -615,7 +619,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                 <div className="mock-review-heading">
                   <span>{item.isCorrect ? "Correct" : "Incorrect"}</span>
                   <strong>
-                    {item.questionNumber ?? "Question"} {item.prompt ?? "Review question"}
+                    {item.questionNumber ?? "Question"} {reviewPromptLabel(item.prompt)}
                   </strong>
                 </div>
                 <p>Your answer: {formatReviewUserAnswer(item.rawAnswer)}</p>

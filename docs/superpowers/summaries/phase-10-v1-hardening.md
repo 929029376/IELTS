@@ -259,6 +259,12 @@
     sentences, explanations, and synonym notes before rendering,
   - whitespace-only imported review evidence now shows explicit missing-content
     messages instead of blank review rows.
+- Added Mac review prompt fallback hardening:
+  - submitted mock review headings trim imported question prompts before
+    rendering,
+  - reopened history review headings also trim imported prompts,
+  - whitespace-only review prompts now show `Review question` instead of an
+    apparently blank heading.
 - Added Mac history review reopening hardening:
   - completed attempts in the report history table can reopen the saved detailed
     review through `GET /api/practice/:attemptId/review`,
@@ -1416,6 +1422,17 @@
       as blank review content.
     - Passed after trimming submitted mock review fields and rendering explicit
       empty states.
+- Mac review prompt fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "blank submitted mock review"`
+    - Initially failed because a whitespace-only submitted review prompt rendered
+      as a blank review heading.
+    - Passed after trimming submitted mock review prompts and falling back to
+      `Review question`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "blank history review answers"`
+    - Initially failed because a whitespace-only historical review prompt
+      rendered as a blank review heading.
+    - Passed after trimming reopened history review prompts and falling back to
+      `Review question`.
 
 ## Remaining V1 Gaps
 

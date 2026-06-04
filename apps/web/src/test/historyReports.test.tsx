@@ -465,7 +465,7 @@ describe("history and reports preview", () => {
                 isCorrect: false,
                 part: "P2",
                 passageTitle: "Transport",
-                prompt: "Where did the route end?",
+                prompt: "   ",
                 questionId: "q-blank-answers",
                 questionNumber: 12,
                 rawAnswer: "   ",
@@ -512,6 +512,7 @@ describe("history and reports preview", () => {
 
     const reviewRegion = await screen.findByRole("region", { name: "History review details" });
     expect(reviewRegion).toBeInTheDocument();
+    expect(screen.getByText("12 Review question")).toBeInTheDocument();
     expect(screen.getByText("Your answer: No answer")).toBeInTheDocument();
     expect(screen.getByText("Accepted: Not configured")).toBeInTheDocument();
     expect(screen.getByText("No answer sentence recorded for this question.")).toBeInTheDocument();

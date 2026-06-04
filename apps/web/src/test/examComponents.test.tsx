@@ -1570,7 +1570,7 @@ describe("exam simulation components", () => {
                 part: "P1",
                 passageId: "passage-blank-review-1",
                 passageTitle: "Blank Review Passage",
-                prompt: "What needs review?",
+                prompt: " ",
                 questionNumber: 1,
                 questionType: "fill_blank"
               }
@@ -1608,7 +1608,7 @@ describe("exam simulation components", () => {
                 isCorrect: false,
                 part: "P1",
                 passageTitle: "Blank Review Passage",
-                prompt: "What needs review?",
+                prompt: " ",
                 questionId: "question-blank-review-1",
                 questionNumber: 1,
                 rawAnswer: " ",
@@ -1632,6 +1632,7 @@ describe("exam simulation components", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit local mock" }));
 
     expect(await screen.findByRole("region", { name: "Mock review details" })).toBeInTheDocument();
+    expect(screen.getByText("1 Review question")).toBeInTheDocument();
     expect(screen.getByText("Your answer: No answer")).toBeInTheDocument();
     expect(screen.getByText("Accepted: Not configured")).toBeInTheDocument();
     expect(screen.getByText("No answer sentence recorded for this question.")).toBeInTheDocument();

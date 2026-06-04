@@ -106,6 +106,10 @@ function formatAcceptedAnswers(acceptedAnswers: string[]) {
   return answers.length > 0 ? answers.join(", ") : "Not configured";
 }
 
+function formatReviewPrompt(prompt: string | null) {
+  return prompt?.trim() || "Review question";
+}
+
 function renderAnswerSentence(item: HistoryReviewItem) {
   const answerSentence = item.answerSentence?.trim();
   if (!answerSentence) {
@@ -310,7 +314,7 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
                   <div className="mock-review-heading">
                     <span>{item.isCorrect ? "Correct" : "Incorrect"}</span>
                     <strong>
-                      {item.questionNumber ?? "Question"} {item.prompt ?? "Review question"}
+                      {item.questionNumber ?? "Question"} {formatReviewPrompt(item.prompt)}
                     </strong>
                   </div>
                   <p>Your answer: {formatUserAnswer(item.rawAnswer)}</p>
