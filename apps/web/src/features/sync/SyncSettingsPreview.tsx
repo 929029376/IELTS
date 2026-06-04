@@ -36,6 +36,10 @@ function backupCount(result: BackupResult | null, key: string) {
   return result?.rowCounts[key] ?? 0;
 }
 
+function displayText(value: string, fallback: string) {
+  return value.trim() || fallback;
+}
+
 function getLocalFilePath(file: File | null) {
   if (!file) {
     return "";
@@ -229,7 +233,7 @@ export function SyncSettingsPreview({
             <FolderSync size={18} aria-hidden="true" />
             <h3>Sync folder</h3>
           </div>
-          <p>{displayedSyncPath}</p>
+          <p>{displayText(displayedSyncPath, "Sync folder not configured")}</p>
           <label className="sync-path-control">
             <span>Sync folder path</span>
             <input
@@ -260,7 +264,7 @@ export function SyncSettingsPreview({
           <dl>
             <div>
               <dt>Device</dt>
-              <dd>{deviceName}</dd>
+              <dd>{displayText(deviceName, "Unknown device")}</dd>
             </div>
             <div>
               <dt>Last sync</dt>
@@ -272,8 +276,8 @@ export function SyncSettingsPreview({
         <div className="sync-files-panel">
           <h3>Append-only files</h3>
           <div className="sync-file-list">
-            {syncFiles.map((fileName) => (
-              <span key={fileName}>{fileName}</span>
+            {syncFiles.map((fileName, index) => (
+              <span key={`${fileName}-${index}`}>{displayText(fileName, "Unknown sync file")}</span>
             ))}
           </div>
         </div>

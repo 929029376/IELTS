@@ -212,4 +212,20 @@ describe("SyncSettingsPreview", () => {
     expect(screen.getByLabelText("Sync folder path")).toHaveValue("/Users/musheng/Desktop/同步空间/IELTS-Sync");
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("shows fallback labels for blank sync configuration metadata", () => {
+    render(
+      <SyncSettingsPreview
+        deviceName="   "
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "   "]}
+        syncPath="   "
+      />
+    );
+
+    expect(screen.getByText("Sync folder not configured")).toBeInTheDocument();
+    expect(screen.getByText("Unknown device")).toBeInTheDocument();
+    expect(screen.getByText("Unknown sync file")).toBeInTheDocument();
+    expect(screen.getByText("attempts.jsonl")).toBeInTheDocument();
+  });
 });

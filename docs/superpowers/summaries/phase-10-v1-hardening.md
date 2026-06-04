@@ -390,6 +390,10 @@
     `PUT /api/sync/config`,
   - saved sync folder paths are written to local runtime config JSON and loaded
     again when the real server starts.
+- Added Mac sync-settings metadata fallback hardening:
+  - blank sync folder display values now render as `Sync folder not configured`,
+  - blank device names now render as `Unknown device`,
+  - blank append-only sync file names now render as `Unknown sync file`.
 - Added Mac review conflict hardening:
   - submitted mock review now renders saved sync conflicts per question,
   - remote conflicting answers show the originating device id and raw answer.
@@ -1397,6 +1401,12 @@
       sync path instead of the server's active Baidu Cloud JSONL sync folder.
     - Passed after App loads `/api/sync/config` and passes the live device name
       and sync folder path into the Sync settings panel.
+- Mac sync-settings metadata fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "blank sync configuration"`
+    - Initially failed because whitespace-only sync folder, device name, and
+      append-only file metadata rendered as blank UI content.
+    - Passed after trimming sync settings metadata and falling back to explicit
+      local configuration labels.
 - Mac manual frequency batch-row hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/frequencyCorrectionTable.test.tsx`
     - Initially failed because manual frequency correction was limited to the
