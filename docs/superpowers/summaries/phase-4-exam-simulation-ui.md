@@ -36,6 +36,11 @@
 - Added a Mock Exam Center starter that calls `POST /api/practice/start` with
   `mode: "mock"` for reading or listening and renders the returned local attempt
   questions from the question bank.
+- Added practice-mode starters beside the mock starters:
+  - reading practice calls `POST /api/practice/start` with `mode: "practice"`,
+  - listening practice calls `POST /api/practice/start` with `mode: "practice"`,
+  - the loaded-attempt panel and exam shell title identify practice attempts
+    separately from mock tests.
 - Connected the loaded local mock attempt to the exam UI:
   - renders returned local questions as answer inputs,
   - saves answers through `POST /api/practice/:attemptId/answer`,
@@ -84,6 +89,16 @@
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because `Start reading mock` did not exist.
     - Passed after adding the local mock starter and loaded question rendering.
+- Mac free-practice start follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because `Start reading practice` did not exist.
+    - Passed after adding reading/listening practice starters, using
+      `mode: "practice"` for the local practice API, and changing the active
+      shell submit label to `Submit practice`.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the free-practice start follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - Mac local mock answer/submit follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the loaded local mock questions had no answer input.

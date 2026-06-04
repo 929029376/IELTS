@@ -23,6 +23,7 @@ interface StartedMockQuestion {
 
 interface StartedMock {
   attemptId: string;
+  mode: "mock" | "practice";
   questions: StartedMockQuestion[];
   subject: "listening" | "reading";
 }
@@ -57,9 +58,9 @@ interface ExamPreviewProps {
   onMockSubmitted?: () => void;
 }
 
-async function startMock(subject: "listening" | "reading"): Promise<StartedMock> {
+async function startAttempt(mode: "mock" | "practice", subject: "listening" | "reading"): Promise<StartedMock> {
   const response = await fetch("/api/practice/start", {
-    body: JSON.stringify({ mode: "mock", subject }),
+    body: JSON.stringify({ mode, subject }),
     headers: {
       "Content-Type": "application/json"
     },
@@ -67,11 +68,11 @@ async function startMock(subject: "listening" | "reading"): Promise<StartedMock>
   });
 
   if (!response.ok) {
-    throw new Error(`Could not start ${subject} mock`);
+    throw new Error(`Could not start ${subject} ${mode}`);
   }
 
-  const started = (await response.json()) as Omit<StartedMock, "subject">;
-  return { ...started, subject };
+  const started = (await response.json()) as Omit<StartedMock, "mode" | "subject">;
+  return { ...started, mode, subject };
 }
 
 function subjectLabel(subject: "listening" | "reading") {
@@ -97,7 +98,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [scoreReport, setScoreReport] = useState<MockSubmitResult | null>(null);
   const [submittedReason, setSubmittedReason] = useState<string | null>(null);
 
-  async function handleStartMock(subject: "listening" | "reading") {
+  async function handleStartAttempt(mode: "mock" | "practice", subject: "listening" | "reading") {
     setIsStarting(true);
     setStartError(null);
     setSubmitError(null);
@@ -105,9 +106,9 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setScoreReport(null);
     setAnswers({});
     try {
-      setActiveMock(await startMock(subject));
+      setActiveMock(await startAttempt(mode, subject));
     } catch {
-      setStartError(`Could not start ${subjectLabel(subject)} mock from the local question bank.`);
+      setStartError(`Could not start ${subjectLabel(subject)} ${mode} from the local question bank.`);
     } finally {
       setIsStarting(false);
     }
@@ -205,19 +206,27 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           <h2>Start from local question bank</h2>
         </div>
         <div className="mock-start-actions">
-          <button disabled={isStarting} onClick={() => void handleStartMock("reading")} type="button">
+          <button disabled={isStarting} onClick={() => void handleStartAttempt("mock", "reading")} type="button">
             Start reading mock
           </button>
-          <button disabled={isStarting} onClick={() => void handleStartMock("listening")} type="button">
+          <button disabled={isStarting} onClick={() => void handleStartAttempt("mock", "listening")} type="button">
             Start listening mock
+          </button>
+          <button disabled={isStarting} onClick={() => void handleStartAttempt("practice", "reading")} type="button">
+            Start reading practice
+          </button>
+          <button disabled={isStarting} onClick={() => void handleStartAttempt("practice", "listening")} type="button">
+            Start listening practice
           </button>
         </div>
       </div>
       {activeMock ? (
-        <section className="loaded-mock-panel" aria-label="Loaded local mock set">
+        <section className="loaded-mock-panel" aria-label={`Loaded local ${activeMock.mode} set`}>
           <div>
             <p className="eyebrow">Attempt {activeMock.attemptId}</p>
-            <h3>Loaded local {activeMock.subject} mock</h3>
+            <h3>
+              Loaded local {activeMock.subject} {activeMock.mode}
+            </h3>
           </div>
           <ol className="loaded-mock-question-list">
             {activeMock.questions.map((question) => (
@@ -229,7 +238,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
             ))}
           </ol>
           <button disabled={isSubmitting || scoreReport !== null} onClick={() => void submitActiveMock()} type="button">
-            Submit local mock
+            Submit local {activeMock.mode}
           </button>
         </section>
       ) : null}
@@ -237,10 +246,13 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
       {submitError ? <p className="mock-start-error">{submitError}</p> : null}
       {activeMock && activeQuestions.length > 0 ? (
         <ExamShell
-          title={`${activeMock.subject === "reading" ? "Reading" : "Listening"} Local Mock Test`}
+          title={`${activeMock.subject === "reading" ? "Reading" : "Listening"} Local ${
+            activeMock.mode === "mock" ? "Mock Test" : "Practice"
+          }`}
           durationSeconds={activeMock.subject === "reading" ? 3600 : 2400}
           questions={mockQuestionStates}
           onSubmit={() => void submitActiveMock()}
+          submitLabel={activeMock.mode === "mock" ? "Submit test" : "Submit practice"}
         >
           {activeMock.subject === "reading" ? (
             <ReadingExamView

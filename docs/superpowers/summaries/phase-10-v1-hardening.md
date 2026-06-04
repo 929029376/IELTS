@@ -84,6 +84,9 @@
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
   start reading or listening mock attempts through the local practice API.
+- Added frontend free-practice controls in the Mock Exam Center so the dashboard
+  can start reading or listening practice attempts through the same local
+  practice API without entering mock mode.
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
@@ -260,6 +263,16 @@
     - `desktop:check` passed.
     - Mac DMG packaging passed and generated
       `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
+- Mac free-practice UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the dashboard could start mock attempts but not
+      free practice attempts.
+    - Passed after adding reading/listening practice start buttons that call
+      `POST /api/practice/start` with `mode: "practice"` and label the active
+      shell with `Submit practice`.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the free-practice UI follow-up, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - Browser verification:
   - Opened `http://127.0.0.1:5173/` in the in-app browser.
   - Confirmed the page title, V1 hardening center, and sync settings were present.

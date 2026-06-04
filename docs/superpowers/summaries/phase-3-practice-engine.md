@@ -25,6 +25,12 @@
 - Added basic reusable web question components:
   - `AnswerInput`
   - `QuestionNavigator`
+- Added Mac dashboard free-practice entry points:
+  - reading practice starts through `POST /api/practice/start` with
+    `mode: "practice"`,
+  - listening practice starts through `POST /api/practice/start` with
+    `mode: "practice"`,
+  - loaded practice attempts are labelled separately from mock exams in the UI.
 - Added question navigation states:
   - unanswered,
   - answered,
@@ -60,6 +66,17 @@
       include detailed review items.
     - Passed after adding prompt, answer key, answer sentence, explanation, and
       correctness details to the review response.
+- Mac free-practice UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the dashboard had mock-start buttons but no
+      reading practice start action.
+    - Passed after adding reading/listening practice start actions that call the
+      practice API with `mode: "practice"` and label the loaded attempt as
+      practice.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the Mac free-practice UI follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 
 ## Notes
 

@@ -13,9 +13,17 @@ export interface ExamShellProps extends PropsWithChildren {
   durationSeconds: number;
   questions: ExamQuestionState[];
   onSubmit: (event: ExamSubmitEvent) => void;
+  submitLabel?: string;
 }
 
-export function ExamShell({ title, durationSeconds, questions, onSubmit, children }: ExamShellProps) {
+export function ExamShell({
+  title,
+  durationSeconds,
+  questions,
+  onSubmit,
+  submitLabel = "Submit test",
+  children
+}: ExamShellProps) {
   const [remainingSeconds, setRemainingSeconds] = useState(durationSeconds);
   const [showWarning, setShowWarning] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -102,7 +110,7 @@ export function ExamShell({ title, durationSeconds, questions, onSubmit, childre
       <footer className="exam-bottom-bar">
         <QuestionNavigator items={navItems} />
         <button className="submit-test-button" type="button" onClick={handleSubmitClick}>
-          Submit test
+          {submitLabel}
         </button>
       </footer>
     </section>

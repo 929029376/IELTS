@@ -177,6 +177,54 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("starts a local reading practice set without entering mock mode", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-practice-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "practice-question-1",
+                part: "P2",
+                passageId: "practice-passage-1",
+                passageTitle: "Focused Reading Practice",
+                prompt: "Which detail should be reviewed?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading practice" }));
+
+    expect(await screen.findByText("Loaded local reading practice")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Loaded local practice set" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Submit practice" })).toBeInTheDocument();
+    expect(screen.getAllByText("Focused Reading Practice").length).toBeGreaterThan(0);
+    expect(screen.getByText("Which detail should be reviewed?")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/start",
+      expect.objectContaining({
+        body: JSON.stringify({ mode: "practice", subject: "reading" }),
+        method: "POST"
+      })
+    );
+  });
+
   it("shows local listening audio metadata returned by the practice API", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
