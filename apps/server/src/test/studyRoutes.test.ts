@@ -125,6 +125,95 @@ describe("study overview routes", () => {
     ).toBe(0);
   });
 
+  it("recommends the highest-weight mock candidate after recency penalties", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-study-recency-overview-"));
+    const server = buildServer({ databasePath: join(tempDir, "ielts.db") });
+    servers.push(server);
+    const db = (server as typeof server & { db: DatabaseHandle }).db;
+    const attempts = createAttemptRepo(db);
+    const questions = createQuestionRepo(db);
+
+    function seedPassage(input: {
+      frequencyClass: "high" | "medium" | "low" | "unknown";
+      part: "P1" | "P2" | "P3" | "P4";
+      title: string;
+    }) {
+      const source = questions.createSource({
+        checksum: `recency-${input.title}`,
+        importStatus: "imported",
+        originalPath: `seed/${input.title}.json`,
+        sourceType: "seed",
+        version: 1
+      });
+      const passage = questions.createPassage({
+        frequencyClass: input.frequencyClass,
+        part: input.part,
+        sourceId: source.id,
+        subject: "listening",
+        title: input.title
+      });
+      const question = questions.createQuestion({
+        answerRules: {},
+        passageId: passage.id,
+        prompt: `${input.title} prompt`,
+        questionNumber: 1,
+        questionType: "fill_blank"
+      });
+      questions.createAnswerKey({
+        acceptedAnswers: ["answer"],
+        answerSentence: "answer",
+        explanation: "sample",
+        questionId: question.id,
+        synonyms: []
+      });
+      return { passage, question };
+    }
+
+    const recentHigh = seedPassage({
+      frequencyClass: "high",
+      part: "P1",
+      title: "A Recently Completed High"
+    });
+    seedPassage({
+      frequencyClass: "medium",
+      part: "P1",
+      title: "B Fresh Medium"
+    });
+    seedPassage({ frequencyClass: "high", part: "P2", title: "P2 High" });
+    seedPassage({ frequencyClass: "high", part: "P3", title: "P3 High" });
+    seedPassage({ frequencyClass: "high", part: "P4", title: "P4 High" });
+
+    const attempt = attempts.createAttempt({
+      mode: "mock",
+      startedAt: "2026-06-03T09:00:00.000Z",
+      subject: "listening"
+    });
+    attempts.saveAnswer({
+      attemptId: attempt.id,
+      isCorrect: true,
+      markedForReview: false,
+      normalizedAnswer: "answer",
+      questionId: recentHigh.question.id,
+      rawAnswer: "answer",
+      timeSpentSeconds: 30
+    });
+    attempts.submitAttempt({
+      attemptId: attempt.id,
+      estimatedBand: 9,
+      rawScore: 1,
+      submittedAt: "2026-06-03T10:00:00.000Z"
+    });
+
+    const response = await server.inject({ method: "GET", url: "/api/study/overview" });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json().recommendedMockSets.listening.passages[0]).toMatchObject({
+      frequencyClass: "medium",
+      selectionWeight: 3,
+      title: "B Fresh Medium"
+    });
+  });
+
   it("returns live intensive listening cues and reading evidence for the Mac intensive panel", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-study-intensive-"));
     const server = buildServer({ databasePath: join(tempDir, "ielts.db") });

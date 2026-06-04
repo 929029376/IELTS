@@ -42,6 +42,9 @@
   - frequency distribution by subject,
   - whether full listening and reading mock sets are currently buildable,
   - high-frequency-first recommended listening and reading mock sets.
+- Hardened the Mac study overview recommendations so each recommended mock-set
+  part picks the candidate with the highest effective `selectionWeight`, after
+  frequency weights and recency penalties are applied.
 - Added a local dashboard study queue that consumes the overview API and surfaces
   recommended mock passages from the local question bank.
 - Wired `POST /api/practice/start` in `mock` mode to the frequency-weighted full-set
@@ -70,6 +73,18 @@
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because the dashboard did not render `Local study queue`.
     - Passed after adding the study overview panel and API loading hook.
+- Mac study overview recency-recommendation follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because the study overview recommended the first
+      alphabetically sorted candidate for a part even when that high-frequency
+      passage had just been completed and had a lower effective selection weight.
+    - Passed after the overview recommendation path selected the highest
+      effective `selectionWeight` per part, keeping mock-start random selection
+      separate from the deterministic dashboard recommendation.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the recency-recommendation follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mock-start integration follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because a reading mock start included both a high-frequency

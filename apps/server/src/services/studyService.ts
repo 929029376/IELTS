@@ -1,6 +1,6 @@
-import type { FrequencyClass, Subject } from "@ielts/shared";
+import type { FrequencyClass, Part, Subject } from "@ielts/shared";
 import type { DatabaseHandle } from "../db/database";
-import { buildFullListeningSet, buildFullReadingSet, type CandidatePassage } from "./testBuilder";
+import { filterCandidatePassages, type CandidatePassage } from "./testBuilder";
 
 interface SubjectOverview {
   cueCount: number;
@@ -105,6 +105,33 @@ function tryBuildSet<T>(builder: () => T): T | null {
   } catch {
     return null;
   }
+}
+
+function pickRecommendedCandidate(candidates: CandidatePassage[]): CandidatePassage | null {
+  return (
+    [...candidates].sort(
+      (left, right) =>
+        right.selectionWeight - left.selectionWeight ||
+        left.frequencyClass.localeCompare(right.frequencyClass) ||
+        left.title.localeCompare(right.title)
+    )[0] ?? null
+  );
+}
+
+function buildRecommendedSet<T extends Subject>(
+  db: DatabaseHandle,
+  subject: T,
+  parts: Part[]
+): { subject: T; passages: CandidatePassage[] } {
+  const passages = parts.map((part) => {
+    const selected = pickRecommendedCandidate(filterCandidatePassages(db, { subject, part }));
+    if (!selected) {
+      throw new Error(`No ${subject} candidate found for ${part}.`);
+    }
+    return selected;
+  });
+
+  return { subject, passages };
 }
 
 function parseJson<T>(value: string): T {
@@ -271,8 +298,8 @@ export function createStudyService(db: DatabaseHandle) {
     },
 
     getOverview(): StudyOverview {
-      const listening = tryBuildSet(() => buildFullListeningSet(db, { random: () => 0 }));
-      const reading = tryBuildSet(() => buildFullReadingSet(db, { random: () => 0 }));
+      const listening = tryBuildSet(() => buildRecommendedSet(db, "listening", ["P1", "P2", "P3", "P4"]));
+      const reading = tryBuildSet(() => buildRecommendedSet(db, "reading", ["P1", "P2", "P3"]));
 
       return {
         readiness: {
