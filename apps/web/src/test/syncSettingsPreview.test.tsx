@@ -66,6 +66,44 @@ describe("SyncSettingsPreview", () => {
     expect(screen.getByText("Not synced yet")).toBeInTheDocument();
   });
 
+  it("clears stale manual sync counts when a later sync fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          conflicts: 1,
+          imported: 3,
+          skipped: 2
+        })
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({})
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Manual sync" }));
+
+    expect(await screen.findByText("Manual sync complete")).toBeInTheDocument();
+    expect(screen.getByText("3 imported")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Manual sync" }));
+
+    expect(await screen.findByText("Could not complete manual sync.")).toBeInTheDocument();
+    expect(screen.queryByText("Manual sync complete")).not.toBeInTheDocument();
+    expect(screen.queryByText("3 imported")).not.toBeInTheDocument();
+  });
+
   it("exports and imports manual backups from the sync settings panel", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const path = String(input);

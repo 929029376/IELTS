@@ -396,6 +396,10 @@
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
+- Added Mac manual sync failure-state hardening:
+  - starting a new manual sync clears previous sync completion counts,
+  - a failed later manual sync no longer leaves stale imported, skipped, and
+    conflict counts visible in the Sync settings panel.
 - Added Mac runtime sync configuration hardening:
   - the real server entrypoint now uses a persistent local database path instead
     of an in-memory database,
@@ -980,6 +984,26 @@
     - Passed after the manual sync timestamp follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
+- Mac manual sync failure-state hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "stale manual sync counts"`
+    - Initially failed because a failed second manual sync left the first sync's
+      imported, skipped, and conflict counts visible.
+    - Passed after clearing manual sync result state at the start of each new
+      manual sync attempt.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - 12 tests passed.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Web TypeScript and Vite production build passed.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed on macOS while Windows evidence remains intentionally deferred.
+    - Shared: 4 tests passed.
+    - Server: 73 tests passed.
+    - Web: 129 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed, including Rust runtime diagnostics.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
 - Mac manual backup intensive-listening follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupService.test.ts`
     - Initially failed because manual backup JSON did not include

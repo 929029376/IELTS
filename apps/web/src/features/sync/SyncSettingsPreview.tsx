@@ -132,6 +132,7 @@ export function SyncSettingsPreview({
   async function runManualSync() {
     setIsSyncing(true);
     setSyncError(null);
+    setSyncResult(null);
     try {
       const response = await fetch("/api/sync/import", { method: "POST" });
       if (!response.ok) {
