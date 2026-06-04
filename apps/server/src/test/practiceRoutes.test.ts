@@ -452,6 +452,45 @@ function seedParenthesizedAnswerQuestion(databasePath: string) {
   }
 }
 
+function seedDelimitedAnswersQuestion(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: "seed/delimited-answers.json",
+      checksum: "delimited-answers-seed",
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "reading",
+      part: "P1",
+      title: "Delimited Answers Practice",
+      frequencyClass: "high"
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "fill_blank",
+      prompt: "Which alternative answer is accepted?",
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["green park; green parks"],
+      answerSentence: "The imported answer key kept both alternatives in one cell.",
+      explanation: "Imported answer cells can contain multiple alternatives.",
+      synonyms: []
+    });
+  } finally {
+    db.close();
+  }
+}
+
 function seedMultipleChoiceQuestion(databasePath: string) {
   const db = openDatabase(databasePath);
   migrate(db);
@@ -1200,6 +1239,47 @@ describe("practice routes", () => {
       expect(answer.json()).toMatchObject({
         isCorrect: true,
         normalizedAnswer: "green park"
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("scores imported multi-answer cells with delimiters", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-delimited-answers-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedDelimitedAnswersQuestion(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string }>;
+      }>();
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId: started.questions[0].id,
+          rawAnswer: "green parks",
+          timeSpentSeconds: 8
+        }
+      });
+
+      expect(answer.statusCode).toBe(200);
+      expect(answer.json()).toMatchObject({
+        isCorrect: true,
+        normalizedAnswer: "green parks"
       });
     } finally {
       await server.close();

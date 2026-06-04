@@ -173,6 +173,19 @@ function stripImportedAnswerLabelPrefix(acceptedAnswer: string): string {
   return acceptedAnswer.replace(/^(?:answer|ans|答案)\s*(?:[:：.]|-)\s*/i, "");
 }
 
+function splitImportedAnswerAlternatives(acceptedAnswer: string): string[] {
+  if (!/[;|]/.test(acceptedAnswer)) {
+    return [acceptedAnswer];
+  }
+
+  const parts = acceptedAnswer
+    .split(/\s*[;|]\s*/)
+    .map((part) => normalizeAnswer(part))
+    .filter(Boolean);
+
+  return parts.length > 1 ? parts : [acceptedAnswer];
+}
+
 function acceptedAnswerVariants(acceptedAnswer: string): string[] {
   const optionalPattern = /\(([^()]+)\)/;
   const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
@@ -180,7 +193,7 @@ function acceptedAnswerVariants(acceptedAnswer: string): string[] {
     normalizedAcceptedAnswer,
     stripImportedAnswerNumberingPrefix(normalizedAcceptedAnswer),
     stripImportedAnswerLabelPrefix(normalizedAcceptedAnswer)
-  ];
+  ].flatMap(splitImportedAnswerAlternatives);
 
   for (let index = 0; index < variants.length; index += 1) {
     const variant = variants[index];

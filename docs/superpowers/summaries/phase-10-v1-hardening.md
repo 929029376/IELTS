@@ -289,6 +289,13 @@
     `答案：green park` are removed from accepted answer variants,
   - real numeric answers such as `3.5 million` remain intact instead of being
     stripped as question numbers, and real answer text `answer` stays intact.
+- Added Mac imported multi-answer cell hardening:
+  - accepted-answer cells such as `green park; green parks` now expand into
+    separate answer variants,
+  - pipe-delimited answer cells such as `green park | green parks` also expand
+    into separate accepted variants,
+  - unrelated answers such as `blue park` still fail instead of being
+    over-accepted.
 - Added Mac slash-alias answer-key scoring hardening:
   - accepted answers with slash-separated aliases such as `centre/center` now
     match either spelling,
@@ -2026,6 +2033,25 @@
     - Passed with all 14 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 16 practice route tests.
+- Mac imported multi-answer cell hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "multi-answer"`
+    - Initially failed because accepted answer `green park; green parks` was
+      compared as one literal answer and did not match typed answer
+      `green parks`.
+    - Passed after semicolon- and pipe-delimited accepted-answer cells were
+      split into separate answer variants.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "multi-answer"`
+    - Initially failed because the practice API marked `green parks` incorrect
+      against imported accepted answer `green park; green parks`.
+    - Passed after the shared multi-answer cell expansion was used by practice
+      answer scoring.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "multiple-choice"`
+    - Passed after adding pipe-delimited normal-answer expansion, confirming
+      multiple-choice option scoring still tokenizes correctly.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Passed with all 15 shared scoring tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 17 practice route tests.
 - Mac slash-alias answer-key scoring hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
     - Initially failed because accepted answer `centre/center` was compared as
@@ -2044,9 +2070,9 @@
     - Passed after the shared slash-alias answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 14 shared scoring tests.
+    - Passed with all 15 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
-    - Passed with all 16 practice route tests.
+    - Passed with all 17 practice route tests.
 
 ## Remaining V1 Gaps
 

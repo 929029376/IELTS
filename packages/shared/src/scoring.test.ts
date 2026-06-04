@@ -14,6 +14,12 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("blue park", ["Green Park", "Park Green"])).toBe(false);
   });
 
+  it("expands imported multi-answer cells separated by semicolons or pipes", () => {
+    expect(isAnswerCorrect("green parks", ["green park; green parks"])).toBe(true);
+    expect(isAnswerCorrect("green parks", ["green park | green parks"])).toBe(true);
+    expect(isAnswerCorrect("blue park", ["green park; green parks"])).toBe(false);
+  });
+
   it("ignores surrounding punctuation copied from imported answer text", () => {
     expect(isAnswerCorrect("green park", ["green park."])).toBe(true);
     expect(isAnswerCorrect("green park.", ["green park"])).toBe(true);
