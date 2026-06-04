@@ -61,6 +61,7 @@ export interface WordLimitOptions {
 }
 
 export interface AnswerCorrectOptions extends WordLimitOptions {
+  judgmentAliases?: boolean;
   maxWords?: number;
   unorderedChoices?: boolean;
 }
@@ -101,6 +102,33 @@ function unorderedChoiceMatch(rawAnswer: string, acceptedAnswer: string): boolea
   }
 
   return rawTokens.every((token, index) => token === acceptedTokens[index]);
+}
+
+function judgmentAlias(answer: string): string | null {
+  const compact = normalizeAnswer(answer).replace(/[\s.-]+/g, "");
+  if (compact === "t" || compact === "true") {
+    return "true";
+  }
+  if (compact === "f" || compact === "false") {
+    return "false";
+  }
+  if (compact === "y" || compact === "yes") {
+    return "yes";
+  }
+  if (compact === "n" || compact === "no") {
+    return "no";
+  }
+  if (compact === "ng" || compact === "notgiven") {
+    return "not given";
+  }
+
+  return null;
+}
+
+function judgmentAliasMatch(rawAnswer: string, acceptedAnswer: string): boolean {
+  const rawAlias = judgmentAlias(rawAnswer);
+  const acceptedAlias = judgmentAlias(acceptedAnswer);
+  return rawAlias !== null && rawAlias === acceptedAlias;
 }
 
 function slashAliasParts(token: string): string[] | null {
@@ -234,6 +262,10 @@ export function isAnswerCorrect(
   const normalizedAnswer = normalizeAnswer(rawAnswer);
   if (options.unorderedChoices) {
     return acceptedAnswers.some((acceptedAnswer) => unorderedChoiceMatch(rawAnswer, acceptedAnswer));
+  }
+
+  if (options.judgmentAliases) {
+    return acceptedAnswers.some((acceptedAnswer) => judgmentAliasMatch(rawAnswer, acceptedAnswer));
   }
 
   return acceptedAnswers.some((acceptedAnswer) =>

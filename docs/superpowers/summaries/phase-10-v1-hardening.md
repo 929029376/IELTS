@@ -344,6 +344,13 @@
     `not given` now render as the matching fixed choice,
   - surrounding whitespace in restored judgment answers no longer leaves the
     select control visually blank.
+- Added Mac judgment-question answer-key abbreviation hardening:
+  - imported `TRUE/FALSE/NOT GIVEN` answer-key abbreviations such as `T`, `F`,
+    and `NG` now match the fixed UI choices,
+  - imported `YES/NO/NOT GIVEN` answer-key abbreviations such as `Y`, `N`, and
+    `NG` now match the fixed UI choices,
+  - these abbreviations are enabled only for IELTS judgment question types so
+    ordinary fill-blank answers are not over-accepted.
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
@@ -1914,6 +1921,18 @@
       case-insensitively and after trimming surrounding whitespace.
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionComponents.test.tsx`
     - Passed with all 5 question component tests.
+- Mac judgment-question answer-key abbreviation hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "judgment abbreviations|answer aliases"`
+    - Initially failed because fixed UI answer `NOT GIVEN` did not match an
+      imported accepted answer abbreviation `NG`.
+    - Passed after adding a judgment-only alias matcher for `T`, `F`, `Y`, `N`,
+      and `NG`, while keeping abbreviation matching disabled for ordinary
+      answers unless explicitly requested.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "judgment abbreviations"`
+    - Initially failed because the practice API marked fixed UI answer
+      `NOT GIVEN` incorrect against imported accepted answer `NG`.
+    - Passed after the practice service enables judgment aliases only for
+      `true_false_not_given` and `yes_no_not_given` questions.
 - Mac multiple-choice scoring hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "without requiring order"`
     - Initially failed because `C A` did not match accepted answer `A C`.

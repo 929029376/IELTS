@@ -530,6 +530,45 @@ function seedMultipleChoiceQuestion(databasePath: string) {
   }
 }
 
+function seedJudgmentAbbreviationQuestion(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: "seed/judgment-abbreviation.json",
+      checksum: "judgment-abbreviation-seed",
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "reading",
+      part: "P1",
+      title: "Judgment Abbreviation Practice",
+      frequencyClass: "high"
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "true_false_not_given",
+      prompt: "The passage gives enough evidence for the claim.",
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["NG"],
+      answerSentence: "The passage does not state enough evidence.",
+      explanation: "Imported IELTS answer keys often abbreviate NOT GIVEN as NG.",
+      synonyms: []
+    });
+  } finally {
+    db.close();
+  }
+}
+
 function seedPracticeMistakeLabelCandidates(databasePath: string) {
   const db = openDatabase(databasePath);
   migrate(db);
@@ -1449,6 +1488,52 @@ describe("practice routes", () => {
             passageTitle: "Listening Asset P1"
           })
         ])
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("scores IELTS judgment abbreviations against fixed UI choices", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-judgment-abbreviation-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedJudgmentAbbreviationQuestion(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", questionType: "true_false_not_given", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string; questionType: string }>;
+      }>();
+      expect(started.questions).toEqual([
+        expect.objectContaining({
+          questionType: "true_false_not_given"
+        })
+      ]);
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId: started.questions[0].id,
+          rawAnswer: "NOT GIVEN",
+          timeSpentSeconds: 12
+        }
+      });
+
+      expect(answer.statusCode).toBe(200);
+      expect(answer.json()).toMatchObject({
+        isCorrect: true,
+        normalizedAnswer: "not given"
       });
     } finally {
       await server.close();

@@ -190,8 +190,15 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
       const maxWords = getMaxWords(question.answerRules);
       const allowNumber = getAllowNumber(question.answerRules);
       const unorderedChoices = question.questionType === "multiple_choice";
+      const judgmentAliases =
+        question.questionType === "true_false_not_given" || question.questionType === "yes_no_not_given";
       const normalizedAnswer = normalizeAnswer(input.rawAnswer);
-      const isCorrect = isAnswerCorrect(input.rawAnswer, acceptedAnswers, { allowNumber, maxWords, unorderedChoices });
+      const isCorrect = isAnswerCorrect(input.rawAnswer, acceptedAnswers, {
+        allowNumber,
+        judgmentAliases,
+        maxWords,
+        unorderedChoices
+      });
 
       const answer = attempts.saveAnswer({
         attemptId: input.attemptId,

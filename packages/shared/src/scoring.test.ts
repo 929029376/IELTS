@@ -119,4 +119,11 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("A, D", ["A C"], { unorderedChoices: true })).toBe(false);
     expect(isAnswerCorrect("C A", ["A C"])).toBe(false);
   });
+
+  it("matches IELTS judgment abbreviations only when enabled", () => {
+    expect(isAnswerCorrect("NOT GIVEN", ["NG"], { judgmentAliases: true })).toBe(true);
+    expect(isAnswerCorrect("FALSE", ["F"], { judgmentAliases: true })).toBe(true);
+    expect(isAnswerCorrect("YES", ["Y"], { judgmentAliases: true })).toBe(true);
+    expect(isAnswerCorrect("NOT GIVEN", ["NG"])).toBe(false);
+  });
 });
