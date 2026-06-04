@@ -36,4 +36,29 @@ describe("desktop runtime diagnostics", () => {
     expect(screen.getByText("Browser/local web runtime")).toBeInTheDocument();
     expect(screen.getByText("Desktop diagnostics appear inside the packaged app.")).toBeInTheDocument();
   });
+
+  it("shows fallback labels for blank runtime diagnostics", () => {
+    render(
+      <DesktopRuntimeDiagnostics
+        status={{
+          appDataDir: "   ",
+          audioMode: "   ",
+          databasePath: "   ",
+          filePickerMode: "   ",
+          isDesktop: true,
+          pdfMode: "   ",
+          platform: "   ",
+          syncPath: "   "
+        }}
+      />
+    );
+
+    expect(screen.getByText("Unknown platform")).toBeInTheDocument();
+    expect(screen.getByText("App data path unavailable")).toBeInTheDocument();
+    expect(screen.getByText("SQLite path unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Sync folder not configured")).toBeInTheDocument();
+    expect(screen.getByText("Unknown file picker mode")).toBeInTheDocument();
+    expect(screen.getByText("Unknown audio mode")).toBeInTheDocument();
+    expect(screen.getByText("Unknown PDF mode")).toBeInTheDocument();
+  });
 });

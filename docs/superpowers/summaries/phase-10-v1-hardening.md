@@ -48,6 +48,12 @@
   - the gate verifies unit/component coverage, Playwright main UI flow, production
     build, desktop runtime diagnostics, and Mac DMG packaging without requiring the
     deferred Windows report.
+- Added Mac desktop runtime diagnostics fallback hardening:
+  - blank packaged runtime platform values now render as `Unknown platform`,
+  - blank app data, SQLite, and sync-folder paths now render explicit unavailable
+    labels,
+  - blank file-picker, audio, and PDF modes now render explicit unknown-mode
+    labels.
 - Expanded Playwright coverage for dashboard, import report, practice, mock exam, review, history, and sync settings anchors.
 - Added a Mac self-use question-bank import surface:
   - local listening directory import,
@@ -544,6 +550,12 @@
     - `desktop:check` passed, including Rust runtime diagnostics.
     - Mac DMG packaging passed and generated
       `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
+- Mac desktop runtime diagnostics fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopRuntimeDiagnostics.test.tsx -t "blank runtime diagnostics"`
+    - Initially failed because whitespace-only packaged runtime diagnostics
+      rendered as blank table values.
+    - Passed after trimming each diagnostic value and falling back to explicit
+      unavailable or unknown labels.
 - Full verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

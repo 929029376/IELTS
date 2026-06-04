@@ -15,6 +15,10 @@ export interface DesktopRuntimeDiagnosticsProps {
   status: DesktopRuntimeStatus | null;
 }
 
+function displayRuntimeValue(value: string, fallback: string) {
+  return value.trim() || fallback;
+}
+
 function RuntimeRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="runtime-row">
@@ -34,13 +38,13 @@ export function DesktopRuntimeDiagnostics({ status }: DesktopRuntimeDiagnosticsP
 
       {status ? (
         <dl className="runtime-diagnostics-grid">
-          <RuntimeRow label="Platform" value={status.platform} />
-          <RuntimeRow label="App data" value={status.appDataDir} />
-          <RuntimeRow label="SQLite" value={status.databasePath} />
-          <RuntimeRow label="Sync folder" value={status.syncPath} />
-          <RuntimeRow label="File picker" value={status.filePickerMode} />
-          <RuntimeRow label="Audio" value={status.audioMode} />
-          <RuntimeRow label="PDF" value={status.pdfMode} />
+          <RuntimeRow label="Platform" value={displayRuntimeValue(status.platform, "Unknown platform")} />
+          <RuntimeRow label="App data" value={displayRuntimeValue(status.appDataDir, "App data path unavailable")} />
+          <RuntimeRow label="SQLite" value={displayRuntimeValue(status.databasePath, "SQLite path unavailable")} />
+          <RuntimeRow label="Sync folder" value={displayRuntimeValue(status.syncPath, "Sync folder not configured")} />
+          <RuntimeRow label="File picker" value={displayRuntimeValue(status.filePickerMode, "Unknown file picker mode")} />
+          <RuntimeRow label="Audio" value={displayRuntimeValue(status.audioMode, "Unknown audio mode")} />
+          <RuntimeRow label="PDF" value={displayRuntimeValue(status.pdfMode, "Unknown PDF mode")} />
         </dl>
       ) : (
         <div className="desktop-runtime-empty">
