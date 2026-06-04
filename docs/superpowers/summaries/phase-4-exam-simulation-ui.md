@@ -91,6 +91,11 @@
     passage text is missing,
   - PDF preview URLs are served through the same local asset API,
   - the preview uses stable dimensions inside the reading passage pane.
+- Added Mac reading passage highlight controls:
+  - selected passage text can be highlighted during a local reading exam or
+    practice attempt,
+  - user highlights render separately from answer-sentence evidence highlights,
+  - highlights can be cleared from the reading toolbar.
 - Added unit coverage for:
   - shell controls,
   - timer auto-submit,
@@ -239,6 +244,16 @@
       extracted passage text did not render a PDF preview.
     - Passed after wiring PDF asset paths into the reading exam view and using
       the local asset API as the embedded PDF source.
+- Mac reading selected-text highlight follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the reading exam view had no
+      `Highlight selected text` control.
+    - Passed after adding selected-text highlight and clear-highlight controls
+      while preserving answer-sentence evidence highlighting.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the selected-text highlight follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac listening practice playback-controls follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because listening practice still rendered the local audio

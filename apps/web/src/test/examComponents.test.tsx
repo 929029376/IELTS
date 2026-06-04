@@ -14,6 +14,7 @@ describe("exam simulation components", () => {
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
@@ -123,6 +124,26 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("textbox", { name: "Notes" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Small font" })).toBeInTheDocument();
     expect(screen.getByRole("separator", { name: "Resize reading panes" })).toBeInTheDocument();
+  });
+
+  it("highlights user-selected reading passage text during a local exam", () => {
+    vi.spyOn(window, "getSelection").mockReturnValue({
+      toString: () => "popular because"
+    } as Selection);
+
+    render(
+      <ReadingExamView
+        passageTitle="The History of Tea"
+        passageText="Tea became popular because the answer sentence explains the trade."
+        highlightedText="answer sentence"
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Highlight selected text" }));
+
+    expect(screen.getByText("popular because")).toHaveClass("user-highlight");
+    expect(screen.getByText("answer sentence")).toHaveClass("ielts-highlight");
   });
 
   it("renders listening sections and strict mock playback controls", () => {

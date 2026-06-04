@@ -167,6 +167,12 @@
   - embedded PDF previews use `GET /api/assets/local` instead of raw filesystem
     paths,
   - the reading passage pane keeps a stable PDF preview height.
+- Added Mac reading selected-text highlight hardening:
+  - the reading exam toolbar can highlight currently selected passage text during
+    local mock or practice attempts,
+  - user highlights use a distinct style from answer-sentence evidence
+    highlights,
+  - reading highlights can be cleared from the toolbar.
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
@@ -834,6 +840,16 @@
       asset paths when no extracted passage text existed.
     - Passed after the Mac reading exam view embedded the PDF through
       `GET /api/assets/local`.
+- Mac reading selected-text highlight hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the reading exam view had no
+      `Highlight selected text` control.
+    - Passed after selected passage text can be highlighted in the reading view
+      while answer-sentence evidence highlights remain visible.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the selected-text highlight hardening, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac review conflict hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because a review response containing `conflicts` did not

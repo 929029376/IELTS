@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export interface ReadingExamViewProps {
   passageTitle: string;
@@ -13,23 +13,62 @@ function localAssetUrl(path: string): string {
   return `/api/assets/local?path=${encodeURIComponent(path)}`;
 }
 
-function renderHighlightedText(text: string, highlightedText?: string) {
-  if (!highlightedText) {
+interface HighlightRange {
+  className: string;
+  end: number;
+  start: number;
+}
+
+function addHighlightRange(ranges: HighlightRange[], text: string, target: string, className: string) {
+  const trimmedTarget = target.trim();
+  if (!trimmedTarget) {
+    return;
+  }
+
+  const start = text.indexOf(trimmedTarget);
+  if (start === -1) {
+    return;
+  }
+
+  const end = start + trimmedTarget.length;
+  if (ranges.some((range) => start < range.end && end > range.start)) {
+    return;
+  }
+
+  ranges.push({ className, end, start });
+}
+
+function renderHighlightedText(text: string, answerHighlight?: string, userHighlights: string[] = []) {
+  const ranges: HighlightRange[] = [];
+  if (answerHighlight) {
+    addHighlightRange(ranges, text, answerHighlight, "ielts-highlight");
+  }
+  userHighlights.forEach((highlight) => addHighlightRange(ranges, text, highlight, "user-highlight"));
+
+  if (ranges.length === 0) {
     return text;
   }
 
-  const index = text.indexOf(highlightedText);
-  if (index === -1) {
-    return text;
+  ranges.sort((left, right) => left.start - right.start);
+
+  const nodes: ReactNode[] = [];
+  let cursor = 0;
+  ranges.forEach((range) => {
+    if (range.start > cursor) {
+      nodes.push(text.slice(cursor, range.start));
+    }
+    nodes.push(
+      <mark className={range.className} key={`${range.className}-${range.start}-${range.end}`}>
+        {text.slice(range.start, range.end)}
+      </mark>
+    );
+    cursor = range.end;
+  });
+  if (cursor < text.length) {
+    nodes.push(text.slice(cursor));
   }
 
-  return (
-    <>
-      {text.slice(0, index)}
-      <mark className="ielts-highlight">{highlightedText}</mark>
-      {text.slice(index + highlightedText.length)}
-    </>
-  );
+  return nodes;
 }
 
 export function ReadingExamView({
@@ -41,10 +80,24 @@ export function ReadingExamView({
 }: ReadingExamViewProps) {
   const [fontScale, setFontScale] = useState<"small" | "regular" | "large">("regular");
   const [leftPanePercent, setLeftPanePercent] = useState(52);
+  const [userHighlights, setUserHighlights] = useState<string[]>([]);
   const renderedText = useMemo(
-    () => renderHighlightedText(passageText, highlightedText),
-    [passageText, highlightedText]
+    () => renderHighlightedText(passageText, highlightedText, userHighlights),
+    [passageText, highlightedText, userHighlights]
   );
+
+  useEffect(() => {
+    setUserHighlights([]);
+  }, [passageText, passageTitle]);
+
+  function highlightSelection() {
+    const selectedText = window.getSelection()?.toString().trim();
+    if (!selectedText || !passageText.includes(selectedText)) {
+      return;
+    }
+
+    setUserHighlights((current) => (current.includes(selectedText) ? current : [...current, selectedText]));
+  }
 
   return (
     <div className={`reading-exam-view font-${fontScale}`}>
@@ -57,6 +110,12 @@ export function ReadingExamView({
         </button>
         <button type="button" onClick={() => setFontScale("large")}>
           Large font
+        </button>
+        <button type="button" onClick={highlightSelection}>
+          Highlight selected text
+        </button>
+        <button type="button" onClick={() => setUserHighlights([])}>
+          Clear highlights
         </button>
       </div>
       <div
