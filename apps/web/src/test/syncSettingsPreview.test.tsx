@@ -141,6 +141,37 @@ describe("SyncSettingsPreview", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("shows a fallback when an exported backup path is blank", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        filePath: "   ",
+        rowCounts: {
+          attempt_answers: 0,
+          attempts: 0,
+          dictation_attempts: 0,
+          listening_cues: 0
+        }
+      })
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export backup" }));
+
+    expect(await screen.findByText("Backup exported")).toBeInTheDocument();
+    expect(screen.getByText("Backup path unavailable")).toBeInTheDocument();
+    expect(screen.getByLabelText("Backup file path")).toHaveValue("");
+  });
+
   it("saves an edited Baidu sync folder path", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/sync/config") {

@@ -487,6 +487,11 @@
   - selecting a backup JSON file can fill the import path from the
     desktop-exposed local file path,
   - restore feedback shows imported tables and row counts.
+- Added Mac backup export path fallback hardening:
+  - whitespace-only backup export paths are trimmed before they fill the restore
+    path input,
+  - blank exported paths now render `Backup path unavailable` instead of an empty
+    backup status row.
 - Added Mac sync-folder file-picker hardening:
   - selecting an existing sync JSONL or `devices.json` file can fill the sync
     folder path from the desktop-exposed local file path's parent directory.
@@ -900,6 +905,12 @@
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the manual backup UI follow-up, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Mac backup export path fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "exported backup path is blank"`
+    - Initially failed because a whitespace-only backup export path rendered as
+      an empty status row and left an unusable blank restore path value.
+    - Passed after trimming the exported backup path before filling the restore
+      input and rendering `Backup path unavailable` for blank export paths.
 - Mac backup file-picker follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
     - Initially failed because backup restore required manually pasting a full

@@ -148,8 +148,9 @@ export function SyncSettingsPreview({
         throw new Error("Could not export backup");
       }
       const result = (await response.json()) as BackupResult;
+      const exportedFilePath = result.filePath?.trim() ?? "";
       setBackupExportResult(result);
-      setBackupFilePath(result.filePath ?? "");
+      setBackupFilePath(exportedFilePath);
       onBackupChanged?.();
     } catch {
       setBackupError("Could not export local backup.");
@@ -334,7 +335,7 @@ export function SyncSettingsPreview({
         {backupExportResult ? (
           <section className="sync-status-panel" role="status">
             <h3>Backup exported</h3>
-            {backupExportResult.filePath ? <p className="backup-file-path">{backupExportResult.filePath}</p> : null}
+            <p className="backup-file-path">{displayText(backupExportResult.filePath ?? "", "Backup path unavailable")}</p>
             <div>
               <span>{backupCount(backupExportResult, "attempts")} attempts</span>
               <span>{backupCount(backupExportResult, "attempt_answers")} answers</span>
