@@ -88,7 +88,8 @@
   - audio source URLs are served through a local asset API instead of exposing
     raw filesystem paths as browser URLs.
 - Added Mac listening practice control hardening:
-  - practice mode Pause calls the local audio element's pause control,
+  - practice mode Pause toggles local audio playback by calling play when paused
+    and pause when playing,
   - practice mode Seek advances the local audio by 10 seconds,
   - practice mode Speed cycles visible playback speed through focused dictation
     rates while mock mode keeps all three controls disabled.
@@ -329,6 +330,12 @@
       were enabled but did not operate the local audio element.
     - Passed after Pause calls `audio.pause()`, Seek advances current time, and
       Speed updates playback rate.
+- Mac listening practice play-pause toggle follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the practice-mode Pause button could pause but
+      could not start paused local audio.
+    - Passed after the same control calls `audio.play()` when the local audio is
+      paused and `audio.pause()` while it is playing.
 - Mac practice-vs-mock timer follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because `ExamShell` always rendered a `Time remaining`

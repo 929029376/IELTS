@@ -56,11 +56,16 @@ export function ListeningExamView({
   const activeAudioPath = activeSection?.audioPath ?? audioPath;
   const activeAudioDurationSeconds = activeSection?.audioDurationSeconds ?? audioDurationSeconds;
 
-  function pausePracticeAudio() {
-    if (isMock) {
+  function togglePracticeAudio() {
+    const audio = audioRef.current;
+    if (isMock || !audio) {
       return;
     }
-    audioRef.current?.pause();
+    if (audio.paused) {
+      void audio.play();
+      return;
+    }
+    audio.pause();
   }
 
   function seekPracticeAudio() {
@@ -105,7 +110,7 @@ export function ListeningExamView({
             type="button"
             disabled={isMock}
             aria-label={isMock ? "Pause disabled in mock mode" : "Pause"}
-            onClick={pausePracticeAudio}
+            onClick={togglePracticeAudio}
           >
             Pause
           </button>

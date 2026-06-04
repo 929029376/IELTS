@@ -318,6 +318,7 @@ describe("exam simulation components", () => {
     );
     const audio = screen.getByLabelText("Local listening audio") as HTMLAudioElement;
     const pauseSpy = vi.spyOn(audio, "pause").mockImplementation(() => undefined);
+    Object.defineProperty(audio, "paused", { configurable: true, value: false });
     audio.currentTime = 20;
     audio.playbackRate = 1;
 
@@ -330,6 +331,25 @@ describe("exam simulation components", () => {
     fireEvent.click(screen.getByRole("button", { name: "Speed" }));
     expect(audio.playbackRate).toBe(1.25);
     expect(screen.getByText("Speed: 1.25x")).toBeInTheDocument();
+  });
+
+  it("starts local listening practice audio from the same play-pause control", () => {
+    render(
+      <ListeningExamView
+        mode="practice"
+        audioTitle="Practice audio"
+        audioPath="/Users/musheng/Desktop/IELTS/listening/practice-p1.mp3"
+        sections={[{ id: "s1", title: "Section 1", questions: <p>Questions 1-10</p> }]}
+        finalReviewSeconds={0}
+      />
+    );
+    const audio = screen.getByLabelText("Local listening audio") as HTMLAudioElement;
+    const playSpy = vi.spyOn(audio, "play").mockResolvedValue(undefined);
+    Object.defineProperty(audio, "paused", { configurable: true, value: true });
+
+    fireEvent.click(screen.getByRole("button", { name: "Pause" }));
+
+    expect(playSpy).toHaveBeenCalled();
   });
 
   it("maps answered and marked question data to nav states", () => {
