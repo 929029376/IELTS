@@ -14,6 +14,7 @@ export interface ExamShellProps extends PropsWithChildren {
   questions: ExamQuestionState[];
   onSubmit: (event: ExamSubmitEvent) => void;
   onSelectQuestion?: (questionNumber: number) => void;
+  onToggleCurrentQuestionMark?: () => void;
   submitLabel?: string;
 }
 
@@ -23,6 +24,7 @@ export function ExamShell({
   questions,
   onSubmit,
   onSelectQuestion,
+  onToggleCurrentQuestionMark,
   submitLabel = "Submit test",
   children
 }: ExamShellProps) {
@@ -88,7 +90,7 @@ export function ExamShell({
             <Settings size={16} aria-hidden="true" />
             Settings
           </button>
-          <button type="button">
+          <button type="button" onClick={onToggleCurrentQuestionMark}>
             <Flag size={16} aria-hidden="true" />
             Mark for review
           </button>

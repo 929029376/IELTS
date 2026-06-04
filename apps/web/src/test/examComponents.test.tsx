@@ -748,6 +748,48 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("marks the active local mock question from the exam topbar", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-topbar-mark-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-topbar-mark-1",
+                part: "P1",
+                passageId: "passage-topbar-mark-1",
+                passageTitle: "Topbar Mark Set",
+                prompt: "Which question is marked from the topbar?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    expect(await screen.findByLabelText("Question 1, current")).toBeInTheDocument();
+    const activeShell = screen.getByLabelText("Reading Local Mock Test");
+
+    fireEvent.click(within(activeShell).getByRole("button", { name: "Mark for review" }));
+
+    expect(screen.getByLabelText("Question 1, marked")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Unmark question 1" })).toBeInTheDocument();
+  });
+
   it("does not submit a local mock when saving current answers fails", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {

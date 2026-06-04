@@ -286,6 +286,18 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setActiveQuestionId(group.questions[0]?.id ?? null);
   }
 
+  function toggleCurrentQuestionMark() {
+    const questionId = currentQuestionId;
+    if (!questionId) {
+      return;
+    }
+
+    setMarkedQuestions((current) => ({
+      ...current,
+      [questionId]: !current[questionId]
+    }));
+  }
+
   const activeQuestions = activeMock?.questions ?? [];
   const questionGroups = groupQuestionsByPassage(activeQuestions);
   const activeGroup = questionGroups.find((group) => group.id === activeGroupId) ?? questionGroups[0];
@@ -469,6 +481,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           questions={mockQuestionStates}
           onSubmit={() => void submitActiveMock()}
           onSelectQuestion={selectQuestion}
+          onToggleCurrentQuestionMark={toggleCurrentQuestionMark}
           submitLabel={activeMock.mode === "mock" ? "Submit test" : "Submit practice"}
         >
           {activeMock.subject === "reading" ? (

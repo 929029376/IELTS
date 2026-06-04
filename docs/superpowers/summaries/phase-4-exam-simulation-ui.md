@@ -45,6 +45,8 @@
   - renders returned local questions as answer inputs,
   - saves answers through `POST /api/practice/:attemptId/answer`,
   - supports marking local mock questions for review,
+  - supports the exam topbar `Mark for review` control for the current local
+    mock question,
   - reflects marked questions in the bottom question navigation and submit warning,
   - supports clicking bottom question navigation items to jump to the matching
     local mock passage or listening section,
@@ -147,6 +149,16 @@
     - Passed after adding local question mark toggles, marked navigation state,
       submit warnings for marked local questions, and `markedForReview`
       persistence in answer-save payloads.
+- Mac exam topbar review-marker follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because clicking the active exam shell's topbar
+      `Mark for review` button left the current local mock question unmarked.
+    - Passed after adding a current-question mark callback to `ExamShell` and
+      wiring it to the active local mock question state in `ExamPreview`.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the exam topbar review-marker follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac full-set passage/section grouping follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because local reading mocks had no P2 passage tab and
