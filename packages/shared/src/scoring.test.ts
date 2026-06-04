@@ -28,9 +28,15 @@ describe("answer scoring", () => {
 
   it("ignores imported answer numbering prefixes without stripping numeric answers", () => {
     expect(isAnswerCorrect("green park", ["1. green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["(1) green park"])).toBe(true);
     expect(isAnswerCorrect("green park", ["Q1: green park"])).toBe(true);
     expect(isAnswerCorrect("3.5 million", ["3.5 million"])).toBe(true);
     expect(isAnswerCorrect("million", ["3.5 million"])).toBe(false);
+  });
+
+  it("ignores surrounding parentheses copied with answer text", () => {
+    expect(isAnswerCorrect("(green park)", ["green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["(green park)"])).toBe(true);
   });
 
   it("matches imported unicode dash answers with typed hyphen answers", () => {

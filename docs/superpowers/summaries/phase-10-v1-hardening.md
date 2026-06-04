@@ -274,6 +274,12 @@
     match typed answers,
   - internal apostrophes in answers such as `John's car` stay intact while only
     the surrounding quote marks are removed.
+- Added Mac surrounding-parentheses answer normalization hardening:
+  - copied user answers such as `(green park)` now match answer keys such as
+    `green park`,
+  - imported answer keys wrapped as `(green park)` also match typed answers,
+  - existing optional-answer notation such as `(the) green park` still expands
+    correctly instead of being treated as a whole-answer wrapper.
 - Added Mac imported-answer numbering-prefix hardening:
   - accepted answers copied with list prefixes such as `1. green park` now
     match typed answers such as `green park`,
@@ -1970,6 +1976,24 @@
     - Passed with all 11 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 14 practice route tests.
+- Mac surrounding-parentheses answer normalization hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "surrounding parentheses"`
+    - Initially failed because copied answer `(green park)` was not normalized
+      to match accepted answer `green park`.
+    - Passed after whole-answer parentheses wrappers were stripped during
+      normalization.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "surrounding parentheses"`
+    - Initially failed because the practice API marked `(green park)` incorrect
+      against accepted answer `green park`.
+    - Passed after shared surrounding-parentheses normalization was used by
+      practice answer scoring.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "optional parenthesized"`
+    - Passed after the wrapper cleanup, confirming optional-answer notation
+      still expands correctly.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Passed with all 13 shared scoring tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 16 practice route tests.
 - Mac imported-answer numbering-prefix hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "numbering prefixes"`
     - Initially failed because accepted answer `1. green park` was compared as
@@ -1986,9 +2010,9 @@
     - Passed after the accepted-answer variant cleanup, confirming surrounding
       punctuation still normalizes correctly.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 12 shared scoring tests.
+    - Passed with all 13 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
-    - Passed with all 15 practice route tests.
+    - Passed with all 16 practice route tests.
 - Mac slash-alias answer-key scoring hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
     - Initially failed because accepted answer `centre/center` was compared as
@@ -2007,9 +2031,9 @@
     - Passed after the shared slash-alias answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 12 shared scoring tests.
+    - Passed with all 13 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
-    - Passed with all 15 practice route tests.
+    - Passed with all 16 practice route tests.
 
 ## Remaining V1 Gaps
 

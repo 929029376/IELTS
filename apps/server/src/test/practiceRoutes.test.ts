@@ -403,9 +403,48 @@ function seedNumberedAnswerQuestion(databasePath: string) {
     });
     questions.createAnswerKey({
       questionId: question.id,
-      acceptedAnswers: ["1. green park"],
+      acceptedAnswers: ["(1) green park"],
       answerSentence: "The imported answer key included the question number.",
       explanation: "Imported answer keys can include numbering prefixes.",
+      synonyms: []
+    });
+  } finally {
+    db.close();
+  }
+}
+
+function seedParenthesizedAnswerQuestion(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: "seed/parenthesized-answer.json",
+      checksum: "parenthesized-answer-seed",
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "reading",
+      part: "P1",
+      title: "Parenthesized Answer Practice",
+      frequencyClass: "high"
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "fill_blank",
+      prompt: "Which parenthesized answer is accepted?",
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["green park"],
+      answerSentence: "The answer itself is green park.",
+      explanation: "User-entered copied answers can include surrounding parentheses.",
       synonyms: []
     });
   } finally {
@@ -1112,6 +1151,47 @@ describe("practice routes", () => {
           markedForReview: false,
           questionId: started.questions[0].id,
           rawAnswer: "green park",
+          timeSpentSeconds: 8
+        }
+      });
+
+      expect(answer.statusCode).toBe(200);
+      expect(answer.json()).toMatchObject({
+        isCorrect: true,
+        normalizedAnswer: "green park"
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("scores copied answers with surrounding parentheses", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-parenthesized-answer-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedParenthesizedAnswerQuestion(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string }>;
+      }>();
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId: started.questions[0].id,
+          rawAnswer: "(green park)",
           timeSpentSeconds: 8
         }
       });
