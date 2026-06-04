@@ -1622,6 +1622,18 @@ h1 {
   color: #20314a;
 }
 
+.loop-status {
+  width: fit-content;
+  margin: 0;
+  padding: 6px 10px;
+  border: 1px solid #cbd8e8;
+  border-radius: 6px;
+  background: #f8fbff;
+  color: #405169;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .dictation-label,
 .cue-editor label {
   display: grid;

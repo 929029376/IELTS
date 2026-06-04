@@ -856,6 +856,12 @@
     - Passed after the frequency-accuracy report hardening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac intensive A-B repeat status hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the Mac intensive listening player could set an
+      A-B loop without surfacing the active A point or loop range.
+    - Passed after showing the custom A-B loop status in the intensive listening
+      player and preserving the existing loop-back playback behavior.
 
 ## Remaining V1 Gaps
 

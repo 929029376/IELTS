@@ -108,6 +108,34 @@ describe("intensive study components", () => {
     expect(screen.getByText("No sentence cues yet. Use A-B repeat or create a cue.")).toBeInTheDocument();
   });
 
+  it("shows the active A-B repeat range while looping custom listening segments", () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath="/Users/musheng/Desktop/IELTS/listening/intensive-p1.mp3"
+        cues={[]}
+        onDictationSubmit={() => undefined}
+      />
+    );
+
+    const audio = screen.getByLabelText("Intensive listening audio") as HTMLAudioElement;
+
+    audio.currentTime = 12.4;
+    fireEvent.click(screen.getByRole("button", { name: "Set A point" }));
+    expect(screen.getByText("A point set at 12.4s")).toBeInTheDocument();
+
+    audio.currentTime = 16.8;
+    fireEvent.click(screen.getByRole("button", { name: "Set B point" }));
+    expect(screen.getByText("A-B loop: 12.4s to 16.8s")).toBeInTheDocument();
+
+    audio.currentTime = 16.9;
+    fireEvent.timeUpdate(audio);
+
+    expect(audio.currentTime).toBe(12.4);
+    expect(play).toHaveBeenCalledTimes(1);
+  });
+
   it("submits dictation text", () => {
     const onDictationSubmit = vi.fn();
     render(

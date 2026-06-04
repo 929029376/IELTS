@@ -206,6 +206,12 @@
     - Passed after the intensive real-audio repeat follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac intensive A-B loop status follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because custom A-B repeat set the loop internally but did
+      not show the active A point or A-B range to the learner.
+    - Passed after the Mac intensive listening player displayed the selected A
+      point and active A-B loop range while keeping the loop behavior intact.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

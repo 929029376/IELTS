@@ -15,6 +15,10 @@ export interface IntensiveListeningPlayerProps {
   onDictationSubmit: (input: { cueId: string; userText: string }) => void;
 }
 
+function formatSeconds(seconds: number): string {
+  return `${seconds.toFixed(1)}s`;
+}
+
 export function IntensiveListeningPlayer({
   audioPath,
   audioTitle,
@@ -83,6 +87,18 @@ export function IntensiveListeningPlayer({
     playAudio();
   }
 
+  function setAPointAtCurrentTime() {
+    const nextPoint = audioRef.current?.currentTime ?? 0;
+    setAPoint(nextPoint);
+    setLoopRange(null);
+  }
+
+  const loopStatus = loopRange
+    ? `A-B loop: ${formatSeconds(loopRange.startSeconds)} to ${formatSeconds(loopRange.endSeconds)}`
+    : aPoint !== null
+      ? `A point set at ${formatSeconds(aPoint)}`
+      : null;
+
   return (
     <section className="intensive-listening-player" aria-label="Intensive listening player">
       <header>
@@ -117,13 +133,14 @@ export function IntensiveListeningPlayer({
         >
           Speed
         </button>
-        <button type="button" onClick={() => setAPoint(audioRef.current?.currentTime ?? 0)}>
+        <button type="button" onClick={setAPointAtCurrentTime}>
           Set A point
         </button>
         <button type="button" onClick={setBPoint}>
           Set B point
         </button>
       </div>
+      {loopStatus ? <p className="loop-status">{loopStatus}</p> : null}
 
       {cues.length > 0 ? (
         <div className="cue-repeat-list" aria-label="Sentence repeat controls">
