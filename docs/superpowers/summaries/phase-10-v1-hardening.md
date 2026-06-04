@@ -48,6 +48,9 @@
   - the gate verifies unit/component coverage, Playwright main UI flow, production
     build, desktop runtime diagnostics, and Mac DMG packaging without requiring the
     deferred Windows report.
+- Changed the Windows Desktop Package GitHub Actions workflow to manual-only
+  `workflow_dispatch` while Windows work is deferred, preventing routine Mac-first
+  `master` pushes from automatically running the Windows NSIS packaging job.
 - Added Mac desktop runtime diagnostics fallback hardening:
   - blank packaged runtime platform values now render as `Unknown platform`,
   - blank app data, SQLite, and sync-folder paths now render explicit unavailable

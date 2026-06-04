@@ -2,18 +2,6 @@ name: Windows Desktop Package
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-    paths:
-      - ".github/workflows/windows-desktop-package.yml"
-      - "apps/**"
-      - "packages/**"
-      - "scripts/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - "tsconfig.base.json"
 
 jobs:
   package-windows:

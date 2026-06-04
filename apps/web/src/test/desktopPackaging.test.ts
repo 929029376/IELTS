@@ -65,6 +65,8 @@ describe("desktop packaging configuration", () => {
     expect(existsSync(workflowPath)).toBe(true);
 
     const workflow = readFileSync(workflowPath, "utf8");
+    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).not.toContain("\n  push:");
     expect(workflow).toContain("runs-on: windows-2022");
     expect(workflow).toContain("pnpm/action-setup");
     expect(workflow).toContain("dtolnay/rust-toolchain@stable");

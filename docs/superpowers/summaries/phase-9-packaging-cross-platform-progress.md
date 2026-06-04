@@ -30,6 +30,9 @@
 - Added `scripts/desktop-check.mjs` to verify Tauri config presence and bundle targets.
 - Added `.github/workflows/windows-desktop-package.yml` so GitHub can build Windows NSIS
   installer artifacts from `master` and preserve the `.exe` as workflow evidence.
+- Changed the Windows Desktop Package workflow to manual-only `workflow_dispatch`
+  while Windows hands-on work is deferred, so Mac-first pushes to `master` no longer
+  trigger Windows NSIS packaging failure emails.
 - Added a host-independence regression test for runtime paths after the first Windows
   packaging workflow run showed that server unit tests failed on `windows-latest`.
 - Updated runtime path construction so Mac and Windows path outputs are based on the
