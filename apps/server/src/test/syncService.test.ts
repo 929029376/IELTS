@@ -264,6 +264,71 @@ describe("sync service", () => {
     });
   });
 
+  it("skips remote answer rows when the local attempt or question is missing", () => {
+    const question = seedQuestion();
+    const service = createSyncService(db, {
+      deviceId: "macbook",
+      deviceName: "MacBook",
+      platform: "darwin",
+      syncFolderPath: syncDir
+    });
+    service.ensureSyncFolder();
+    service.appendExternalEvent("attempts", {
+      createdAt: "2026-06-01T09:00:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-attempt-for-missing-question-answer",
+      payload: {
+        estimatedBand: null,
+        id: "remote-attempt-for-missing-question-answer",
+        mode: "practice",
+        rawScore: null,
+        startedAt: "2026-06-01T09:00:00.000Z",
+        subject: "reading",
+        submittedAt: null
+      },
+      type: "attempt.created"
+    });
+    service.appendExternalEvent("answers", {
+      createdAt: "2026-06-01T09:01:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-answer-missing-attempt",
+      payload: {
+        attemptId: "missing-local-attempt",
+        id: "remote-answer-missing-attempt-row",
+        isCorrect: true,
+        markedForReview: false,
+        normalizedAnswer: "green park",
+        questionId: question.id,
+        rawAnswer: "Green Park",
+        timeSpentSeconds: 20
+      },
+      type: "answer.saved"
+    });
+    service.appendExternalEvent("answers", {
+      createdAt: "2026-06-01T09:02:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-answer-missing-question",
+      payload: {
+        attemptId: "remote-attempt-for-missing-question-answer",
+        id: "remote-answer-missing-question-row",
+        isCorrect: false,
+        markedForReview: false,
+        normalizedAnswer: "blue park",
+        questionId: "missing-local-question",
+        rawAnswer: "Blue Park",
+        timeSpentSeconds: 25
+      },
+      type: "answer.saved"
+    });
+
+    expect(service.importRemoteEvents()).toMatchObject({ imported: 1, skipped: 2 });
+    expect(createAttemptRepo(db).getAttemptWithAnswers("remote-attempt-for-missing-question-answer")).toMatchObject({
+      answers: []
+    });
+    expect(createSyncRepo(db).hasSyncEvent("remote-answer-missing-attempt")).toBe(false);
+    expect(createSyncRepo(db).hasSyncEvent("remote-answer-missing-question")).toBe(false);
+  });
+
   it("keeps remote answer conflicts for submitted local attempts instead of overwriting", () => {
     const question = seedQuestion();
     const attempts = createAttemptRepo(db);

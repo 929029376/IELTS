@@ -476,6 +476,13 @@
     local question bank are skipped instead of failing the entire sync import,
   - the remote attempt record still imports so history can appear before the
     matching question bank is available locally.
+- Added Mac remote answer-dependency sync hardening:
+  - remote answer rows whose `attemptId` or `questionId` is not available locally
+    are skipped instead of failing the entire Baidu Cloud JSONL sync import,
+  - unresolved remote answer events remain unrecorded locally so they can be
+    retried after the missing attempt or question-bank context is restored,
+  - partial cross-device sync can continue importing other valid attempt and
+    answer history.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -2004,6 +2011,20 @@
     - Passed with all 8 sync service tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test`
     - Passed with all 99 server tests.
+- Mac remote answer-dependency sync hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts -t "skips remote answer rows"`
+    - Initially failed with a SQLite foreign-key error when a remote answer event
+      referenced a missing local attempt or a missing local question.
+    - Passed after answer sync checks both dependencies and returns unresolved
+      events as skipped instead of writing invalid answer rows.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+    - Passed with all 9 sync service tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 100 server tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 137 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

@@ -274,6 +274,12 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
   }
 
   function upsertAnswer(payload: AttemptAnswerRecord, event: SyncEnvelope) {
+    const attempt = db.prepare("SELECT id FROM attempts WHERE id = ?").get(payload.attemptId);
+    const question = db.prepare("SELECT id FROM questions WHERE id = ?").get(payload.questionId);
+    if (!attempt || !question) {
+      return { conflict: false, inserted: false };
+    }
+
     const existing = db
       .prepare(
         `
@@ -340,7 +346,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       (existing.rawAnswer !== payload.rawAnswer || existing.normalizedAnswer !== payload.normalizedAnswer)
     ) {
       insertAnswerConflict(existing.id);
-      return { conflict: true };
+      return { conflict: true, inserted: true };
     }
 
     const submittedUnansweredQuestion = !existing
@@ -390,7 +396,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
         updatedAt: submittedUnansweredQuestion.submittedAt
       });
       insertAnswerConflict(localAnswerId);
-      return { conflict: true };
+      return { conflict: true, inserted: true };
     }
 
     db.prepare(
@@ -431,7 +437,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       markedForReview: payload.markedForReview ? 1 : 0,
       updatedAt: event.createdAt
     });
-    return { conflict: false };
+    return { conflict: false, inserted: true };
   }
 
   function addMistake(payload: MistakeLabelPayload) {
@@ -583,7 +589,11 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     if (event.type === "attempt.created" || event.type === "attempt.submitted") {
       upsertAttempt(event.payload as AttemptSyncPayload);
     } else if (event.type === "answer.saved") {
-      conflict = upsertAnswer(event.payload as AttemptAnswerRecord, event).conflict;
+      const answerResult = upsertAnswer(event.payload as AttemptAnswerRecord, event);
+      if (!answerResult.inserted) {
+        return { conflict: false, inserted: false };
+      }
+      conflict = answerResult.conflict;
     } else if (event.type === "mistake.added") {
       addMistake(event.payload as MistakeLabelPayload);
     } else if (event.type === "intensive.listening_cue.created") {
