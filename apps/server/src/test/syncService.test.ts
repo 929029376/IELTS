@@ -1,4 +1,4 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -75,6 +75,21 @@ describe("sync service", () => {
     });
     expect(getDefaultSyncFolderPath("darwin")).toBe("/Users/musheng/Desktop/同步空间/IELTS-Sync");
     expect(getDefaultSyncFolderPath("win32", "D:/BaiduSync/IELTS-Sync")).toBe("D:/BaiduSync/IELTS-Sync");
+  });
+
+  it("repairs malformed devices metadata instead of failing sync startup", () => {
+    writeFileSync(join(syncDir, "devices.json"), "{ not valid json");
+    const service = createSyncService(db, {
+      deviceId: "macbook",
+      deviceName: "MacBook",
+      platform: "darwin",
+      syncFolderPath: syncDir
+    });
+
+    expect(() => service.ensureSyncFolder()).not.toThrow();
+    expect(JSON.parse(readFileSync(join(syncDir, "devices.json"), "utf8"))).toMatchObject({
+      devices: [expect.objectContaining({ id: "macbook", platform: "darwin" })]
+    });
   });
 
   it("appends local attempt, answer, and mistake events into JSONL files", () => {

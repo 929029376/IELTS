@@ -55,6 +55,9 @@
   - valid events in the same file still import,
   - a partially written or conflict-corrupted sync line no longer prevents local
     startup.
+- Added devices metadata repair for Baidu Cloud sync:
+  - malformed `devices.json` is treated as empty device metadata,
+  - the current device entry is rewritten so sync startup continues.
 - Added event dedupe through `sync_events.event_id`.
 - Added merge behavior for attempts and answers.
 - Added conflict preservation for submitted local attempts:
@@ -140,6 +143,16 @@
     - Passed after the malformed JSONL sync follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
+- Malformed devices metadata follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+    - Initially failed because malformed `devices.json` threw in
+      `ensureSyncFolder`.
+    - Passed after treating malformed devices metadata as empty and rewriting the
+      current device entry.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the malformed devices metadata follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
   - Initially failed because the Manual sync button did not call the sync API or
     render a completion status.

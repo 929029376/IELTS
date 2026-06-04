@@ -138,6 +138,9 @@
   - malformed Baidu Cloud JSONL lines are skipped instead of crashing startup or
     manual sync,
   - valid events in the same sync file still import.
+- Added malformed devices metadata sync hardening:
+  - malformed `devices.json` is repaired instead of crashing startup,
+  - valid current-device metadata is rewritten.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -395,6 +398,16 @@
     - Passed after the malformed JSONL sync hardening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Malformed devices metadata sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+    - Initially failed because malformed `devices.json` threw in
+      `ensureSyncFolder`.
+    - Passed after malformed devices metadata is treated as empty and the current
+      device entry is rewritten.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the malformed devices metadata sync hardening follow-up,
+      including unit/component tests, Playwright, production build, desktop
+      diagnostics, and Mac DMG packaging.
 - Mac readiness follow-up:
   - `node scripts/mac-readiness-check.mjs`
     - Initially failed because the question-bank import panel regression clicked

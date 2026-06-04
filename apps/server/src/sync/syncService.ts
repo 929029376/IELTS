@@ -34,6 +34,13 @@ interface SyncEnvelope<TPayload = unknown> {
   type: string;
 }
 
+interface SyncDeviceRecord {
+  firstSeenAt: string;
+  id: string;
+  name: string;
+  platform: NodeJS.Platform | string;
+}
+
 interface MistakeLabelPayload {
   attemptAnswerId: string;
   id: string;
@@ -93,6 +100,37 @@ function parseJsonl(text: string): { events: SyncEnvelope[]; malformedCount: num
     );
 }
 
+function readDevicesFile(devicesPath: string): { devices: SyncDeviceRecord[] } {
+  if (!existsSync(devicesPath)) {
+    return { devices: [] };
+  }
+
+  try {
+    const parsed = JSON.parse(readFileSync(devicesPath, "utf8")) as { devices?: unknown };
+    if (!Array.isArray(parsed.devices)) {
+      return { devices: [] };
+    }
+
+    return {
+      devices: parsed.devices.filter((device): device is SyncDeviceRecord => {
+        if (!device || typeof device !== "object") {
+          return false;
+        }
+
+        const record = device as Record<string, unknown>;
+        return (
+          typeof record.firstSeenAt === "string" &&
+          typeof record.id === "string" &&
+          typeof record.name === "string" &&
+          typeof record.platform === "string"
+        );
+      })
+    };
+  } catch {
+    return { devices: [] };
+  }
+}
+
 export function getDefaultSyncFolderPath(platform: NodeJS.Platform | string, selectedWindowsPath?: string): string {
   if (platform === "win32") {
     return selectedWindowsPath ?? "IELTS-Sync";
@@ -118,15 +156,13 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     }
 
     const devicesPath = syncPath("devices.json");
-    const device = {
+    const device: SyncDeviceRecord = {
       firstSeenAt: new Date().toISOString(),
       id: options.deviceId,
       name: options.deviceName,
       platform: options.platform
     };
-    const devices = existsSync(devicesPath)
-      ? (JSON.parse(readFileSync(devicesPath, "utf8")) as { devices?: typeof device[] })
-      : { devices: [] };
+    const devices = readDevicesFile(devicesPath);
     const nextDevices = [
       ...(devices.devices ?? []).filter((existingDevice) => existingDevice.id !== options.deviceId),
       device
