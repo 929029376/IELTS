@@ -4,6 +4,7 @@ import { join } from "node:path";
 import type { AttemptAnswerRecord, AttemptQuestionRecord, AttemptRecord } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { applyFrequencyEntryToMatchingPassages, type FrequencyEntryRecord } from "../db/frequencyRepo";
+import type { StatsSnapshot } from "../services/analyticsService";
 import type { DictationAttemptRecord, ListeningCueRecord } from "../db/intensiveRepo";
 import { createSyncRepo } from "../db/syncRepo";
 
@@ -239,6 +240,10 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
 
   function appendFrequencyEntryEvent(entry: FrequencyEntryRecord, createdAt: string) {
     return appendEvent("frequency.entry.upserted", entry, createdAt);
+  }
+
+  function appendStatsSnapshotEvent(snapshot: StatsSnapshot, createdAt: string) {
+    return appendEvent("stats.snapshot.created", snapshot, createdAt);
   }
 
   function appendExternalEvent(group: SyncGroup, event: SyncEnvelope) {
@@ -707,6 +712,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     appendListeningCueEvent,
     appendListeningCueUpdateEvent,
     appendMistakeEvent,
+    appendStatsSnapshotEvent,
     ensureSyncFolder,
     getOptions: () => ({ ...currentOptions }),
     importRemoteEvents,

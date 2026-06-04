@@ -1,4 +1,5 @@
 import { mkdirSync, writeFileSync } from "node:fs";
+import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import type { FrequencyClass, Part, Subject } from "@ielts/shared";
 import { dataDir } from "../config/paths";
@@ -42,6 +43,13 @@ export interface DashboardReport {
   predictedReading: BandPrediction;
   recommendedNextPractice: string | null;
   weakestQuestionType: string | null;
+}
+
+export interface StatsSnapshot {
+  createdAt: string;
+  id: string;
+  payloadJson: string;
+  snapshotType: string;
 }
 
 export interface AnalyticsServiceOptions {
@@ -323,7 +331,29 @@ export function createAnalyticsService(db: DatabaseHandle, options: AnalyticsSer
     return { mistakesCsv, mockCsv, mockJson };
   }
 
+  function createDashboardSnapshot(): StatsSnapshot {
+    const snapshot: StatsSnapshot = {
+      createdAt: now,
+      id: randomUUID(),
+      payloadJson: JSON.stringify({
+        analytics: getAccuracyAnalytics(),
+        dashboard: getDashboardReport()
+      }),
+      snapshotType: "dashboard_report"
+    };
+
+    db.prepare(
+      `
+      INSERT INTO stats_snapshots (id, snapshot_type, payload_json, created_at)
+      VALUES (@id, @snapshotType, @payloadJson, @createdAt)
+    `
+    ).run(snapshot);
+
+    return snapshot;
+  }
+
   return {
+    createDashboardSnapshot,
     exportReports,
     getAccuracyAnalytics,
     getDashboardReport,

@@ -496,6 +496,12 @@
   - cross-device analytics and prediction snapshots can be preserved alongside
     intensive-listening events in the same stats sync file,
   - imported snapshot events are recorded in `sync_events` for dedupe.
+- Added Mac local stats snapshot write hardening:
+  - `POST /api/reports/snapshot` now persists the current dashboard report and
+    accuracy analytics into `stats_snapshots`,
+  - saved snapshots append `stats.snapshot.created` to Baidu Cloud `stats.jsonl`
+    when sync is configured,
+  - the stats snapshot path now has both local write and remote import coverage.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -2062,6 +2068,25 @@
     - Passed with all 11 sync service tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test`
     - Passed with all 102 server tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 137 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
+- Mac local stats snapshot write hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/reportsRoutes.test.ts -t "analytics snapshot"`
+    - Initially failed with `404` because the reports snapshot endpoint did not
+      exist.
+    - Passed after `POST /api/reports/snapshot` persists the current local
+      dashboard/analytics payload and appends `stats.snapshot.created` when sync
+      is configured.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/reportsRoutes.test.ts`
+    - Passed with both reports route tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+    - Passed with all 11 sync service tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 103 server tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server build`
+    - Passed TypeScript server build.
   - `npx pnpm@9.15.4 --filter @ielts/web test`
     - Passed with all 137 web tests.
   - `npx pnpm@9.15.4 --filter @ielts/web build`

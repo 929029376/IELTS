@@ -61,7 +61,8 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
   registerStudyRoutes(server, db, sync);
   registerReportsRoutes(server, db, {
     exportDir: options.exportDir,
-    now: options.now
+    now: options.now,
+    sync
   });
   registerBackupRoutes(server, db, {
     backupDir: options.backupDir,

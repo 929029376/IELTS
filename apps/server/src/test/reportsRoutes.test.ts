@@ -1,9 +1,9 @@
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createAttemptRepo } from "../db/attemptRepo";
-import { openDatabase } from "../db/database";
+import { openDatabase, type DatabaseHandle } from "../db/database";
 import { migrate } from "../db/migrate";
 import { createQuestionRepo } from "../db/questionRepo";
 import { buildServer } from "../server";
@@ -101,6 +101,58 @@ describe("reports routes", () => {
         mockCsv: expect.stringContaining("mock-report-2026-05-31.csv"),
         mockJson: expect.stringContaining("mock-report-2026-05-31.json")
       });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("creates a local analytics snapshot and appends a stats sync event", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-reports-snapshot-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    seedReportData(databasePath);
+
+    const server = buildServer({
+      databasePath,
+      now: "2026-05-31T00:00:00.000Z",
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const response = await server.inject({ method: "POST", url: "/api/reports/snapshot" });
+      expect(response.statusCode).toBe(200);
+      const snapshot = response.json<{ createdAt: string; id: string; payloadJson: string; snapshotType: string }>();
+      expect(snapshot).toMatchObject({
+        createdAt: "2026-05-31T00:00:00.000Z",
+        snapshotType: "dashboard_report"
+      });
+      expect(JSON.parse(snapshot.payloadJson)).toMatchObject({
+        analytics: {
+          byFrequencyClass: {
+            high: {
+              correct: 1,
+              total: 1
+            }
+          }
+        },
+        dashboard: {
+          predictedListening: {
+            predictedBand: 7
+          }
+        }
+      });
+
+      const db = (server as typeof server & { db: DatabaseHandle }).db;
+      expect(db.prepare("SELECT id FROM stats_snapshots WHERE id = ?").get(snapshot.id)).toBeTruthy();
+      const statsJsonl = readFileSync(join(syncFolderPath, "stats.jsonl"), "utf8");
+      expect(statsJsonl).toContain("stats.snapshot.created");
+      expect(statsJsonl).toContain(snapshot.id);
     } finally {
       await server.close();
       rmSync(tempDir, { recursive: true, force: true });
