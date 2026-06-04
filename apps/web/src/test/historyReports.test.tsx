@@ -206,6 +206,51 @@ describe("history and reports preview", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/reports/snapshot", expect.objectContaining({ method: "POST" }));
   });
 
+  it("shows progress while saving a local analytics snapshot", async () => {
+    type SnapshotResponse = {
+      json: () => Promise<{ createdAt: string; id: string; payloadJson: string; snapshotType: string }>;
+      ok: boolean;
+    };
+    let resolveSnapshot: ((value: SnapshotResponse) => void) | null = null;
+    const fetchMock = vi.fn(
+      () =>
+        new Promise<SnapshotResponse>((resolve) => {
+          resolveSnapshot = resolve;
+        })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Save analytics snapshot" }));
+
+    expect(screen.getByRole("button", { name: "Saving analytics snapshot" })).toBeDisabled();
+
+    resolveSnapshot?.({
+      ok: true,
+      json: async () => ({
+        createdAt: "2026-06-05T10:00:00.000Z",
+        id: "snapshot-2",
+        payloadJson: "{}",
+        snapshotType: "dashboard_report"
+      })
+    });
+
+    expect(await screen.findByText("snapshot-2")).toBeInTheDocument();
+  });
+
   it("copies exported report paths to the clipboard for local file lookup", async () => {
     const exportedFiles = {
       mistakesCsv: "/Users/musheng/Desktop/IELTS/data/exports/mistakes-2026-06-04.csv",

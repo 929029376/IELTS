@@ -340,7 +340,7 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
           </button>
           <button disabled={isSavingSnapshot} onClick={() => void saveAnalyticsSnapshot()} type="button">
             <Save size={16} aria-hidden="true" />
-            Save analytics snapshot
+            {isSavingSnapshot ? "Saving analytics snapshot" : "Save analytics snapshot"}
           </button>
         </div>
       </div>

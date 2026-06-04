@@ -508,6 +508,11 @@
     snapshot id and date,
   - failed snapshot saves show a dedicated error without disturbing report export
     state.
+- Added Mac report snapshot progress hardening:
+  - the snapshot action now switches to `Saving analytics snapshot` while the
+    request is in flight,
+  - the button remains disabled during save so duplicate snapshot writes are
+    avoided from repeated clicks.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -2111,6 +2116,22 @@
     - Passed TypeScript server build.
   - `npx pnpm@9.15.4 --filter @ielts/web test`
     - Passed with all 138 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
+- Mac report snapshot progress hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "progress while saving"`
+    - Initially failed because the snapshot button was disabled during save but
+      still rendered the idle `Save analytics snapshot` text.
+    - Passed after the button renders `Saving analytics snapshot` while the
+      snapshot request is in flight.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Passed with all 15 history/report component tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 103 server tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server build`
+    - Passed TypeScript server build.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 139 web tests.
   - `npx pnpm@9.15.4 --filter @ielts/web build`
     - Passed TypeScript and Vite production build.
 - Mac review-attempt integrity hardening:
