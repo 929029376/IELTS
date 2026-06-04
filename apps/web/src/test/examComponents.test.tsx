@@ -155,6 +155,29 @@ describe("exam simulation components", () => {
     expect(split).toHaveStyle({ gridTemplateColumns: "60% 8px minmax(0, 1fr)" });
   });
 
+  it("resizes reading panes from the keyboard divider controls", () => {
+    const { container } = render(
+      <ReadingExamView
+        passageTitle="The History of Tea"
+        passageText="Tea became popular because the answer sentence explains the trade."
+        highlightedText="answer sentence"
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+    const split = container.querySelector(".reading-split") as HTMLElement;
+    const divider = screen.getByRole("separator", { name: "Resize reading panes" });
+
+    fireEvent.keyDown(divider, { key: "ArrowRight" });
+    expect(split).toHaveStyle({ gridTemplateColumns: "57% 8px minmax(0, 1fr)" });
+    expect(divider).toHaveAttribute("aria-valuenow", "57");
+
+    fireEvent.keyDown(divider, { key: "Home" });
+    expect(split).toHaveStyle({ gridTemplateColumns: "35% 8px minmax(0, 1fr)" });
+
+    fireEvent.keyDown(divider, { key: "End" });
+    expect(split).toHaveStyle({ gridTemplateColumns: "70% 8px minmax(0, 1fr)" });
+  });
+
   it("highlights reading answer evidence when imported passage casing or whitespace differs", () => {
     const { container } = render(
       <ReadingExamView

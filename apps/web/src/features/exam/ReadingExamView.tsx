@@ -1,4 +1,4 @@
-import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 export interface ReadingExamViewProps {
@@ -166,6 +166,25 @@ export function ReadingExamView({
     setLeftPanePercent(leftPanePercent === 52 ? 58 : 52);
   }
 
+  function handleDividerKeyDown(event: ReactKeyboardEvent<HTMLButtonElement>) {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      setLeftPanePercent((current) => clampPanePercent(current - 5));
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      setLeftPanePercent((current) => clampPanePercent(current + 5));
+    }
+    if (event.key === "Home") {
+      event.preventDefault();
+      setLeftPanePercent(35);
+    }
+    if (event.key === "End") {
+      event.preventDefault();
+      setLeftPanePercent(70);
+    }
+  }
+
   return (
     <div className={`reading-exam-view font-${fontScale}`}>
       <div className="reading-toolbar" aria-label="Reading settings">
@@ -217,6 +236,7 @@ export function ReadingExamView({
           role="separator"
           type="button"
           onClick={handleDividerClick}
+          onKeyDown={handleDividerKeyDown}
           onMouseDown={handleDividerMouseDown}
         />
         <aside className="reading-questions" aria-label="Reading questions">

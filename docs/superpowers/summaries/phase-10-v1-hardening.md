@@ -183,7 +183,8 @@
   - reading highlights can be cleared from the toolbar.
 - Added Mac reading pane drag hardening:
   - the reading exam divider can be dragged to resize passage and question panes,
-  - the divider keeps a click shortcut and accessible separator metadata.
+  - the divider keeps a click shortcut and accessible separator metadata,
+  - ArrowLeft, ArrowRight, Home, and End can adjust the split from the keyboard.
 - Added Mac reading answer-evidence highlight hardening:
   - reading mock/practice answer-sentence evidence highlights now tolerate
     casing differences and repeated whitespace from imported passage text.
@@ -1083,6 +1084,11 @@
       width toggling instead of real dragging.
     - Passed after adding drag-based pane width calculation and regression
       coverage.
+- Mac reading pane keyboard-resize hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the reading divider exposed separator value
+      metadata but did not support keyboard resizing.
+    - Passed after adding ArrowLeft, ArrowRight, Home, and End handling.
 
 ## Remaining V1 Gaps
 
