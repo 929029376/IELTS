@@ -70,8 +70,10 @@ describe("answer scoring", () => {
   it("expands slash-separated aliases in accepted answers", () => {
     expect(isAnswerCorrect("center", ["centre/center"])).toBe(true);
     expect(isAnswerCorrect("centre", ["centre/center"])).toBe(true);
+    expect(isAnswerCorrect("center", ["centre／center"])).toBe(true);
     expect(isAnswerCorrect("center", ["centre / center"])).toBe(true);
     expect(isAnswerCorrect("city center", ["city centre / city center"])).toBe(true);
+    expect(isAnswerCorrect("city center", ["city centre ／ city center"])).toBe(true);
     expect(isAnswerCorrect("central", ["centre/center"])).toBe(false);
   });
 

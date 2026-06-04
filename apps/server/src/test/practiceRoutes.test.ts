@@ -247,7 +247,7 @@ function seedSlashAliasAnswerQuestion(databasePath: string) {
     });
     questions.createAnswerKey({
       questionId: question.id,
-      acceptedAnswers: ["centre / center"],
+      acceptedAnswers: ["centre／center"],
       answerSentence: "The speaker says the centre.",
       explanation: "The answer key accepts UK and US spelling.",
       synonyms: []

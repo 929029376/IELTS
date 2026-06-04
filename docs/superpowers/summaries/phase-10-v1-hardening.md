@@ -311,6 +311,8 @@
   - accepted answers with slash-separated aliases such as `centre/center` now
     match either spelling,
   - spaced slash aliases such as `centre / center` also match either spelling,
+  - full-width slash aliases such as `centre／center` and
+    `city centre ／ city center` also match the intended spelling variant,
   - short phrase aliases such as `city centre / city center` can match the
     selected phrase variant,
   - unrelated answers such as `central` still fail,
@@ -2094,14 +2096,19 @@
     - A follow-up red run failed because `centre / center` and
       `city centre / city center` were still treated as one literal answer
       instead of spaced slash aliases.
+    - A later red run failed because full-width slash aliases such as
+      `centre／center` and `city centre ／ city center` were not recognized as
+      slash-separated aliases.
     - Passed after expanding alphabetic slash-separated accepted-answer tokens
-      into answer aliases and adding phrase-level expansion for spaced slash
-      alternatives.
+      into answer aliases, adding phrase-level expansion for spaced slash
+      alternatives, and normalizing full-width slashes to ASCII slashes.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "slash-separated"`
     - Initially failed because the practice API marked `center` incorrect
       against accepted answer `centre/center`.
     - A follow-up red run failed when the practice API saw accepted answer
       `centre / center`.
+    - A later red run failed when the practice API saw accepted answer
+      `centre／center`.
     - Passed after the shared slash-alias answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
