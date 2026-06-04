@@ -110,7 +110,36 @@ function slashAliasParts(token: string): string[] | null {
   return parts;
 }
 
+function isAlphabeticPhrase(phrase: string): boolean {
+  return phrase
+    .split(/\s+/)
+    .filter(Boolean)
+    .every((token) => /^[a-z][a-z'-]*$/.test(token));
+}
+
+function phraseSlashAliasParts(variant: string): string[] | null {
+  if (!variant.includes("/") || !/\s\/\s|\s\/|\/\s/.test(variant)) {
+    return null;
+  }
+
+  const parts = variant
+    .split(/\s*\/\s*/)
+    .map((part) => normalizeAnswer(part))
+    .filter(Boolean);
+
+  if (parts.length < 2 || !parts.every(isAlphabeticPhrase)) {
+    return null;
+  }
+
+  return parts;
+}
+
 function expandSlashAliases(variant: string): string[] {
+  const phraseAliases = phraseSlashAliasParts(variant);
+  if (phraseAliases) {
+    return phraseAliases;
+  }
+
   const tokens = variant.split(/\s+/).filter(Boolean);
   let variants = [""];
 
@@ -140,7 +169,9 @@ function acceptedAnswerVariants(acceptedAnswer: string): string[] {
     variants.push(normalizeAnswer(variant.replace(optionalPattern, match[1])));
   }
 
-  return Array.from(new Set(variants.filter((variant) => !optionalPattern.test(variant)).flatMap(expandSlashAliases)));
+  return Array.from(
+    new Set(variants.filter((variant) => !optionalPattern.test(variant)).flatMap(expandSlashAliases))
+  );
 }
 
 export function isAnswerCorrect(

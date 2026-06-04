@@ -254,11 +254,14 @@
 - Added Mac slash-alias answer-key scoring hardening:
   - accepted answers with slash-separated aliases such as `centre/center` now
     match either spelling,
+  - spaced slash aliases such as `centre / center` also match either spelling,
+  - short phrase aliases such as `city centre / city center` can match the
+    selected phrase variant,
   - unrelated answers such as `central` still fail,
   - slash-separated numeric tokens such as dates remain whole answer tokens
     instead of being over-expanded,
   - practice and mock scoring can handle imported answer-key notation that lists
-    answer aliases compactly.
+    answer aliases compactly or with spaces around the slash.
 - Added Mac IELTS judgment-question input hardening:
   - `TRUE/FALSE/NOT GIVEN` questions now use fixed answer choices,
   - `YES/NO/NOT GIVEN` questions now use fixed answer choices,
@@ -1881,11 +1884,17 @@
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
     - Initially failed because accepted answer `centre/center` was compared as
       one literal normalized string and did not match user answer `center`.
+    - A follow-up red run failed because `centre / center` and
+      `city centre / city center` were still treated as one literal answer
+      instead of spaced slash aliases.
     - Passed after expanding alphabetic slash-separated accepted-answer tokens
-      into answer aliases.
+      into answer aliases and adding phrase-level expansion for spaced slash
+      alternatives.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "slash-separated"`
     - Initially failed because the practice API marked `center` incorrect
       against accepted answer `centre/center`.
+    - A follow-up red run failed when the practice API saw accepted answer
+      `centre / center`.
     - Passed after the shared slash-alias answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
