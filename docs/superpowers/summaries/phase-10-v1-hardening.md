@@ -51,7 +51,9 @@
 - Expanded Playwright coverage for dashboard, import report, practice, mock exam, review, history, and sync settings anchors.
 - Added a Mac self-use question-bank import surface:
   - local listening directory import,
+  - individual listening ZIP import,
   - local reading PDF directory import,
+  - individual reading PDF import,
   - frequency CSV/XLSX import,
   - corrected manual frequency row import,
   - Playwright anchors for the Question Bank import region and default Mac local paths.
@@ -276,6 +278,9 @@
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
+- Added Mac single-file import controls so a single listening ZIP or reading PDF
+  can be imported directly from the Question Bank panel without rescanning the
+  whole source directory.
 - Added Mac post-mock dashboard refresh hardening:
   - successful local mock submissions now refresh report history, latest mock
     score, score prediction cards, and the local study overview without requiring
@@ -356,6 +361,13 @@
     - 2 Playwright Chromium tests passed with Question Bank import anchors.
   - `npx pnpm@9.15.4 build`
     - Shared, server, and web production builds passed.
+- Mac single-file import UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
+    - Initially failed because the Mac Question Bank panel did not expose the
+      existing single listening ZIP and single reading PDF import routes.
+    - Passed after adding single-file path fields, disabled empty-path states,
+      and API calls to `POST /api/import/listening-zip` and
+      `POST /api/import/reading-pdf`.
 - Mac mock-start UI follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the dashboard exam preview had no `Start reading mock`

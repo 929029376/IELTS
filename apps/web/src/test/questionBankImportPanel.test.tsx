@@ -1,9 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QuestionBankImportPanel } from "../features/import/QuestionBankImportPanel";
 
 describe("QuestionBankImportPanel", () => {
   afterEach(() => {
+    cleanup();
     vi.restoreAllMocks();
   });
 
@@ -69,5 +70,48 @@ describe("QuestionBankImportPanel", () => {
       );
     });
     expect(await screen.findByText("Imported 1 item into the local question bank.")).toBeInTheDocument();
+  });
+
+  it("imports a single listening ZIP and a single reading PDF from local paths", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ importedCount: 1 })
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<QuestionBankImportPanel />);
+
+    fireEvent.change(screen.getByLabelText("Listening ZIP path"), {
+      target: { value: "/Users/musheng/Desktop/IELTS/listening/P1/高频/1. P1 Enquiry.zip" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Import listening ZIP" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/import/listening-zip",
+        expect.objectContaining({
+          body: JSON.stringify({ zipPath: "/Users/musheng/Desktop/IELTS/listening/P1/高频/1. P1 Enquiry.zip" }),
+          method: "POST"
+        })
+      );
+    });
+
+    fireEvent.change(screen.getByLabelText("Reading PDF path"), {
+      target: { value: "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - Tea.pdf" }
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Import reading PDF" })).toBeEnabled();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Import reading PDF" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/import/reading-pdf",
+        expect.objectContaining({
+          body: JSON.stringify({ pdfPath: "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - Tea.pdf" }),
+          method: "POST"
+        })
+      );
+    });
   });
 });

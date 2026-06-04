@@ -43,7 +43,9 @@ function toFrequencyPayload(row: FrequencyCorrectionRow) {
 
 export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete?: () => void }) {
   const [listeningDir, setListeningDir] = useState("/Users/musheng/Desktop/IELTS/listening");
+  const [listeningZipPath, setListeningZipPath] = useState("");
   const [readingDir, setReadingDir] = useState("/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF");
+  const [readingPdfPath, setReadingPdfPath] = useState("");
   const [frequencyFilePath, setFrequencyFilePath] = useState("");
   const [frequencyRows, setFrequencyRows] = useState<FrequencyCorrectionRow[]>([defaultFrequencyRow]);
   const [status, setStatus] = useState("Ready for local question-bank imports.");
@@ -101,6 +103,30 @@ export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete
           className="import-panel"
           onSubmit={(event) => {
             event.preventDefault();
+            void runImport("listening ZIP", "/api/import/listening-zip", { zipPath: listeningZipPath });
+          }}
+        >
+          <div className="import-panel-title">
+            <FolderInput size={18} aria-hidden="true" />
+            <h3>Single listening ZIP</h3>
+          </div>
+          <label>
+            Listening ZIP path
+            <input
+              placeholder="/Users/musheng/Desktop/IELTS/listening/P1/高频/1. P1 Enquiry.zip"
+              value={listeningZipPath}
+              onChange={(event) => setListeningZipPath(event.target.value)}
+            />
+          </label>
+          <button type="submit" disabled={isImporting || listeningZipPath.trim().length === 0}>
+            Import listening ZIP
+          </button>
+        </form>
+
+        <form
+          className="import-panel"
+          onSubmit={(event) => {
+            event.preventDefault();
             void runImport("reading directory", "/api/import/reading-directory", { rootDir: readingDir });
           }}
         >
@@ -114,6 +140,30 @@ export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete
           </label>
           <button type="submit" disabled={isImporting}>
             Import reading directory
+          </button>
+        </form>
+
+        <form
+          className="import-panel"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void runImport("reading PDF", "/api/import/reading-pdf", { pdfPath: readingPdfPath });
+          }}
+        >
+          <div className="import-panel-title">
+            <FolderInput size={18} aria-hidden="true" />
+            <h3>Single reading PDF</h3>
+          </div>
+          <label>
+            Reading PDF path
+            <input
+              placeholder="/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - Tea.pdf"
+              value={readingPdfPath}
+              onChange={(event) => setReadingPdfPath(event.target.value)}
+            />
+          </label>
+          <button type="submit" disabled={isImporting || readingPdfPath.trim().length === 0}>
+            Import reading PDF
           </button>
         </form>
 

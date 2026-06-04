@@ -1,6 +1,6 @@
 # Phase 2 Question Bank Import Summary
 
-**Date:** 2026-05-31, with Mac import route follow-up on 2026-06-03
+**Date:** 2026-05-31, with Mac import route follow-ups on 2026-06-03 and 2026-06-04
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -48,6 +48,7 @@
   - Uses the existing importer modules and stores assets under the configured asset root.
 - Added `apps/web/src/features/import/QuestionBankImportPanel.tsx`.
   - Provides Mac local path inputs for the existing `listening` folder and reading PDF folder.
+  - Provides single-file Mac imports for an individual listening ZIP or reading PDF.
   - Provides frequency CSV/XLSX import and corrected frequency row import.
   - Shows import progress and imported item counts in the dashboard.
 - Integrated the Question Bank import panel into the main app dashboard.
@@ -111,6 +112,13 @@
       frequency-table update.
     - Passed after adding an `Add frequency row` action that appends another
       editable row with the previous row's subject, part, and source month.
+- Mac single-file import UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
+    - Initially failed because the Mac Question Bank panel could only submit
+      listening and reading directory imports, even though the backend already
+      exposed individual listening ZIP and reading PDF import routes.
+    - Passed after adding single-file path controls for
+      `POST /api/import/listening-zip` and `POST /api/import/reading-pdf`.
 
 ## Notes
 
