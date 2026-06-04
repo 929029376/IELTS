@@ -92,6 +92,12 @@
     historical mistake label,
   - the dashboard exposes those filters before starting reading or listening
     practice.
+- Added Mac IELTS word-limit scoring hardening:
+  - imported or manually authored `wordLimit` strings are parsed alongside
+    `maxWords`,
+  - `NO MORE THAN TWO WORDS AND/OR A NUMBER` allows the number outside the word
+    count,
+  - practice and mock answers use the shared scoring behavior.
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
@@ -624,6 +630,16 @@
       `NO MORE THAN TWO WORDS` bypassed the word-limit gate.
     - Passed after practice scoring extracts numeric limits from common IELTS
       word-limit phrases before checking correctness.
+- Mac number-permitted word-limit scoring hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Initially failed because the shared word-limit helper counted a permitted
+      numeric token as an extra word.
+    - Passed after adding an `allowNumber` scoring option.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because `NO MORE THAN TWO WORDS AND/OR A NUMBER` was
+      parsed as only a two-word limit.
+    - Passed after the practice service detects number-permitted IELTS rule text
+      and forwards that scoring option.
 
 ## Remaining V1 Gaps
 

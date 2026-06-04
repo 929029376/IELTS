@@ -75,6 +75,23 @@ function getMaxWords(answerRules: Record<string, unknown>): number | undefined {
   return undefined;
 }
 
+function getAllowNumber(answerRules: Record<string, unknown>): boolean {
+  for (const key of ["allowNumber", "allow_number", "numberAllowed", "number_allowed"]) {
+    if (answerRules[key] === true) {
+      return true;
+    }
+  }
+
+  for (const key of ["maxWords", "wordLimit", "max_words"]) {
+    const value = answerRules[key];
+    if (typeof value === "string" && /\bnumber\b/i.test(value)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function createPracticeService(db: DatabaseHandle, options: TestBuilderOptions = {}) {
   const attempts = createAttemptRepo(db);
   const questions = createQuestionRepo(db);
@@ -165,8 +182,9 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
 
       const acceptedAnswers = question.answerKeys.flatMap((answerKey) => answerKey.acceptedAnswers);
       const maxWords = getMaxWords(question.answerRules);
+      const allowNumber = getAllowNumber(question.answerRules);
       const normalizedAnswer = normalizeAnswer(input.rawAnswer);
-      const isCorrect = isAnswerCorrect(input.rawAnswer, acceptedAnswers, { maxWords });
+      const isCorrect = isAnswerCorrect(input.rawAnswer, acceptedAnswers, { allowNumber, maxWords });
 
       const answer = attempts.saveAnswer({
         attemptId: input.attemptId,

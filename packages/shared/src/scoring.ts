@@ -47,7 +47,15 @@ export function normalizeAnswer(answer: string): string {
     .toLowerCase();
 }
 
-export function wordCountWithinLimit(answer: string, maxWords?: number): boolean {
+export interface WordLimitOptions {
+  allowNumber?: boolean;
+}
+
+function isNumberToken(token: string): boolean {
+  return /^[+-]?\d[\d,.:/-]*(st|nd|rd|th)?$/i.test(token);
+}
+
+export function wordCountWithinLimit(answer: string, maxWords?: number, options: WordLimitOptions = {}): boolean {
   if (!maxWords) {
     return true;
   }
@@ -57,15 +65,16 @@ export function wordCountWithinLimit(answer: string, maxWords?: number): boolean
     return true;
   }
 
-  return normalized.split(/\s+/).length <= maxWords;
+  const words = normalized.split(/\s+/).filter((token) => !(options.allowNumber && isNumberToken(token)));
+  return words.length <= maxWords;
 }
 
 export function isAnswerCorrect(
   rawAnswer: string,
   acceptedAnswers: string[],
-  options: { maxWords?: number } = {}
+  options: { allowNumber?: boolean; maxWords?: number } = {}
 ): boolean {
-  if (!wordCountWithinLimit(rawAnswer, options.maxWords)) {
+  if (!wordCountWithinLimit(rawAnswer, options.maxWords, { allowNumber: options.allowNumber })) {
     return false;
   }
 

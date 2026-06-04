@@ -36,6 +36,11 @@
   - frequency class,
   - question type,
   - historical mistake label.
+- Added IELTS number-permitted word-limit scoring:
+  - `NO MORE THAN TWO WORDS AND/OR A NUMBER` keeps the number outside the word
+    count,
+  - explicit answer-rule flags such as `allowNumber` are also honored,
+  - the behavior is shared by direct scoring helpers and practice API answers.
 - Added question navigation states:
   - unanswered,
   - answered,
@@ -109,6 +114,16 @@
       produce a numeric max-word limit.
     - Passed after practice scoring parsed common IELTS English number words in
       word-limit rule strings.
+- Mac number-permitted word-limit scoring follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Initially failed because `wordCountWithinLimit` did not support a number
+      outside the word count.
+    - Passed after adding the shared `allowNumber` scoring option.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because the practice API parsed the word count but did
+      not detect `AND/OR A NUMBER`.
+    - Passed after practice scoring detected number-permitted IELTS rule text
+      and passed the shared option into answer correctness.
 
 ## Notes
 

@@ -17,4 +17,10 @@ describe("answer scoring", () => {
     expect(wordCountWithinLimit("green park", 2)).toBe(true);
     expect(wordCountWithinLimit("the green park", 2)).toBe(false);
   });
+
+  it("allows a number outside the word count when the IELTS rule permits it", () => {
+    expect(wordCountWithinLimit("green park 24", 2, { allowNumber: true })).toBe(true);
+    expect(wordCountWithinLimit("green park station", 2, { allowNumber: true })).toBe(false);
+    expect(isAnswerCorrect("green park 24", ["green park 24"], { allowNumber: true, maxWords: 2 })).toBe(true);
+  });
 });
