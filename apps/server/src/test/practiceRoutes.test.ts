@@ -403,7 +403,7 @@ function seedNumberedAnswerQuestion(databasePath: string) {
     });
     questions.createAnswerKey({
       questionId: question.id,
-      acceptedAnswers: ["(1) green park"],
+      acceptedAnswers: ["Answer: green park"],
       answerSentence: "The imported answer key included the question number.",
       explanation: "Imported answer keys can include numbering prefixes.",
       synonyms: []

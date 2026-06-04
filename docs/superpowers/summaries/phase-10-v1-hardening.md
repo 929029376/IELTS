@@ -285,8 +285,10 @@
     match typed answers such as `green park`,
   - `Q1: green park` style prefixes from answer-key sheets are also removed
     from accepted answer variants,
+  - answer-label prefixes such as `Answer: green park`, `Ans. green park`, and
+    `答案：green park` are removed from accepted answer variants,
   - real numeric answers such as `3.5 million` remain intact instead of being
-    stripped as question numbers.
+    stripped as question numbers, and real answer text `answer` stays intact.
 - Added Mac slash-alias answer-key scoring hardening:
   - accepted answers with slash-separated aliases such as `centre/center` now
     match either spelling,
@@ -2001,16 +2003,27 @@
     - Passed after accepted-answer variants strip safe question-number prefixes
       such as `1. ` and `Q1: ` while preserving real numeric answers such as
       `3.5 million`.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "label prefixes"`
+    - Initially failed because accepted answer `Answer: green park` was
+      compared as one literal answer and did not match typed answer
+      `green park`.
+    - A follow-up red run failed for the Chinese label `答案：green park`
+      because the full-width colon had no following space.
+    - Passed after accepted-answer variants strip `Answer`, `Ans`, and `答案`
+      labels with ASCII or full-width punctuation while preserving real answer
+      text `answer`.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "numbering prefixes"`
     - Initially failed because the practice API marked `green park` incorrect
       against imported accepted answer `1. green park`.
-    - Passed after the shared accepted-answer numbering-prefix cleanup was used
-      by practice answer scoring.
+    - A follow-up red run failed when the practice API saw imported accepted
+      answer `Answer: green park`.
+    - Passed after the shared accepted-answer prefix cleanup was used by
+      practice answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "surrounding punctuation"`
     - Passed after the accepted-answer variant cleanup, confirming surrounding
       punctuation still normalizes correctly.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 13 shared scoring tests.
+    - Passed with all 14 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 16 practice route tests.
 - Mac slash-alias answer-key scoring hardening:
@@ -2031,7 +2044,7 @@
     - Passed after the shared slash-alias answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 13 shared scoring tests.
+    - Passed with all 14 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 16 practice route tests.
 

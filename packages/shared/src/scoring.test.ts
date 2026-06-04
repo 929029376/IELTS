@@ -34,6 +34,13 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("million", ["3.5 million"])).toBe(false);
   });
 
+  it("ignores imported answer label prefixes", () => {
+    expect(isAnswerCorrect("green park", ["Answer: green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["Ans. green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["答案：green park"])).toBe(true);
+    expect(isAnswerCorrect("answer", ["answer"])).toBe(true);
+  });
+
   it("ignores surrounding parentheses copied with answer text", () => {
     expect(isAnswerCorrect("(green park)", ["green park"])).toBe(true);
     expect(isAnswerCorrect("green park", ["(green park)"])).toBe(true);

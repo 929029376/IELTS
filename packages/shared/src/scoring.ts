@@ -44,7 +44,7 @@ export function normalizeAnswer(answer: string): string {
     .replace(/[“”]/g, "\"")
     .replace(/^['"]+|['"]+$/g, "")
     .replace(/^\(([^()]+)\)$/g, "$1")
-    .replace(/^[.,;:!?]+|[.,;:!?]+$/g, "")
+    .replace(/^[.,;:：!?]+|[.,;:：!?]+$/g, "")
     .replace(/[‐‑‒–—―]/g, "-")
     .replace(/\s*-\s*/g, "-")
     .replace(/\s+/g, " ")
@@ -169,10 +169,18 @@ function stripImportedAnswerNumberingPrefix(acceptedAnswer: string): string {
   return acceptedAnswer.replace(/^(?:q\s*)?\d{1,2}[.):]\s+/i, "");
 }
 
+function stripImportedAnswerLabelPrefix(acceptedAnswer: string): string {
+  return acceptedAnswer.replace(/^(?:answer|ans|答案)\s*(?:[:：.]|-)\s*/i, "");
+}
+
 function acceptedAnswerVariants(acceptedAnswer: string): string[] {
   const optionalPattern = /\(([^()]+)\)/;
   const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
-  const variants = [normalizedAcceptedAnswer, stripImportedAnswerNumberingPrefix(normalizedAcceptedAnswer)];
+  const variants = [
+    normalizedAcceptedAnswer,
+    stripImportedAnswerNumberingPrefix(normalizedAcceptedAnswer),
+    stripImportedAnswerLabelPrefix(normalizedAcceptedAnswer)
+  ];
 
   for (let index = 0; index < variants.length; index += 1) {
     const variant = variants[index];
