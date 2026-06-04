@@ -483,6 +483,13 @@
     retried after the missing attempt or question-bank context is restored,
   - partial cross-device sync can continue importing other valid attempt and
     answer history.
+- Added Mac remote mistake-dependency sync hardening:
+  - remote mistake-label rows whose `attemptAnswerId` is not available locally
+    are skipped instead of failing the entire Baidu Cloud JSONL sync import,
+  - unresolved remote mistake events remain unrecorded locally so they can be
+    retried after the missing answer context is restored,
+  - partial cross-device sync can continue importing other valid mistakes and
+    study-history events.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -2021,6 +2028,20 @@
     - Passed with all 9 sync service tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test`
     - Passed with all 100 server tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 137 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
+- Mac remote mistake-dependency sync hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts -t "skips remote mistake rows"`
+    - Initially failed with a SQLite foreign-key error when a remote mistake
+      event referenced a missing local attempt answer.
+    - Passed after mistake sync checks the local answer dependency and returns
+      unresolved events as skipped instead of writing invalid mistake rows.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+    - Passed with all 10 sync service tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 101 server tests.
   - `npx pnpm@9.15.4 --filter @ielts/web test`
     - Passed with all 137 web tests.
   - `npx pnpm@9.15.4 --filter @ielts/web build`

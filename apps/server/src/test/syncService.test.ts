@@ -329,6 +329,33 @@ describe("sync service", () => {
     expect(createSyncRepo(db).hasSyncEvent("remote-answer-missing-question")).toBe(false);
   });
 
+  it("skips remote mistake rows when the local answer is missing", () => {
+    const service = createSyncService(db, {
+      deviceId: "macbook",
+      deviceName: "MacBook",
+      platform: "darwin",
+      syncFolderPath: syncDir
+    });
+    service.ensureSyncFolder();
+    service.appendExternalEvent("mistakes", {
+      createdAt: "2026-06-01T09:03:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-mistake-missing-answer",
+      payload: {
+        attemptAnswerId: "missing-local-answer",
+        id: "remote-mistake-missing-answer-row",
+        label: "定位失败"
+      },
+      type: "mistake.added"
+    });
+
+    expect(service.importRemoteEvents()).toMatchObject({ imported: 0, skipped: 1 });
+    expect(createSyncRepo(db).hasSyncEvent("remote-mistake-missing-answer")).toBe(false);
+    expect(
+      db.prepare("SELECT id FROM mistake_labels WHERE id = ?").get("remote-mistake-missing-answer-row")
+    ).toBeUndefined();
+  });
+
   it("keeps remote answer conflicts for submitted local attempts instead of overwriting", () => {
     const question = seedQuestion();
     const attempts = createAttemptRepo(db);

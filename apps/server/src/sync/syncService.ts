@@ -441,12 +441,18 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
   }
 
   function addMistake(payload: MistakeLabelPayload) {
+    const answer = db.prepare("SELECT id FROM attempt_answers WHERE id = ?").get(payload.attemptAnswerId);
+    if (!answer) {
+      return false;
+    }
+
     db.prepare(
       `
       INSERT OR IGNORE INTO mistake_labels (id, attempt_answer_id, label)
       VALUES (@id, @attemptAnswerId, @label)
     `
     ).run(payload);
+    return true;
   }
 
   function addListeningCue(payload: ListeningCueRecord, createdAt: string) {
@@ -595,7 +601,9 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       }
       conflict = answerResult.conflict;
     } else if (event.type === "mistake.added") {
-      addMistake(event.payload as MistakeLabelPayload);
+      if (!addMistake(event.payload as MistakeLabelPayload)) {
+        return { conflict: false, inserted: false };
+      }
     } else if (event.type === "intensive.listening_cue.created") {
       if (!addListeningCue(event.payload as ListeningCueRecord, event.createdAt)) {
         return { conflict: false, inserted: false };
