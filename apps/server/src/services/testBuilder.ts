@@ -26,6 +26,13 @@ export interface TestBuilderOptions {
   now?: string;
 }
 
+export class MissingMockCandidateError extends Error {
+  constructor(subject: Subject, part: Part) {
+    super(`No ${subject} candidate found for ${part}.`);
+    this.name = "MissingMockCandidateError";
+  }
+}
+
 export function calculateSelectionWeight(input: {
   frequencyClass: FrequencyClass;
   lastCompletedAt: string | null;
@@ -158,7 +165,7 @@ function buildFullSet(
     const candidates = filterCandidatePassages(db, { subject, part }, options);
     const selected = weightedPick(candidates, random);
     if (!selected) {
-      throw new Error(`No ${subject} candidate found for ${part}.`);
+      throw new MissingMockCandidateError(subject, part);
     }
     return selected;
   });

@@ -395,6 +395,12 @@
     attempt rows,
   - this keeps history, prediction, backup, and Baidu Cloud sync logs from being
     polluted by abandoned zero-question attempts.
+- Added Mac incomplete-mock start hardening:
+  - local mock starts that cannot find a required IELTS part now return a client
+    conflict response,
+  - missing-part mock starts no longer surface as server errors,
+  - no attempt row is created until the frequency-weighted builder can assemble a
+    complete part distribution.
 - Added Mac local exam metadata fallback hardening:
   - blank imported passage titles now render as `Untitled passage` in loaded
     mock/practice lists, reading passage headers, and listening section labels,
@@ -1785,6 +1791,15 @@
       inserted.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 20 practice route tests.
+- Mac incomplete-mock start hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "missing a required part"`
+    - Initially failed because a reading mock request with P1 and P2 candidates
+      but no P3 candidate returned `500`, even though the issue was local
+      question-bank readiness rather than a server fault.
+    - Passed after the full-set builder raises a typed missing-candidate error
+      and the practice route maps it to `409` before any attempt is inserted.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 21 practice route tests.
 - Mac practice local-resource hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because free practice attempts did not receive imported

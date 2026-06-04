@@ -4,7 +4,7 @@ import { frequencyClassSchema, partSchema, questionTypeSchema } from "@ielts/sha
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { createPracticeService, EmptyPracticeStartError } from "../services/practiceService";
-import type { TestBuilderOptions } from "../services/testBuilder";
+import { MissingMockCandidateError, type TestBuilderOptions } from "../services/testBuilder";
 import type { SyncService } from "../sync/syncService";
 
 const startPracticeSchema = z.object({
@@ -39,6 +39,9 @@ export function registerPracticeRoutes(
       result = practice.startPractice(input);
     } catch (error) {
       if (error instanceof EmptyPracticeStartError) {
+        return reply.code(409).send({ error: error.message });
+      }
+      if (error instanceof MissingMockCandidateError) {
         return reply.code(409).send({ error: error.message });
       }
       throw error;

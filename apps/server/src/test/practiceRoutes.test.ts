@@ -800,6 +800,31 @@ describe("practice routes", () => {
     }
   });
 
+  it("does not create an attempt when a mock set is missing a required part", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-incomplete-mock-start-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedPracticeFilterCandidates(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "mock", subject: "reading" }
+      });
+
+      expect(start.statusCode).toBe(409);
+      expect(start.json()).toMatchObject({
+        error: "No reading candidate found for P3."
+      });
+      expect(countAttempts(databasePath)).toBe(0);
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("filters practice starts by part, frequency class, and question type", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-filter-routes-"));
     const databasePath = join(tempDir, "ielts.db");
