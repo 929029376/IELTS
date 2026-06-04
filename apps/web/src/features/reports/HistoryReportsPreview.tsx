@@ -97,6 +97,18 @@ function formatDuration(seconds: number | null) {
   return `${minutes} min`;
 }
 
+function formatHistorySubject(subject: string) {
+  return subject.trim() || "Unknown subject";
+}
+
+function formatHistoryMode(mode: string) {
+  return mode.trim() || "Unknown mode";
+}
+
+function formatHistoryDate(submittedAt: string) {
+  return submittedAt.trim().slice(0, 10) || "Date unavailable";
+}
+
 function formatUserAnswer(rawAnswer: string) {
   return rawAnswer.trim() || "No answer";
 }
@@ -387,9 +399,9 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
               {history.length > 0 ? (
                 history.map((attempt) => (
                   <tr key={attempt.id}>
-                    <td>{attempt.subject}</td>
-                    <td>{attempt.mode}</td>
-                    <td>{attempt.submittedAt.slice(0, 10)}</td>
+                    <td>{formatHistorySubject(attempt.subject)}</td>
+                    <td>{formatHistoryMode(attempt.mode)}</td>
+                    <td>{formatHistoryDate(attempt.submittedAt)}</td>
                     <td>{attempt.rawScore ?? "-"}</td>
                     <td>{attempt.estimatedBand ?? "-"}</td>
                     <td>{formatDuration(attempt.durationSeconds)}</td>

@@ -83,6 +83,37 @@ describe("history and reports preview", () => {
     expect(screen.getByText("33%")).toBeInTheDocument();
   });
 
+  it("shows clear fallbacks for blank history attempt metadata", () => {
+    render(
+      <HistoryReportsPreview
+        history={[
+          {
+            durationSeconds: null,
+            estimatedBand: null,
+            id: "attempt-blank-history-meta",
+            mode: "   ",
+            rawScore: null,
+            startedAt: "2026-06-04T10:00:00.000Z",
+            subject: "   ",
+            submittedAt: "   "
+          }
+        ]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    expect(screen.getByText("Unknown subject")).toBeInTheDocument();
+    expect(screen.getByText("Unknown mode")).toBeInTheDocument();
+    expect(screen.getByText("Date unavailable")).toBeInTheDocument();
+  });
+
   it("shows clear fallbacks for blank accuracy and mistake labels", () => {
     render(
       <HistoryReportsPreview

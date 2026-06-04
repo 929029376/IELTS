@@ -172,6 +172,11 @@
     rendering,
   - whitespace-only exported paths now show explicit unavailable-path messages,
   - copying report paths uses the same fallback strings instead of blank lines.
+- Added Mac history attempt metadata fallback hardening:
+  - history table subjects and modes are trimmed before rendering,
+  - whitespace-only subject and mode values now show `Unknown subject` and
+    `Unknown mode`,
+  - whitespace-only submitted dates now show `Date unavailable`.
 - Added Mac study queue title fallback hardening:
   - recommended mock passages with whitespace-only imported titles now render as
     `Untitled passage`,
@@ -1286,6 +1291,12 @@
       empty report rows and copied as blank clipboard lines.
     - Passed after trimming exported report paths and falling back to explicit
       unavailable-path messages for rendering and copy.
+- Mac history attempt metadata fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "blank history attempt metadata"`
+    - Initially failed because whitespace-only history subject, mode, and
+      submitted date metadata rendered as blank table cells.
+    - Passed after trimming history metadata and falling back to
+      `Unknown subject`, `Unknown mode`, and `Date unavailable`.
 - Mac study queue title fallback hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/studyOverviewPanel.test.tsx`
     - Initially failed because whitespace-only recommended mock passage titles
