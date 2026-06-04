@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface CueDraft {
   startSeconds: number;
@@ -7,15 +7,26 @@ export interface CueDraft {
   transcript: string;
 }
 
+type CueInitialValue = Omit<CueDraft, "transcript"> & { transcript?: string | null };
+
 export interface CueEditorProps {
+  initialCue?: CueInitialValue | null;
   onSave: (cue: CueDraft) => void;
+  submitLabel?: string;
 }
 
-export function CueEditor({ onSave }: CueEditorProps) {
-  const [label, setLabel] = useState("");
-  const [startSeconds, setStartSeconds] = useState("0");
-  const [endSeconds, setEndSeconds] = useState("0");
-  const [transcript, setTranscript] = useState("");
+export function CueEditor({ initialCue = null, onSave, submitLabel = "Save cue" }: CueEditorProps) {
+  const [label, setLabel] = useState(initialCue?.label ?? "");
+  const [startSeconds, setStartSeconds] = useState(String(initialCue?.startSeconds ?? 0));
+  const [endSeconds, setEndSeconds] = useState(String(initialCue?.endSeconds ?? 0));
+  const [transcript, setTranscript] = useState(initialCue?.transcript ?? "");
+
+  useEffect(() => {
+    setLabel(initialCue?.label ?? "");
+    setStartSeconds(String(initialCue?.startSeconds ?? 0));
+    setEndSeconds(String(initialCue?.endSeconds ?? 0));
+    setTranscript(initialCue?.transcript ?? "");
+  }, [initialCue]);
 
   return (
     <form
@@ -61,7 +72,7 @@ export function CueEditor({ onSave }: CueEditorProps) {
           onChange={(event) => setTranscript(event.target.value)}
         />
       </label>
-      <button type="submit">Save cue</button>
+      <button type="submit">{submitLabel}</button>
     </form>
   );
 }

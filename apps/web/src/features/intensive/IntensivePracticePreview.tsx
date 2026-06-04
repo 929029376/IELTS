@@ -36,13 +36,26 @@ function normalizeCues(cues: NonNullable<IntensiveStudyPreviewView["listening"]>
   }));
 }
 
+function mergeCues(
+  sourceCues: NonNullable<IntensiveStudyPreviewView["listening"]>["cues"],
+  changedCues: NonNullable<IntensiveStudyPreviewView["listening"]>["cues"]
+) {
+  const merged = new Map(sourceCues.map((cue) => [cue.id, cue]));
+  changedCues.forEach((cue) => merged.set(cue.id, cue));
+  return [...merged.values()];
+}
+
 async function postJson<T>(path: string, payload: Record<string, unknown>): Promise<T> {
+  return writeJson(path, payload, "POST");
+}
+
+async function writeJson<T>(path: string, payload: Record<string, unknown>, method: "POST" | "PUT"): Promise<T> {
   const response = await fetch(path, {
     body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json"
     },
-    method: "POST"
+    method
   });
 
   if (!response.ok) {
@@ -63,12 +76,13 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
   const [answerSentenceStatus, setAnswerSentenceStatus] = useState<string | null>(null);
   const [savedAnswerSentence, setSavedAnswerSentence] = useState<string | null>(null);
   const [savedCues, setSavedCues] = useState<NonNullable<IntensiveStudyPreviewView["listening"]>["cues"]>([]);
+  const [editingCue, setEditingCue] = useState<ReturnType<typeof normalizeCues>[number] | null>(null);
 
   const listening = preview?.listening
     ? {
         audioPath: preview.listening.audioPath ?? null,
         audioTitle: preview.listening.audioTitle,
-        cues: normalizeCues([...preview.listening.cues, ...savedCues]),
+        cues: normalizeCues(mergeCues(preview.listening.cues, savedCues)),
         passageId: preview.listening.passageId
       }
     : null;
@@ -96,6 +110,30 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
       setCueStatus("Cue saved for sentence repeat.");
     } catch {
       setCueStatus("Could not save cue.");
+    }
+  }
+
+  async function updateCue(cue: CueDraft) {
+    if (!editingCue) {
+      return;
+    }
+
+    try {
+      const savedCue = await writeJson<NonNullable<IntensiveStudyPreviewView["listening"]>["cues"][number]>(
+        `/api/study/listening-cues/${editingCue.id}`,
+        {
+          endSeconds: cue.endSeconds,
+          label: cue.label,
+          startSeconds: cue.startSeconds,
+          transcript: cue.transcript
+        },
+        "PUT"
+      );
+      setSavedCues((cues) => mergeCues(cues, [savedCue]));
+      setEditingCue(null);
+      setCueStatus("Cue updated for sentence repeat.");
+    } catch {
+      setCueStatus("Could not update cue.");
     }
   }
 
@@ -166,11 +204,26 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
                   void submitDictation(input);
                 }}
               />
+              {listening.cues.length > 0 ? (
+                <div className="cue-edit-list" aria-label="Cue edit controls">
+                  {listening.cues.map((cue) => (
+                    <button key={cue.id} type="button" onClick={() => setEditingCue(cue)}>
+                      Edit {cue.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
               {dictationStatus ? <p className="import-status">{dictationStatus}</p> : null}
               <CueEditor
+                initialCue={editingCue}
                 onSave={(cue) => {
-                  void saveCue(cue);
+                  if (editingCue) {
+                    void updateCue(cue);
+                  } else {
+                    void saveCue(cue);
+                  }
                 }}
+                submitLabel={editingCue ? "Update cue" : "Save cue"}
               />
             </>
           ) : (

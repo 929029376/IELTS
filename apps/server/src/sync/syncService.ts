@@ -213,6 +213,10 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     return appendEvent("intensive.listening_cue.created", cue, createdAt);
   }
 
+  function appendListeningCueUpdateEvent(cue: ListeningCueRecord, createdAt: string) {
+    return appendEvent("intensive.listening_cue.updated", cue, createdAt);
+  }
+
   function appendDictationAttemptEvent(attempt: DictationAttemptRecord, createdAt: string) {
     return appendEvent("intensive.dictation_attempt.saved", attempt, createdAt);
   }
@@ -390,6 +394,25 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     return true;
   }
 
+  function updateListeningCue(payload: ListeningCueRecord) {
+    const passage = db.prepare("SELECT id FROM passages WHERE id = ?").get(payload.passageId);
+    if (!passage) {
+      return false;
+    }
+
+    const result = db.prepare(
+      `
+      UPDATE listening_cues
+      SET start_seconds = @startSeconds,
+          end_seconds = @endSeconds,
+          label = @label,
+          transcript = @transcript
+      WHERE id = @id
+    `
+    ).run(payload);
+    return result.changes > 0;
+  }
+
   function addDictationAttempt(payload: DictationAttemptRecord, createdAt: string) {
     const cue = db.prepare("SELECT id FROM listening_cues WHERE id = ?").get(payload.cueId);
     if (!cue) {
@@ -486,6 +509,10 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       if (!addListeningCue(event.payload as ListeningCueRecord, event.createdAt)) {
         return { conflict: false, inserted: false };
       }
+    } else if (event.type === "intensive.listening_cue.updated") {
+      if (!updateListeningCue(event.payload as ListeningCueRecord)) {
+        return { conflict: false, inserted: false };
+      }
     } else if (event.type === "intensive.dictation_attempt.saved") {
       if (!addDictationAttempt(event.payload as DictationAttemptRecord, event.createdAt)) {
         return { conflict: false, inserted: false };
@@ -545,6 +572,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     appendExternalEvent,
     appendFrequencyEntryEvent,
     appendListeningCueEvent,
+    appendListeningCueUpdateEvent,
     appendMistakeEvent,
     ensureSyncFolder,
     importRemoteEvents

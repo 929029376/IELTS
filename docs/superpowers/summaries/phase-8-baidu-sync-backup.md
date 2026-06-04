@@ -25,6 +25,7 @@
   - close-reading mistake-label selection.
 - Added append-only JSONL sync events for Mac intensive listening writes:
   - sentence cue creation,
+  - sentence cue updates,
   - dictation attempt saving.
 - Added append-only JSONL sync events for Mac close-reading evidence writes:
   - manual answer-sentence updates are written as
@@ -124,6 +125,17 @@
       referenced local question-bank rows exist.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the intensive listening sync follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac intensive listening cue-update sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because updating an existing sentence cue did not append
+      `intensive.listening_cue.updated`, and remote cue update events were not
+      applied after the cue existed locally.
+    - Passed after appending cue update events to `stats.jsonl` and applying
+      resolvable remote cue corrections during startup/manual sync import.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the intensive listening cue-update sync follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - Mac close-reading answer-sentence sync follow-up:

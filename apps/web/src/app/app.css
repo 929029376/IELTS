@@ -1609,6 +1609,7 @@ h1 {
 }
 
 .practice-audio-controls,
+.cue-edit-list,
 .cue-repeat-list {
   display: flex;
   flex-wrap: wrap;
@@ -1616,6 +1617,7 @@ h1 {
 }
 
 .practice-audio-controls button,
+.cue-edit-list button,
 .cue-repeat-list button,
 .intensive-listening-player button,
 .cue-editor button,

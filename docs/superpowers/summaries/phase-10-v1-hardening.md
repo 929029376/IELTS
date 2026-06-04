@@ -73,8 +73,12 @@
   local cue and answer-evidence data is available.
 - Added Mac intensive study write hardening:
   - cue creation now posts to `POST /api/study/listening-cues`,
+  - existing cue corrections now post to
+    `PUT /api/study/listening-cues/:cueId`,
   - dictation submit now posts to `POST /api/study/dictation-attempts`,
-  - newly saved cues immediately appear in sentence repeat controls.
+  - newly saved cues immediately appear in sentence repeat controls,
+  - corrected cues immediately update sentence repeat labels and dictation
+    transcript checks.
 - Added Mac intensive real-audio repeat hardening:
   - `/api/study/intensive` now returns the selected listening passage's local
     audio path,
@@ -204,6 +208,7 @@
     foreign keys remain valid.
 - Added Mac intensive listening sync hardening:
   - sentence cue creation now appends `intensive.listening_cue.created` events,
+  - sentence cue corrections now append `intensive.listening_cue.updated` events,
   - dictation attempt saving now appends `intensive.dictation_attempt.saved`
     events,
   - both event types are written to Baidu Cloud `stats.jsonl` for cross-device
@@ -478,6 +483,19 @@
       no-ops.
     - Passed after wiring them to local APIs and rendering saved/correctness
       status.
+- Mac intensive cue-update follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed with `404` because existing sentence cues could not be
+      corrected through the local study API.
+    - Passed after adding `PUT /api/study/listening-cues/:cueId`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because existing sentence cues had repeat buttons but no
+      edit action in the Mac intensive panel.
+    - Passed after adding cue edit buttons, prefilled cue fields, `PUT` save
+      handling, and refreshed repeat labels.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the cue-update hardening, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - Mac intensive real-audio repeat follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
     - Initially failed because `/api/study/intensive` did not include the local
@@ -658,6 +676,15 @@
     - Passed after the intensive listening sync hardening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac intensive listening cue-update sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because cue corrections did not append
+      `intensive.listening_cue.updated`, and remote cue update events were not
+      applied after the local cue existed.
+    - Passed after adding cue-update sync append/import handling.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the cue-update sync hardening, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - Mac close-reading answer-sentence sync follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
     - Initially failed because answer-sentence updates were saved locally but did

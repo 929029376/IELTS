@@ -15,6 +15,8 @@ const createCueBody = z.object({
   transcript: z.string().nullable().optional()
 });
 
+const updateCueBody = createCueBody.omit({ passageId: true });
+
 const createDictationBody = z.object({
   cueId: z.string().min(1),
   userText: z.string()
@@ -50,6 +52,23 @@ export function registerStudyRoutes(server: FastifyInstance, db: DatabaseHandle,
     sync?.appendListeningCueEvent(cue, new Date().toISOString());
 
     return reply.code(201).send(cue);
+  });
+  server.put("/api/study/listening-cues/:cueId", async (request, reply) => {
+    const params = z.object({ cueId: z.string().min(1) }).parse(request.params);
+    const body = updateCueBody.parse(request.body);
+    const cue = intensive.updateListeningCue({
+      endSeconds: body.endSeconds,
+      id: params.cueId,
+      label: body.label ?? null,
+      startSeconds: body.startSeconds,
+      transcript: body.transcript ?? null
+    });
+    if (!cue) {
+      return reply.code(404).send({ message: "Listening cue not found." });
+    }
+
+    sync?.appendListeningCueUpdateEvent(cue, new Date().toISOString());
+    return reply.send(cue);
   });
   server.post("/api/study/dictation-attempts", async (request, reply) => {
     const body = createDictationBody.parse(request.body);

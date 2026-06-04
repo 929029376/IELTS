@@ -242,6 +242,17 @@ describe("sync routes", () => {
       const cue = cueResponse.json<{ id: string }>();
 
       await server.inject({
+        method: "PUT",
+        payload: {
+          endSeconds: 5.4,
+          label: "Corrected Sentence 1",
+          startSeconds: 1.5,
+          transcript: "Green Park corrected"
+        },
+        url: `/api/study/listening-cues/${cue.id}`
+      });
+
+      await server.inject({
         method: "POST",
         payload: {
           cueId: cue.id,
@@ -252,9 +263,95 @@ describe("sync routes", () => {
 
       const statsJsonl = readFileSync(join(syncFolderPath, "stats.jsonl"), "utf8");
       expect(statsJsonl).toContain("intensive.listening_cue.created");
+      expect(statsJsonl).toContain("intensive.listening_cue.updated");
       expect(statsJsonl).toContain("intensive.dictation_attempt.saved");
       expect(statsJsonl).toContain("Green Park");
+      expect(statsJsonl).toContain("Green Park corrected");
       expect(statsJsonl).toContain("green park");
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
+  it("imports remote intensive listening cue updates after the local cue exists", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-intensive-cue-update-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    const passageId = seedListeningPassage(databasePath);
+    mkdirSync(syncFolderPath, { recursive: true });
+    writeFileSync(
+      join(syncFolderPath, "stats.jsonl"),
+      [
+        JSON.stringify({
+          createdAt: "2026-06-04T08:00:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "remote-cue-create-before-update",
+          payload: {
+            endSeconds: 4.2,
+            id: "remote-cue-update-1",
+            label: "Sentence 1",
+            passageId,
+            startSeconds: 1.2,
+            transcript: "Green Park"
+          },
+          type: "intensive.listening_cue.created"
+        }),
+        JSON.stringify({
+          createdAt: "2026-06-04T08:02:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "remote-cue-update-after-create",
+          payload: {
+            endSeconds: 5.6,
+            id: "remote-cue-update-1",
+            label: "Corrected Sentence 1",
+            passageId,
+            startSeconds: 1.5,
+            transcript: "Green Park corrected"
+          },
+          type: "intensive.listening_cue.updated"
+        }),
+        ""
+      ].join("\n")
+    );
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const db = (server as typeof server & { db: DatabaseHandle }).db;
+      const cue = db
+        .prepare(
+          `
+          SELECT
+            start_seconds AS startSeconds,
+            end_seconds AS endSeconds,
+            label,
+            transcript
+          FROM listening_cues
+          WHERE id = ?
+        `
+        )
+        .get("remote-cue-update-1") as {
+        endSeconds: number;
+        label: string;
+        startSeconds: number;
+        transcript: string;
+      };
+
+      expect(cue).toEqual({
+        endSeconds: 5.6,
+        label: "Corrected Sentence 1",
+        startSeconds: 1.5,
+        transcript: "Green Park corrected"
+      });
     } finally {
       await server.close();
       rmSync(tempDir, { force: true, recursive: true });

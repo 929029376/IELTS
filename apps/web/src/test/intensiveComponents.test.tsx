@@ -245,6 +245,69 @@ describe("intensive study components", () => {
     );
   });
 
+  it("updates an existing listening cue through the local study API", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        endSeconds: 5.8,
+        id: "cue-live-1",
+        label: "Corrected Sentence 1",
+        passageId: "passage-live-1",
+        startSeconds: 1.6,
+        transcript: "Green Park corrected"
+      })
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: {
+            audioTitle: "Live cue review",
+            cues: [
+              {
+                endSeconds: 4.2,
+                id: "cue-live-1",
+                label: "Sentence 1",
+                startSeconds: 1.2,
+                transcript: "Green Park"
+              }
+            ],
+            passageId: "passage-live-1"
+          },
+          reading: null
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit Sentence 1" }));
+    expect(screen.getByLabelText("Cue label")).toHaveValue("Sentence 1");
+    expect(screen.getByLabelText("Start time")).toHaveValue("1.2");
+    expect(screen.getByLabelText("End time")).toHaveValue("4.2");
+    expect(screen.getByLabelText("Transcript")).toHaveValue("Green Park");
+
+    fireEvent.change(screen.getByLabelText("Cue label"), { target: { value: "Corrected Sentence 1" } });
+    fireEvent.change(screen.getByLabelText("Start time"), { target: { value: "1.6" } });
+    fireEvent.change(screen.getByLabelText("End time"), { target: { value: "5.8" } });
+    fireEvent.change(screen.getByLabelText("Transcript"), { target: { value: "Green Park corrected" } });
+    fireEvent.click(screen.getByRole("button", { name: "Update cue" }));
+
+    expect(await screen.findByText("Cue updated for sentence repeat.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Repeat Corrected Sentence 1" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/study/listening-cues/cue-live-1",
+      expect.objectContaining({
+        body: JSON.stringify({
+          endSeconds: 5.8,
+          label: "Corrected Sentence 1",
+          startSeconds: 1.6,
+          transcript: "Green Park corrected"
+        }),
+        method: "PUT"
+      })
+    );
+  });
+
   it("saves close-reading mistake labels through the local study API", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,

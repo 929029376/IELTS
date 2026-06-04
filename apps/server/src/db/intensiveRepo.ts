@@ -32,8 +32,8 @@ export function createIntensiveRepo(db: DatabaseHandle) {
       return record;
     },
 
-    updateListeningCue(input: ListeningCueUpdateInput): void {
-      db.prepare(`
+    updateListeningCue(input: ListeningCueUpdateInput): ListeningCueRecord | null {
+      const result = db.prepare(`
         UPDATE listening_cues
         SET start_seconds = @startSeconds,
             end_seconds = @endSeconds,
@@ -41,6 +41,25 @@ export function createIntensiveRepo(db: DatabaseHandle) {
             transcript = @transcript
         WHERE id = @id
       `).run(input);
+      if (result.changes === 0) {
+        return null;
+      }
+
+      return db
+        .prepare(
+          `
+          SELECT
+            id,
+            passage_id AS passageId,
+            start_seconds AS startSeconds,
+            end_seconds AS endSeconds,
+            label,
+            transcript
+          FROM listening_cues
+          WHERE id = ?
+        `
+        )
+        .get(input.id) as ListeningCueRecord;
     },
 
     listListeningCues(passageId: string): ListeningCueRecord[] {

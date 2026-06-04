@@ -44,10 +44,14 @@
 - Added local intensive study write APIs and Mac UI wiring:
   - `POST /api/study/listening-cues` creates sentence cues for the active local
     listening passage,
+  - `PUT /api/study/listening-cues/:cueId` updates an existing cue's start/end
+    time, label, and transcript,
   - `POST /api/study/dictation-attempts` persists dictation attempts and returns
     correctness against the cue transcript,
   - saving a cue in the Mac dashboard immediately enables sentence repeat, and
-    submitting dictation shows the saved/correctness result.
+    submitting dictation shows the saved/correctness result,
+  - existing cues can be loaded into the Mac cue editor and corrected without
+    recreating the segment.
 - Added Mac real-audio sentence repeat wiring:
   - the intensive listening preview now returns the local listening audio path,
   - `IntensiveListeningPlayer` renders a real `<audio>` element served through
@@ -206,6 +210,20 @@
     - Passed after the intensive real-audio repeat follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac cue update follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed with `404` because existing listening cues could not be
+      updated through the local study API.
+    - Passed after adding `PUT /api/study/listening-cues/:cueId` and returning
+      the corrected cue for the intensive preview.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the Mac intensive panel exposed sentence repeat
+      controls but no `Edit Sentence` action for existing cues.
+    - Passed after loading existing cue values into the cue editor, saving them
+      through `PUT`, and refreshing the repeat label/status.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the cue update follow-up, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - Mac intensive A-B loop status follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
     - Initially failed because custom A-B repeat set the loop internally but did

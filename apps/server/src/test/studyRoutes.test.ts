@@ -351,11 +351,43 @@ describe("study overview routes", () => {
       transcript: "Green Park"
     });
 
+    const updateResponse = await server.inject({
+      method: "PUT",
+      payload: {
+        endSeconds: 5.8,
+        label: "Corrected Sentence 1",
+        startSeconds: 1.6,
+        transcript: "Green Park corrected"
+      },
+      url: `/api/study/listening-cues/${cue.id}`
+    });
+
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.json()).toMatchObject({
+      endSeconds: 5.8,
+      id: cue.id,
+      label: "Corrected Sentence 1",
+      passageId: passage.id,
+      startSeconds: 1.6,
+      transcript: "Green Park corrected"
+    });
+
+    const updatedPreview = await server.inject({ method: "GET", url: "/api/study/intensive" });
+    expect(updatedPreview.json().listening.cues).toEqual([
+      expect.objectContaining({
+        endSeconds: 5.8,
+        id: cue.id,
+        label: "Corrected Sentence 1",
+        startSeconds: 1.6,
+        transcript: "Green Park corrected"
+      })
+    ]);
+
     const dictationResponse = await server.inject({
       method: "POST",
       payload: {
         cueId: cue.id,
-        userText: " green park "
+        userText: " green park corrected "
       },
       url: "/api/study/dictation-attempts"
     });
@@ -364,8 +396,8 @@ describe("study overview routes", () => {
     expect(dictationResponse.json()).toMatchObject({
       cueId: cue.id,
       isCorrect: true,
-      normalizedText: "green park",
-      userText: " green park "
+      normalizedText: "green park corrected",
+      userText: " green park corrected "
     });
   });
 
