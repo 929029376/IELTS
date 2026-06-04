@@ -21,7 +21,7 @@
 - Implemented `ReadingExamView`.
   - Left passage pane.
   - Right question pane.
-  - Clickable divider for pane-width changes.
+  - Draggable divider for pane-width changes, with a retained click shortcut.
   - Answer text highlighting.
   - Notes panel.
   - Font size controls.
@@ -96,6 +96,10 @@
     practice attempt,
   - user highlights render separately from answer-sentence evidence highlights,
   - highlights can be cleared from the reading toolbar.
+- Added Mac reading pane drag hardening:
+  - the reading exam divider can be dragged to resize passage and question panes,
+  - the divider keeps accessible separator metadata and the existing click
+    shortcut.
 - Added Mac reading answer-evidence highlight hardening:
   - answer-sentence evidence in the reading exam view matches imported passage
     text without requiring identical casing,
@@ -268,6 +272,12 @@
       highlight imported reading text such as `Answer   Sentence`.
     - Passed after the reading exam highlighter began treating casing and
       whitespace differences as equivalent.
+- Mac reading pane drag follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because dragging the reading pane divider did not change
+      the passage/question pane width.
+    - Passed after the divider began calculating pane width from the drag
+      position while preserving the click shortcut.
 - Mac listening practice playback-controls follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because listening practice still rendered the local audio

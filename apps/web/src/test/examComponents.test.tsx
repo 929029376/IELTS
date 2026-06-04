@@ -126,6 +126,35 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("separator", { name: "Resize reading panes" })).toBeInTheDocument();
   });
 
+  it("resizes reading passage and question panes by dragging the divider", () => {
+    const { container } = render(
+      <ReadingExamView
+        passageTitle="The History of Tea"
+        passageText="Tea became popular because the answer sentence explains the trade."
+        highlightedText="answer sentence"
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+    const split = container.querySelector(".reading-split") as HTMLElement;
+    vi.spyOn(split, "getBoundingClientRect").mockReturnValue({
+      bottom: 600,
+      height: 400,
+      left: 100,
+      right: 1100,
+      top: 200,
+      width: 1000,
+      x: 100,
+      y: 200,
+      toJSON: () => ({})
+    });
+
+    fireEvent.mouseDown(screen.getByRole("separator", { name: "Resize reading panes" }), { clientX: 620 });
+    fireEvent.mouseMove(window, { clientX: 700 });
+    fireEvent.mouseUp(window);
+
+    expect(split).toHaveStyle({ gridTemplateColumns: "60% 8px minmax(0, 1fr)" });
+  });
+
   it("highlights reading answer evidence when imported passage casing or whitespace differs", () => {
     const { container } = render(
       <ReadingExamView

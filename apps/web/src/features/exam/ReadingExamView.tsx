@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import type { MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export interface ReadingExamViewProps {
   passageTitle: string;
@@ -87,6 +87,10 @@ function renderHighlightedText(text: string, answerHighlight?: string, userHighl
   return nodes;
 }
 
+function clampPanePercent(value: number): number {
+  return Math.min(70, Math.max(35, Math.round(value)));
+}
+
 export function ReadingExamView({
   passageTitle,
   passageText,
@@ -94,6 +98,8 @@ export function ReadingExamView({
   highlightedText,
   questions
 }: ReadingExamViewProps) {
+  const didDragDividerRef = useRef(false);
+  const splitRef = useRef<HTMLDivElement | null>(null);
   const [fontScale, setFontScale] = useState<"small" | "regular" | "large">("regular");
   const [leftPanePercent, setLeftPanePercent] = useState(52);
   const [userHighlights, setUserHighlights] = useState<string[]>([]);
@@ -113,6 +119,51 @@ export function ReadingExamView({
     }
 
     setUserHighlights((current) => (current.includes(selectedText) ? current : [...current, selectedText]));
+  }
+
+  function updatePanePercentFromClientX(clientX: number) {
+    const split = splitRef.current;
+    if (!split) {
+      return;
+    }
+
+    const rect = split.getBoundingClientRect();
+    if (rect.width <= 0) {
+      return;
+    }
+
+    setLeftPanePercent(clampPanePercent(((clientX - rect.left) / rect.width) * 100));
+  }
+
+  function handleDividerMouseDown(event: ReactMouseEvent<HTMLButtonElement>) {
+    const startX = event.clientX;
+    didDragDividerRef.current = false;
+    event.preventDefault();
+    updatePanePercentFromClientX(event.clientX);
+
+    function handleMouseMove(moveEvent: MouseEvent) {
+      if (Math.abs(moveEvent.clientX - startX) > 2) {
+        didDragDividerRef.current = true;
+      }
+      updatePanePercentFromClientX(moveEvent.clientX);
+    }
+
+    function handleMouseUp() {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    }
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  }
+
+  function handleDividerClick() {
+    if (didDragDividerRef.current) {
+      didDragDividerRef.current = false;
+      return;
+    }
+
+    setLeftPanePercent(leftPanePercent === 52 ? 58 : 52);
   }
 
   return (
@@ -135,6 +186,7 @@ export function ReadingExamView({
         </button>
       </div>
       <div
+        ref={splitRef}
         className="reading-split"
         style={{ gridTemplateColumns: `${leftPanePercent}% 8px minmax(0, 1fr)` }}
       >
@@ -157,10 +209,15 @@ export function ReadingExamView({
         </article>
         <button
           aria-label="Resize reading panes"
+          aria-orientation="vertical"
+          aria-valuemax={70}
+          aria-valuemin={35}
+          aria-valuenow={leftPanePercent}
           className="reading-divider"
           role="separator"
           type="button"
-          onClick={() => setLeftPanePercent(leftPanePercent === 52 ? 58 : 52)}
+          onClick={handleDividerClick}
+          onMouseDown={handleDividerMouseDown}
         />
         <aside className="reading-questions" aria-label="Reading questions">
           {questions}

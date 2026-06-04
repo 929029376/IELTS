@@ -1550,6 +1550,7 @@ h1 {
   border-radius: 0;
   background: #edf2f7;
   cursor: col-resize;
+  touch-action: none;
 }
 
 .font-small {

@@ -181,6 +181,9 @@
   - user highlights use a distinct style from answer-sentence evidence
     highlights,
   - reading highlights can be cleared from the toolbar.
+- Added Mac reading pane drag hardening:
+  - the reading exam divider can be dragged to resize passage and question panes,
+  - the divider keeps a click shortcut and accessible separator metadata.
 - Added Mac reading answer-evidence highlight hardening:
   - reading mock/practice answer-sentence evidence highlights now tolerate
     casing differences and repeated whitespace from imported passage text.
@@ -1074,6 +1077,12 @@
       exact casing and spacing to highlight imported passage text.
     - Passed after making reading exam evidence matching case-insensitive and
       whitespace-flexible.
+- Mac reading pane drag hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the reading divider only supported click-based
+      width toggling instead of real dragging.
+    - Passed after adding drag-based pane width calculation and regression
+      coverage.
 
 ## Remaining V1 Gaps
 
