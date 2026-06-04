@@ -4,6 +4,8 @@ import { isAnswerCorrect, normalizeAnswer, wordCountWithinLimit } from "./scorin
 describe("answer scoring", () => {
   it("normalizes case, repeated spaces, curly apostrophes, and hyphen spacing", () => {
     expect(normalizeAnswer("  Green   Park  ")).toBe("green park");
+    expect(normalizeAnswer("Ｇｒｅｅｎ　Ｐａｒｋ")).toBe("green park");
+    expect(normalizeAnswer("２４")).toBe("24");
     expect(normalizeAnswer("John’s  car")).toBe("john's car");
     expect(normalizeAnswer("well - known")).toBe("well-known");
     expect(normalizeAnswer("well–known")).toBe("well-known");
@@ -11,6 +13,8 @@ describe("answer scoring", () => {
 
   it("accepts answer aliases after normalization", () => {
     expect(isAnswerCorrect(" green park ", ["Green Park", "Park Green"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["Ｇｒｅｅｎ Ｐａｒｋ"])).toBe(true);
+    expect(isAnswerCorrect("24", ["２４"])).toBe(true);
     expect(isAnswerCorrect("blue park", ["Green Park", "Park Green"])).toBe(false);
   });
 

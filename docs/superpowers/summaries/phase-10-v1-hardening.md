@@ -262,6 +262,12 @@
   - spaced Unicode dash forms still use the existing hyphen-spacing rule,
   - practice and mock scoring can handle answer keys copied from PDFs or DOCX
     files that use typographic dash characters.
+- Added Mac Unicode compatibility answer normalization hardening:
+  - imported full-width English answers such as `Ｇｒｅｅｎ Ｐａｒｋ` now
+    normalize to typed answers such as `green park`,
+  - imported full-width numeric answers such as `２４` now normalize to typed
+    answers such as `24`,
+  - full-width spaces are collapsed through the existing whitespace rule.
 - Added Mac surrounding-punctuation answer normalization hardening:
   - imported answers copied as sentence fragments such as `green park.` now
     match typed answers such as `green park`,
@@ -1969,6 +1975,31 @@
     - Passed with all 9 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 12 practice route tests.
+- Mac Unicode compatibility answer normalization hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "normalizes case|answer aliases"`
+    - Initially failed because imported full-width answer text such as
+      `Ｇｒｅｅｎ　Ｐａｒｋ` normalized to full-width lowercase instead of
+      `green park`, and accepted answer `２４` did not match typed answer `24`.
+    - Passed after answer normalization applies Unicode NFKC compatibility
+      normalization before quote, punctuation, slash, dash, whitespace, and
+      lowercase cleanup.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "surrounding punctuation"`
+    - Initially failed because the practice API marked `green park` incorrect
+      against imported accepted answer `Ｇｒｅｅｎ Ｐａｒｋ。`.
+    - Passed after the shared Unicode compatibility normalization was used by
+      practice answer scoring.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated|optional parenthesized|multi-answer"`
+    - Passed after the NFKC cleanup, confirming recent slash, optional-word,
+      and multi-answer compatibility paths still work.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Initially exposed a numbering-prefix regression because NFKC converted
+      `1．green park` to `1.green park`, which the previous prefix rule did not
+      strip without a following space.
+    - Passed after numeric dot prefixes are stripped only when the dot is not
+      followed by another digit, preserving real decimal answers such as
+      `3.5 million`.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "numbering prefixes"`
+    - Passed after the NFKC follow-up numbering-prefix adjustment.
 - Mac surrounding-punctuation answer normalization hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "surrounding punctuation"`
     - Initially failed because accepted answer `green park.` was not normalized

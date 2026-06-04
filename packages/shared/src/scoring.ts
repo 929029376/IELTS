@@ -40,6 +40,7 @@ export function estimateBand(rawScore: number, table: BandRange[]): number {
 export function normalizeAnswer(answer: string): string {
   return answer
     .trim()
+    .normalize("NFKC")
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, "\"")
     .replace(/[（]/g, "(")
@@ -172,7 +173,8 @@ function stripImportedAnswerNumberingPrefix(acceptedAnswer: string): string {
   return acceptedAnswer
     .replace(/^\(\s*\d{1,2}\s*\)\s*/i, "")
     .replace(/^q\s*\d{1,2}\s*[.):：．、]\s*/i, "")
-    .replace(/^\d{1,2}[.)]\s+/i, "")
+    .replace(/^\d{1,2}\.(?!\d)\s*/i, "")
+    .replace(/^\d{1,2}\)\s+/i, "")
     .replace(/^\d{1,2}\s*[:：]\s+/i, "")
     .replace(/^\d{1,2}\s*[．、]\s*/i, "");
 }
