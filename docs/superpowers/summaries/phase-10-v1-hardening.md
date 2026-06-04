@@ -252,6 +252,8 @@
     `(the) green park(s)` now expand all combinations,
   - accepted answers imported with full-width optional markers such as
     `（the） green park（s）` now expand the same way,
+  - accepted answers imported with square-bracket optional markers such as
+    `[the] green park[s]` now expand the same way,
   - unrelated alternatives such as `a green park` still fail,
   - practice and mock scoring can handle imported answer-key notation that marks
     articles or short words as optional.
@@ -1945,10 +1947,14 @@
     - A later red run failed because full-width optional markers such as
       `（the） green park` and `（the） green park（s）` were not recognized as
       parenthesized optional segments.
+    - A later red run failed because square-bracket optional markers such as
+      `[the] green park` and `[the] green park[s]` were not recognized as
+      optional segments.
     - Passed after expanding accepted answers with one parenthesized optional
       segment into with-optional and without-optional variants, then after
       recursively expanding all parenthesized optional segments, and finally
-      normalizing full-width parentheses to ASCII parentheses.
+      normalizing full-width parentheses and square-bracket optional markers
+      into the same optional-segment representation.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "optional parenthesized"`
     - Initially failed because the practice API marked `green park` incorrect
       against accepted answer `(the) green park`.
@@ -1956,6 +1962,8 @@
       `(the) green park(s)`.
     - A later red run failed against accepted answer
       `（the） green park（s）`.
+    - A later red run failed against accepted answer
+      `[the] green park[s]`.
     - Passed after the shared optional-answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
