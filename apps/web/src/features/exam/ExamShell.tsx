@@ -8,6 +8,8 @@ export interface ExamSubmitEvent {
   reason: "manual" | "time_expired";
 }
 
+export type ExamTimerMode = "countdown" | "elapsed";
+
 export interface ExamShellProps extends PropsWithChildren {
   title: string;
   durationSeconds: number;
@@ -16,6 +18,7 @@ export interface ExamShellProps extends PropsWithChildren {
   onSelectQuestion?: (questionNumber: number) => void;
   onToggleCurrentQuestionMark?: () => void;
   submitLabel?: string;
+  timerMode?: ExamTimerMode;
 }
 
 export function ExamShell({
@@ -26,9 +29,10 @@ export function ExamShell({
   onSelectQuestion,
   onToggleCurrentQuestionMark,
   submitLabel = "Submit test",
+  timerMode = "countdown",
   children
 }: ExamShellProps) {
-  const [remainingSeconds, setRemainingSeconds] = useState(durationSeconds);
+  const [timerSeconds, setTimerSeconds] = useState(timerMode === "elapsed" ? 0 : durationSeconds);
   const [showWarning, setShowWarning] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [activePanel, setActivePanel] = useState<"help" | "settings" | null>(null);
@@ -46,12 +50,22 @@ export function ExamShell({
   }
 
   useEffect(() => {
+    setTimerSeconds(timerMode === "elapsed" ? 0 : durationSeconds);
+    setShowWarning(false);
+    setIsSubmitted(false);
+  }, [durationSeconds, timerMode, title]);
+
+  useEffect(() => {
     if (isSubmitted) {
       return undefined;
     }
 
     const timerId = window.setInterval(() => {
-      setRemainingSeconds((current) => {
+      setTimerSeconds((current) => {
+        if (timerMode === "elapsed") {
+          return current + 1;
+        }
+
         if (current <= 1) {
           window.clearInterval(timerId);
           submit("time_expired");
@@ -62,7 +76,7 @@ export function ExamShell({
     }, 1000);
 
     return () => window.clearInterval(timerId);
-  }, [isSubmitted]);
+  }, [isSubmitted, timerMode]);
 
   function handleSubmitClick() {
     if (unansweredCount > 0 || markedCount > 0) {
@@ -80,9 +94,9 @@ export function ExamShell({
           <h2>{title}</h2>
         </div>
         <div className="exam-controls" aria-label="Exam controls">
-          <span className="exam-timer" aria-label="Time remaining">
+          <span className="exam-timer" aria-label={timerMode === "elapsed" ? "Time elapsed" : "Time remaining"}>
             <Timer size={16} aria-hidden="true" />
-            {formatTimer(remainingSeconds)}
+            {formatTimer(timerSeconds)}
           </span>
           <button type="button" onClick={() => setActivePanel("help")}>
             <CircleHelp size={16} aria-hidden="true" />

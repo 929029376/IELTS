@@ -483,6 +483,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           onSelectQuestion={selectQuestion}
           onToggleCurrentQuestionMark={toggleCurrentQuestionMark}
           submitLabel={activeMock.mode === "mock" ? "Submit test" : "Submit practice"}
+          timerMode={activeMock.mode === "mock" ? "countdown" : "elapsed"}
         >
           {activeMock.subject === "reading" ? (
             <>

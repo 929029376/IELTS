@@ -111,6 +111,12 @@
     - Passed after the Mac practice-filter follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
+- Mac practice elapsed-timer follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because practice attempts still used the strict mock
+      countdown timer and could auto-submit on timeout.
+    - Passed after practice attempts switched to elapsed time tracking while
+      mock attempts retained countdown auto-submit behavior.
 - Mac word-limit alias scoring follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because practice scoring only honored

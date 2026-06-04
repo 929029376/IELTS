@@ -862,6 +862,12 @@
       A-B loop without surfacing the active A point or loop range.
     - Passed after showing the custom A-B loop status in the intensive listening
       player and preserving the existing loop-back playback behavior.
+- Mac practice elapsed-timer hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because Mac practice attempts reused the mock countdown
+      timer and did not expose a free-practice elapsed timer.
+    - Passed after wiring practice attempts to elapsed time tracking while
+      keeping mock attempts on strict countdown and timeout submit.
 
 ## Remaining V1 Gaps
 

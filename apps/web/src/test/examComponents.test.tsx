@@ -78,6 +78,36 @@ describe("exam simulation components", () => {
     expect(onSubmit).toHaveBeenCalledWith({ reason: "time_expired" });
   });
 
+  it("uses elapsed timing for practice sessions without auto-submitting", () => {
+    const onSubmit = vi.fn();
+
+    render(
+      <ExamShell
+        title="Reading Practice"
+        durationSeconds={2}
+        timerMode="elapsed"
+        questions={[{ questionNumber: 1, answered: true, markedForReview: false }]}
+        onSubmit={onSubmit}
+        submitLabel="Submit practice"
+      >
+        <p>Practice body</p>
+      </ExamShell>
+    );
+
+    expect(screen.getByLabelText("Time elapsed")).toHaveTextContent("00:00");
+
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+
+    expect(screen.getByLabelText("Time elapsed")).toHaveTextContent("00:03");
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Submit practice" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ reason: "manual" });
+  });
+
   it("renders reading split panes with highlight, notes, and font size controls", () => {
     render(
       <ReadingExamView
@@ -381,6 +411,7 @@ describe("exam simulation components", () => {
 
     expect(await screen.findByText("Loaded local reading practice")).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Loaded local practice set" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Time elapsed")).toHaveTextContent("00:00");
     expect(screen.getByRole("button", { name: "Submit practice" })).toBeInTheDocument();
     expect(screen.getAllByText("Focused Reading Practice").length).toBeGreaterThan(0);
     expect(screen.getByText("Which detail should be reviewed?")).toBeInTheDocument();

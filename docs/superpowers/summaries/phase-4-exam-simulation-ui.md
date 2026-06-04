@@ -250,6 +250,12 @@
     - Passed after the listening practice playback-controls follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac practice-vs-mock timer follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because `ExamShell` always rendered a `Time remaining`
+      countdown, even for free practice mode.
+    - Passed after adding a timer mode so mock exams keep strict countdown and
+      practice sessions show elapsed time without automatic timeout submission.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.
