@@ -98,6 +98,11 @@ export function IntensiveListeningPlayer({
     setLoopRange(null);
   }
 
+  function clearLoop() {
+    setAPoint(null);
+    setLoopRange(null);
+  }
+
   function toggleSpeed() {
     const audio = audioRef.current;
     if (!audio) {
@@ -147,6 +152,11 @@ export function IntensiveListeningPlayer({
         <button type="button" onClick={setBPoint}>
           Set B point
         </button>
+        {loopRange || aPoint !== null ? (
+          <button type="button" onClick={clearLoop}>
+            Clear loop
+          </button>
+        ) : null}
       </div>
       {loopStatus ? <p className="loop-status">{loopStatus}</p> : null}
 

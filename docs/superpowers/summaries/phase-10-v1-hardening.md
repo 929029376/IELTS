@@ -92,6 +92,10 @@
   - the intensive listening Speed control now displays the active playback rate,
   - toggling slow playback updates the local audio element and the visible speed
     label for clearer focused-listening feedback.
+- Added Mac intensive clear-loop hardening:
+  - active A points and A-B loops now expose a `Clear loop` action,
+  - clearing the loop removes the focused repeat range so playback can continue
+    normally during longer focused-listening passes.
 - Added Mac close-reading mistake-label hardening:
   - intensive reading preview now exposes the latest wrong reading answer id,
   - mistake-label buttons persist through `POST /api/study/mistake-labels`,
@@ -1041,6 +1045,12 @@
       rendered only `Speed` instead of the current playback rate.
     - Passed after showing `Speed: 1x` initially and `Speed: 0.85x` after slow
       playback is toggled.
+- Mac intensive clear-loop hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because A-B repeat could be started but not explicitly
+      cleared from the intensive listening controls.
+    - Passed after adding `Clear loop` and verifying later time updates no
+      longer jump back to the cleared A point.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

@@ -155,6 +155,33 @@ describe("intensive study components", () => {
     expect(play).toHaveBeenCalledTimes(1);
   });
 
+  it("clears an active A-B loop during intensive listening", () => {
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath="/Users/musheng/Desktop/IELTS/listening/intensive-p1.mp3"
+        cues={[]}
+        onDictationSubmit={() => undefined}
+      />
+    );
+
+    const audio = screen.getByLabelText("Intensive listening audio") as HTMLAudioElement;
+
+    audio.currentTime = 12.4;
+    fireEvent.click(screen.getByRole("button", { name: "Set A point" }));
+    audio.currentTime = 16.8;
+    fireEvent.click(screen.getByRole("button", { name: "Set B point" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear loop" }));
+
+    expect(screen.queryByText("A-B loop: 12.4s to 16.8s")).not.toBeInTheDocument();
+
+    audio.currentTime = 16.9;
+    fireEvent.timeUpdate(audio);
+
+    expect(audio.currentTime).toBe(16.9);
+  });
+
   it("submits dictation text", () => {
     const onDictationSubmit = vi.fn();
     render(
