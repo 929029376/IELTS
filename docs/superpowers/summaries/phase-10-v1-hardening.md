@@ -236,6 +236,11 @@
   - `NO MORE THAN TWO WORDS AND/OR A NUMBER` allows the number outside the word
     count,
   - practice and mock answers use the shared scoring behavior.
+- Added Mac IELTS judgment-question input hardening:
+  - `TRUE/FALSE/NOT GIVEN` questions now use fixed answer choices,
+  - `YES/NO/NOT GIVEN` questions now use fixed answer choices,
+  - the practice/mock UI avoids typo-prone free-text entry for these IELTS
+    judgment question types.
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
@@ -1790,6 +1795,14 @@
     - Passed with 39 exam simulation component tests, including manual submit,
       elapsed practice timing, strict listening mock playback, and timed local
       mock auto-submit coverage.
+- Mac IELTS judgment-question input hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionComponents.test.tsx -t "fixed answer choices"`
+    - Initially failed because `TRUE/FALSE/NOT GIVEN` and `YES/NO/NOT GIVEN`
+      answer inputs rendered as typo-prone textboxes.
+    - Passed after rendering those judgment question types as fixed select
+      controls with standard IELTS answer values.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionComponents.test.tsx`
+    - Passed with all 4 question component tests.
 
 ## Remaining V1 Gaps
 

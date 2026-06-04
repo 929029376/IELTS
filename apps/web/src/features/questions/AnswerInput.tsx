@@ -8,7 +8,42 @@ export interface AnswerInputProps {
   onBlur?: () => void;
 }
 
+const trueFalseNotGivenChoices = ["TRUE", "FALSE", "NOT GIVEN"];
+const yesNoNotGivenChoices = ["YES", "NO", "NOT GIVEN"];
+
+function fixedChoicesForQuestionType(questionType: QuestionType) {
+  if (questionType === "true_false_not_given") {
+    return trueFalseNotGivenChoices;
+  }
+
+  if (questionType === "yes_no_not_given") {
+    return yesNoNotGivenChoices;
+  }
+
+  return null;
+}
+
 export function AnswerInput({ questionId, questionType, value, onBlur, onChange }: AnswerInputProps) {
+  const fixedChoices = fixedChoicesForQuestionType(questionType);
+  if (fixedChoices) {
+    return (
+      <select
+        aria-label={`Answer for question ${questionId}`}
+        className="answer-input"
+        value={value}
+        onBlur={onBlur}
+        onChange={(event) => onChange(event.target.value)}
+      >
+        <option value="">Choose answer</option>
+        {fixedChoices.map((choice) => (
+          <option key={choice} value={choice}>
+            {choice}
+          </option>
+        ))}
+      </select>
+    );
+  }
+
   if (questionType === "single_choice" || questionType === "multiple_choice") {
     return (
       <textarea
