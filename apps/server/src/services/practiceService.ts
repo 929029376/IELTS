@@ -50,6 +50,13 @@ export class PracticeQuestionNotFoundError extends Error {
   }
 }
 
+export class PracticeQuestionSubjectMismatchError extends Error {
+  constructor() {
+    super("Question subject does not match attempt subject.");
+    this.name = "PracticeQuestionSubjectMismatchError";
+  }
+}
+
 const wordLimitNumbers: Record<string, number> = {
   eight: 8,
   five: 5,
@@ -217,6 +224,9 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
       const question = questions.getQuestionWithAnswerKeys(input.questionId);
       if (!question) {
         throw new PracticeQuestionNotFoundError();
+      }
+      if (question.subject !== attempt.subject) {
+        throw new PracticeQuestionSubjectMismatchError();
       }
 
       const acceptedAnswers = question.answerKeys.flatMap((answerKey) => answerKey.acceptedAnswers);

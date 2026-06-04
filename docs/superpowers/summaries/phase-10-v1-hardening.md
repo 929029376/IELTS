@@ -411,6 +411,13 @@
   - invalid question ids no longer surface as server errors,
   - no answer row or Baidu Cloud answer sync event is written for a missing
     question.
+- Added Mac answer-subject integrity hardening:
+  - answer-save requests now reject questions whose subject differs from the
+    attempt subject,
+  - listening questions can no longer be saved into reading attempts, and vice
+    versa,
+  - no answer row or Baidu Cloud answer sync event is written for a cross-subject
+    mismatch.
 - Added Mac submit-attempt integrity hardening:
   - submit requests for missing attempt ids now return `404`,
   - invalid submit requests no longer surface as server errors,
@@ -1835,6 +1842,14 @@
       practice route maps it to `404` before writing an answer.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 25 practice route tests.
+- Mac answer-subject integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "subject does not match"`
+    - Initially failed because a reading attempt could save an answer for a
+      listening question and pollute reading history/statistics.
+    - Passed after answer saving rejects cross-subject question writes with
+      `409` before inserting an answer.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 26 practice route tests.
 - Mac submit-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "submitting a missing attempt"`
     - Initially failed because submitting a missing attempt id returned `500`.

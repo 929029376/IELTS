@@ -7,7 +7,8 @@ import {
   createPracticeService,
   EmptyPracticeStartError,
   PracticeAttemptNotFoundError,
-  PracticeQuestionNotFoundError
+  PracticeQuestionNotFoundError,
+  PracticeQuestionSubjectMismatchError
 } from "../services/practiceService";
 import { MissingMockCandidateError, type TestBuilderOptions } from "../services/testBuilder";
 import type { SyncService } from "../sync/syncService";
@@ -73,6 +74,9 @@ export function registerPracticeRoutes(
       }
       if (error instanceof PracticeQuestionNotFoundError) {
         return reply.code(404).send({ error: error.message });
+      }
+      if (error instanceof PracticeQuestionSubjectMismatchError) {
+        return reply.code(409).send({ error: error.message });
       }
       throw error;
     }

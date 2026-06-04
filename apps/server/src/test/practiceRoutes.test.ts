@@ -119,6 +119,46 @@ function seedFortyQuestions(databasePath: string) {
   }
 }
 
+function seedSingleListeningQuestion(databasePath: string): string {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: "seed/single-listening.json",
+      checksum: "single-listening-seed",
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "listening",
+      part: "P1",
+      title: "Single Listening Question",
+      frequencyClass: "high"
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "fill_blank",
+      prompt: "Which listening answer is mentioned?",
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["audio answer"],
+      answerSentence: "The speaker says audio answer.",
+      explanation: "The answer belongs to listening.",
+      synonyms: []
+    });
+    return question.id;
+  } finally {
+    db.close();
+  }
+}
+
 function seedWordLimitAliasQuestion(databasePath: string) {
   const db = openDatabase(databasePath);
   migrate(db);
@@ -1055,6 +1095,47 @@ describe("practice routes", () => {
       expect(answer.statusCode).toBe(404);
       expect(answer.json()).toMatchObject({
         error: "Question not found."
+      });
+      expect(countAttemptAnswers(databasePath)).toBe(0);
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects answers whose question subject does not match the attempt subject", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-answer-subject-mismatch-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+    const listeningQuestionId = seedSingleListeningQuestion(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+      }>();
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId: listeningQuestionId,
+          rawAnswer: "audio answer",
+          timeSpentSeconds: 9
+        }
+      });
+
+      expect(answer.statusCode).toBe(409);
+      expect(answer.json()).toMatchObject({
+        error: "Question subject does not match attempt subject."
       });
       expect(countAttemptAnswers(databasePath)).toBe(0);
     } finally {
