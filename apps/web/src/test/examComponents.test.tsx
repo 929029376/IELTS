@@ -54,6 +54,8 @@ describe("exam simulation components", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit test" }));
 
     expect(screen.getByText("1 unanswered question and 1 marked question remain.")).toBeInTheDocument();
+    expect(screen.getByText("Unanswered: 2")).toBeInTheDocument();
+    expect(screen.getByText("Marked for review: 2")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Submit anyway" }));
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });

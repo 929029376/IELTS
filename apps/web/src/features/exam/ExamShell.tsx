@@ -21,6 +21,10 @@ export interface ExamShellProps extends PropsWithChildren {
   timerMode?: ExamTimerMode;
 }
 
+function questionNumberList(questions: ExamQuestionState[], predicate: (question: ExamQuestionState) => boolean) {
+  return questions.filter(predicate).map((question) => question.questionNumber).join(", ");
+}
+
 export function ExamShell({
   title,
   durationSeconds,
@@ -39,6 +43,8 @@ export function ExamShell({
   const [largeText, setLargeText] = useState(false);
   const unansweredCount = questions.filter((question) => !question.answered).length;
   const markedCount = questions.filter((question) => question.markedForReview).length;
+  const unansweredNumbers = questionNumberList(questions, (question) => !question.answered);
+  const markedNumbers = questionNumberList(questions, (question) => question.markedForReview);
   const navItems = useMemo(() => createQuestionNavItems(questions), [questions]);
 
   function submit(reason: ExamSubmitEvent["reason"]) {
@@ -149,6 +155,8 @@ export function ExamShell({
             {unansweredCount} unanswered question{unansweredCount === 1 ? "" : "s"} and {markedCount} marked
             question{markedCount === 1 ? "" : "s"} remain.
           </p>
+          {unansweredNumbers ? <p>Unanswered: {unansweredNumbers}</p> : null}
+          {markedNumbers ? <p>Marked for review: {markedNumbers}</p> : null}
           <button type="button" onClick={() => submit("manual")}>
             Submit anyway
           </button>

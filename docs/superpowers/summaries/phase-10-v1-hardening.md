@@ -223,6 +223,10 @@
   - stop submission when the pre-submit answer save fails,
   - submit through the practice submit API,
   - show the returned raw score and estimated band report.
+- Added Mac exam submit-warning navigation hardening:
+  - submit confirmation now lists unanswered question numbers,
+  - submit confirmation now lists marked-for-review question numbers,
+  - the final mock/practice check is easier to use under exam-time pressure.
 - Added submitted-mock review hardening:
   - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
   - the Mac dashboard renders correctness, user answer, accepted answer, answer
@@ -1332,6 +1336,12 @@
     - Initially failed because selected reading highlights were lost when
       switching away from a passage and returning.
     - Passed after storing selected highlights per active reading passage.
+- Mac exam submit-warning navigation hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "renders timer"`
+    - Initially failed because the submit warning showed only unanswered and
+      marked counts, not the exact question numbers to review before submission.
+    - Passed after rendering unanswered and marked-for-review question-number
+      lists in the submit warning.
 
 ## Remaining V1 Gaps
 
