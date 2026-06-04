@@ -1497,7 +1497,7 @@ describe("exam simulation components", () => {
                 id: "conflict-1",
                 questionId: "question-review-1",
                 remoteCreatedAt: "2026-06-04T10:02:00.000Z",
-                remoteDeviceId: "windows-pc",
+                remoteDeviceId: "   ",
                 remoteIsCorrect: true,
                 remoteRawAnswer: "   ",
                 status: "conflict"
@@ -1547,7 +1547,7 @@ describe("exam simulation components", () => {
     expect(screen.getByText("The evidence sentence names the route directly.")).toBeInTheDocument();
     expect(screen.getByText("moved through = travelled via")).toBeInTheDocument();
     expect(screen.getByText("Sync conflict")).toBeInTheDocument();
-    expect(screen.getByText("Remote answer from windows-pc: No answer")).toBeInTheDocument();
+    expect(screen.getByText("Remote answer from Unknown device: No answer")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/practice/attempt-reading-review-1/review",
       expect.objectContaining({ method: "GET" })

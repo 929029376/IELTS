@@ -293,6 +293,11 @@
   - reopened history review sync conflicts use the same fallback behavior,
   - whitespace-only remote answers now show `No answer` instead of an empty
     conflict row.
+- Added Mac sync-conflict device fallback hardening:
+  - submitted mock review sync conflicts trim remote device ids before rendering,
+  - reopened history review sync conflicts use the same fallback behavior,
+  - whitespace-only remote device ids now show `Unknown device` instead of a
+    malformed conflict source label.
 - Added Mac history review reopening hardening:
   - completed attempts in the report history table can reopen the saved detailed
     review through `GET /api/practice/:attemptId/review`,
@@ -1496,6 +1501,17 @@
       as an empty history-review conflict row.
     - Passed after trimming reopened history conflict answers and falling back to
       `No answer`.
+- Mac sync-conflict device fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "loads detailed review evidence"`
+    - Initially failed because a whitespace-only remote conflict device id
+      rendered as a malformed submitted-mock conflict source label.
+    - Passed after trimming submitted mock conflict device ids and falling back
+      to `Unknown device`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "saved sync conflicts"`
+    - Initially failed because a whitespace-only remote conflict device id
+      rendered as a malformed history-review conflict source label.
+    - Passed after trimming reopened history conflict device ids and falling
+      back to `Unknown device`.
 
 ## Remaining V1 Gaps
 

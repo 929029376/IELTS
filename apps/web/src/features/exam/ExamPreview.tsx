@@ -166,6 +166,10 @@ function formatConflictAnswer(rawAnswer: string) {
   return rawAnswer.trim() || "No answer";
 }
 
+function formatConflictDeviceId(deviceId: string) {
+  return deviceId.trim() || "Unknown device";
+}
+
 function formatReviewAcceptedAnswers(acceptedAnswers: string[]) {
   const answers = acceptedAnswers.map((answer) => answer.trim()).filter(Boolean);
   return answers.length > 0 ? answers.join(", ") : "Not configured";
@@ -637,7 +641,8 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                     <ul>
                       {conflictsForQuestion(mockReview, item.questionId).map((conflict) => (
                         <li key={conflict.id}>
-                          Remote answer from {conflict.remoteDeviceId}: {formatConflictAnswer(conflict.remoteRawAnswer)}
+                          Remote answer from {formatConflictDeviceId(conflict.remoteDeviceId)}:{" "}
+                          {formatConflictAnswer(conflict.remoteRawAnswer)}
                         </li>
                       ))}
                     </ul>
