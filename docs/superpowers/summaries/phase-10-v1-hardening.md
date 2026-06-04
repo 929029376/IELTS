@@ -244,6 +244,11 @@
   - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
   - the Mac dashboard renders correctness, user answer, accepted answer, answer
     sentence highlight, explanation, and synonym notes after submission.
+- Added Mac submitted-mock review empty-state hardening:
+  - submitted review panels trim user answers, accepted answers, answer
+    sentences, explanations, and synonym notes before rendering,
+  - whitespace-only imported review evidence now shows explicit missing-content
+    messages instead of blank review rows.
 - Added Mac history review reopening hardening:
   - completed attempts in the report history table can reopen the saved detailed
     review through `GET /api/practice/:attemptId/review`,
@@ -1383,6 +1388,12 @@
       loaded local mock visible.
     - Passed after clearing the active local attempt before requesting another
       mock or practice set.
+- Mac submitted-mock review empty-state hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "blank submitted mock review"`
+    - Initially failed because whitespace-only submitted review answers rendered
+      as blank review content.
+    - Passed after trimming submitted mock review fields and rendering explicit
+      empty states.
 
 ## Remaining V1 Gaps
 

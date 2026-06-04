@@ -1482,4 +1482,89 @@ describe("exam simulation components", () => {
       expect.objectContaining({ method: "GET" })
     );
   });
+
+  it("shows empty states for blank submitted mock review evidence", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const path = String(input);
+      if (path === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-blank-review",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-blank-review-1",
+                part: "P1",
+                passageId: "passage-blank-review-1",
+                passageTitle: "Blank Review Passage",
+                prompt: "What needs review?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-blank-review/answer") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (path === "/api/practice/attempt-reading-blank-review/submit") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-blank-review",
+            estimatedBand: 4,
+            rawScore: 0,
+            submittedAt: "2026-06-04T10:30:00.000Z"
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-blank-review/review") {
+        return {
+          ok: true,
+          json: async () => ({
+            id: "attempt-reading-blank-review",
+            reviewItems: [
+              {
+                acceptedAnswers: [" ", ""],
+                answerSentence: "   ",
+                explanation: " ",
+                isCorrect: false,
+                part: "P1",
+                passageTitle: "Blank Review Passage",
+                prompt: "What needs review?",
+                questionId: "question-blank-review-1",
+                questionNumber: 1,
+                rawAnswer: " ",
+                synonyms: [" "]
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    await screen.findByText("Loaded local reading mock");
+    fireEvent.click(screen.getByRole("button", { name: "Submit local mock" }));
+
+    expect(await screen.findByRole("region", { name: "Mock review details" })).toBeInTheDocument();
+    expect(screen.getByText("Your answer: No answer")).toBeInTheDocument();
+    expect(screen.getByText("Accepted: Not configured")).toBeInTheDocument();
+    expect(screen.getByText("No answer sentence recorded for this question.")).toBeInTheDocument();
+    expect(screen.getByText("No explanation recorded for this question.")).toBeInTheDocument();
+    expect(screen.getByText("No synonym notes recorded for this question.")).toBeInTheDocument();
+  });
 });

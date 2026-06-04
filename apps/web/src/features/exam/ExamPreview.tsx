@@ -143,12 +143,46 @@ function subjectLabel(subject: "listening" | "reading") {
   return subject === "listening" ? "listening" : "reading";
 }
 
+function formatReviewUserAnswer(rawAnswer: string) {
+  return rawAnswer.trim() || "No answer";
+}
+
+function formatReviewAcceptedAnswers(acceptedAnswers: string[]) {
+  const answers = acceptedAnswers.map((answer) => answer.trim()).filter(Boolean);
+  return answers.length > 0 ? answers.join(", ") : "Not configured";
+}
+
 function renderReviewEvidence(item: MockReviewItem) {
-  if (!item.answerSentence) {
+  const answerSentence = item.answerSentence?.trim();
+  if (!answerSentence) {
     return <p className="empty-state">No answer sentence recorded for this question.</p>;
   }
 
-  return <mark className="ielts-highlight">{item.answerSentence}</mark>;
+  return <mark className="ielts-highlight">{answerSentence}</mark>;
+}
+
+function renderReviewExplanation(item: MockReviewItem) {
+  const explanation = item.explanation?.trim();
+  if (!explanation) {
+    return <p className="empty-state">No explanation recorded for this question.</p>;
+  }
+
+  return <p>{explanation}</p>;
+}
+
+function renderReviewSynonyms(item: MockReviewItem) {
+  const synonyms = item.synonyms.map((synonym) => synonym.trim()).filter(Boolean);
+  if (synonyms.length === 0) {
+    return <p className="empty-state">No synonym notes recorded for this question.</p>;
+  }
+
+  return (
+    <ul className="mock-review-synonyms">
+      {synonyms.map((synonym) => (
+        <li key={synonym}>{synonym}</li>
+      ))}
+    </ul>
+  );
 }
 
 function findPdfAssetPath(question?: StartedMockQuestion): string | null {
@@ -573,17 +607,11 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                     {item.questionNumber ?? "Question"} {item.prompt ?? "Review question"}
                   </strong>
                 </div>
-                <p>Your answer: {item.rawAnswer || "No answer"}</p>
-                <p>Accepted: {item.acceptedAnswers.join(", ") || "Not configured"}</p>
+                <p>Your answer: {formatReviewUserAnswer(item.rawAnswer)}</p>
+                <p>Accepted: {formatReviewAcceptedAnswers(item.acceptedAnswers)}</p>
                 <div className="answer-sentence-preview">{renderReviewEvidence(item)}</div>
-                {item.explanation ? <p>{item.explanation}</p> : null}
-                {item.synonyms.length > 0 ? (
-                  <ul className="mock-review-synonyms">
-                    {item.synonyms.map((synonym) => (
-                      <li key={synonym}>{synonym}</li>
-                    ))}
-                  </ul>
-                ) : null}
+                {renderReviewExplanation(item)}
+                {renderReviewSynonyms(item)}
                 {conflictsForQuestion(mockReview, item.questionId).length > 0 ? (
                   <div className="sync-conflict-review" aria-label={`Sync conflicts for question ${item.questionId}`}>
                     <strong>Sync conflict</strong>
