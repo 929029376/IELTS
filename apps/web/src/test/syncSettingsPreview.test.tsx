@@ -186,4 +186,30 @@ describe("SyncSettingsPreview", () => {
       })
     );
   });
+
+  it("fills the sync folder path from a selected JSONL sync file", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    const syncFile = new File(["{}"], "attempts.jsonl", { type: "application/jsonl" });
+    Object.defineProperty(syncFile, "path", {
+      value: "/Users/musheng/Desktop/同步空间/IELTS-Sync/attempts.jsonl"
+    });
+
+    fireEvent.change(screen.getByLabelText("Choose sync JSONL or devices file"), {
+      target: { files: [syncFile] }
+    });
+
+    expect(screen.getByLabelText("Sync folder path")).toHaveValue("/Users/musheng/Desktop/同步空间/IELTS-Sync");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
 });

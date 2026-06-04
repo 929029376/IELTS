@@ -301,6 +301,9 @@
   - selecting a backup JSON file can fill the import path from the
     desktop-exposed local file path,
   - restore feedback shows imported tables and row counts.
+- Added Mac sync-folder file-picker hardening:
+  - selecting an existing sync JSONL or `devices.json` file can fill the sync
+    folder path from the desktop-exposed local file path's parent directory.
 - Added Mac backup reminder refresh hardening:
   - successful backup export/import actions refresh the dashboard data snapshot,
   - the V1 hardening backup reminder updates immediately after a backup is
@@ -712,6 +715,12 @@
       local backup JSON path.
     - Passed after adding a backup JSON file selector that reads
       desktop-exposed local `File.path` values into the import field.
+- Mac sync-folder file-picker follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because selecting an existing Baidu Cloud sync file could
+      not populate the editable sync folder path.
+    - Passed after adding a sync JSONL/devices file selector that derives the
+      folder from the selected file's desktop-exposed local path.
 - Mac backup reminder refresh follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because exporting a backup left the V1 hardening backup

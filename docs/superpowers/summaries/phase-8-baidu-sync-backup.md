@@ -89,6 +89,8 @@
 - Added editable Mac sync folder settings:
   - the Sync settings panel can save a new Baidu Cloud folder path through
     `PUT /api/sync/config`,
+  - selecting an existing sync JSONL or `devices.json` file in packaged Mac use
+    can fill the sync folder path from the file's parent directory,
   - saved sync folder paths are written to local runtime config JSON and loaded
     again when the real server starts,
   - saving a path initializes JSONL sync files and updates the displayed sync
@@ -298,6 +300,12 @@
       folder path control.
     - Passed after adding Mac UI controls to save and display an updated Baidu
       Cloud sync folder path.
+- Mac sync-folder file-picker follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because selecting an existing Baidu Cloud sync file could
+      not populate the sync folder path.
+    - Passed after adding a sync JSONL/devices file selector that derives the
+      selected sync folder from the desktop-exposed local file path.
 - Mac review conflict visibility follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because review responses with `conflicts` did not render

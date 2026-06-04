@@ -45,6 +45,12 @@ function getLocalFilePath(file: File | null) {
   return fileWithLocalPath.path?.trim() || fileWithLocalPath.webkitRelativePath?.trim() || "";
 }
 
+function getParentDirectory(filePath: string) {
+  const normalizedPath = filePath.trim();
+  const separatorIndex = Math.max(normalizedPath.lastIndexOf("/"), normalizedPath.lastIndexOf("\\"));
+  return separatorIndex > 0 ? normalizedPath.slice(0, separatorIndex) : "";
+}
+
 export function SyncSettingsPreview({
   deviceName,
   lastSyncAt,
@@ -189,6 +195,21 @@ export function SyncSettingsPreview({
     }
   }
 
+  function fillSyncFolderFromSelectedFile(file: File | null) {
+    const localPath = getLocalFilePath(file);
+    const parentDirectory = getParentDirectory(localPath);
+    if (parentDirectory.length > 0) {
+      setEditableSyncPath(parentDirectory);
+      setSyncError(null);
+      setSyncConfigSaved(false);
+      return;
+    }
+
+    if (file) {
+      setSyncError(`${file.name} selected, but the local folder path was not exposed. Paste the full folder path before saving.`);
+    }
+  }
+
   return (
     <section className="sync-settings-band" aria-label="Sync settings">
       <div className="reports-header">
@@ -215,6 +236,15 @@ export function SyncSettingsPreview({
               aria-label="Sync folder path"
               onChange={(event) => setEditableSyncPath(event.target.value)}
               value={editableSyncPath}
+            />
+          </label>
+          <label className="sync-folder-file-picker">
+            <span>Choose sync JSONL or devices file</span>
+            <input
+              accept=".jsonl,.json,application/json"
+              aria-label="Choose sync JSONL or devices file"
+              type="file"
+              onChange={(event) => fillSyncFolderFromSelectedFile(event.currentTarget.files?.[0] ?? null)}
             />
           </label>
           <button
