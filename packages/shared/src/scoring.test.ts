@@ -20,6 +20,7 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("green parks", ["green park、green parks"])).toBe(true);
     expect(isAnswerCorrect("green parks", ["green park | green parks"])).toBe(true);
     expect(isAnswerCorrect("green parks", ["green park or green parks"])).toBe(true);
+    expect(isAnswerCorrect("green parks", ["green park 或 green parks"])).toBe(true);
     expect(isAnswerCorrect("blue park", ["green park; green parks"])).toBe(false);
   });
 
