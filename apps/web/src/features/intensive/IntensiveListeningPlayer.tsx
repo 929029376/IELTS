@@ -114,6 +114,15 @@ export function IntensiveListeningPlayer({
     setPlaybackRate(nextRate);
   }
 
+  function submitDictation() {
+    if (!activeCue) {
+      return;
+    }
+
+    onDictationSubmit({ cueId: activeCue.id, userText: dictationText });
+    setDictationText("");
+  }
+
   const loopStatus = loopRange
     ? `A-B loop: ${formatSeconds(loopRange.startSeconds)} to ${formatSeconds(loopRange.endSeconds)}`
     : aPoint !== null
@@ -184,7 +193,7 @@ export function IntensiveListeningPlayer({
       <button
         type="button"
         disabled={!activeCue}
-        onClick={() => activeCue && onDictationSubmit({ cueId: activeCue.id, userText: dictationText })}
+        onClick={submitDictation}
       >
         Submit dictation
       </button>

@@ -66,6 +66,10 @@
   - an active A point or A-B loop now exposes a `Clear loop` control,
   - clearing the loop removes the active repeat range so subsequent playback can
     continue normally outside the focused segment.
+- Added Mac dictation flow hardening:
+  - submitting a dictation attempt now clears the text box,
+  - continuous sentence practice can move to the next cue without carrying the
+    previous typed answer forward.
 - Added Mac close-reading mistake-label persistence:
   - `/api/study/intensive` now returns the latest wrong reading
     `attemptAnswerId` when available,
@@ -249,6 +253,11 @@
     - Initially failed because an active A-B loop had no `Clear loop` control.
     - Passed after clearing the loop removed the active range and prevented
       later time updates from jumping back to the A point.
+- Mac dictation input reset follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the dictation textarea kept the submitted answer.
+    - Passed after dictation submit clears the local textarea for continuous
+      sentence practice.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

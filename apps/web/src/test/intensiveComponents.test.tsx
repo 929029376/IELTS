@@ -199,6 +199,25 @@ describe("intensive study components", () => {
     expect(onDictationSubmit).toHaveBeenCalledWith({ cueId: "cue-1", userText: "green park" });
   });
 
+  it("clears dictation text after submitting for continuous sentence practice", () => {
+    const onDictationSubmit = vi.fn();
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath={null}
+        cues={[{ id: "cue-1", startSeconds: 1, endSeconds: 4, label: "Sentence 1", transcript: "Green Park" }]}
+        onDictationSubmit={onDictationSubmit}
+      />
+    );
+
+    const input = screen.getByLabelText("Dictation input");
+
+    fireEvent.change(input, { target: { value: "green park" } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit dictation" }));
+
+    expect(input).toHaveValue("");
+  });
+
   it("edits listening cue fields", () => {
     const onSave = vi.fn();
     render(<CueEditor onSave={onSave} />);

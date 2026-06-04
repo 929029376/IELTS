@@ -96,6 +96,10 @@
   - active A points and A-B loops now expose a `Clear loop` action,
   - clearing the loop removes the focused repeat range so playback can continue
     normally during longer focused-listening passes.
+- Added Mac dictation reset hardening:
+  - the intensive listening dictation box clears after submit,
+  - consecutive sentence practice no longer carries the previous typed answer
+    into the next attempt.
 - Added Mac close-reading mistake-label hardening:
   - intensive reading preview now exposes the latest wrong reading answer id,
   - mistake-label buttons persist through `POST /api/study/mistake-labels`,
@@ -1051,6 +1055,11 @@
       cleared from the intensive listening controls.
     - Passed after adding `Clear loop` and verifying later time updates no
       longer jump back to the cleared A point.
+- Mac dictation reset hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because submitted dictation text remained in the textarea.
+    - Passed after the intensive player clears the text after dispatching the
+      dictation submit action.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown
