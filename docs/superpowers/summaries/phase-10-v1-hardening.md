@@ -450,6 +450,13 @@
   - reopened history reviews show the same `Unanswered` state,
   - existing older review payloads without `isAnswered` remain compatible and
     continue to display `Correct` or `Incorrect`.
+- Added Mac unanswered-analytics integrity hardening:
+  - accuracy analytics now count unanswered loaded questions as incorrect
+    instead of excluding them from the denominator,
+  - part, question-type, and frequency-class accuracy no longer become
+    artificially high when a submitted attempt skipped questions,
+  - older synced or restored attempts without `attempt_questions` still fall back
+    to saved answer rows for compatibility.
 - Added Mac review-attempt integrity hardening:
   - review requests for missing attempt ids now return `404`,
   - invalid history/review links no longer surface as server errors,
@@ -1924,6 +1931,18 @@
       `attempt_questions` to the schema and backup table list.
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx src/test/historyReports.test.tsx`
     - Passed with submitted review and history review UI coverage.
+- Mac unanswered-analytics integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/analyticsService.test.ts -t "unanswered loaded questions"`
+    - Initially failed because part, question-type, and frequency-class accuracy
+      counted only the one saved answer row, producing `1/1` accuracy for a
+      three-question attempt with two skipped questions.
+    - Passed after analytics reads `attempt_questions` with a left join to saved
+      answers and treats missing answers as incorrect, while preserving a
+      fallback path for older attempts without loaded-question records.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/analyticsService.test.ts`
+    - Passed with all 5 analytics service tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 95 server tests.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

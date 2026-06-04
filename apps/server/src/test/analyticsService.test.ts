@@ -181,6 +181,62 @@ describe("analytics service", () => {
     expect(analytics.mistakeLabels).toEqual([{ label: "定位失败", count: 2 }]);
   });
 
+  it("counts unanswered loaded questions as incorrect in accuracy analytics", () => {
+    const questions = createQuestionRepo(db);
+    const attempts = createAttemptRepo(db);
+    const source = questions.createSource({
+      checksum: "unanswered-analytics-source",
+      importStatus: "imported",
+      originalPath: "seed/unanswered-analytics.json",
+      sourceType: "seed",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P1",
+      sourceId: source.id,
+      subject: "reading",
+      title: "Unanswered Analytics"
+    });
+    const questionIds = Array.from({ length: 3 }, (_, index) => {
+      return questions.createQuestion({
+        answerRules: {},
+        passageId: passage.id,
+        prompt: `Question ${index + 1}`,
+        questionNumber: index + 1,
+        questionType: "matching"
+      }).id;
+    });
+    const attempt = attempts.createAttempt({
+      mode: "mock",
+      startedAt: "2026-05-06T10:00:00.000Z",
+      subject: "reading"
+    });
+    attempts.recordAttemptQuestions(attempt.id, questionIds);
+    attempts.saveAnswer({
+      attemptId: attempt.id,
+      isCorrect: true,
+      markedForReview: false,
+      normalizedAnswer: "right",
+      questionId: questionIds[0],
+      rawAnswer: "right",
+      timeSpentSeconds: 30
+    });
+    attempts.submitAttempt({
+      attemptId: attempt.id,
+      estimatedBand: 4,
+      rawScore: 1,
+      submittedAt: "2026-05-06T11:00:00.000Z"
+    });
+
+    const service = createAnalyticsService(db, { exportDir, now: "2026-05-31T00:00:00.000Z" });
+    const analytics = service.getAccuracyAnalytics();
+
+    expect(analytics.byPart.reading.P1).toMatchObject({ correct: 1, total: 3, accuracy: 1 / 3 });
+    expect(analytics.byQuestionType.matching).toMatchObject({ correct: 1, total: 3, accuracy: 1 / 3 });
+    expect(analytics.byFrequencyClass.high).toMatchObject({ correct: 1, total: 3, accuracy: 1 / 3 });
+  });
+
   it("predicts scores from recent mock exams with practice as a secondary signal", () => {
     seedAnsweredAttempt({
       estimatedBand: 6,

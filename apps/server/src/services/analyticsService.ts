@@ -150,12 +150,31 @@ export function createAnalyticsService(db: DatabaseHandle, options: AnalyticsSer
           p.part,
           p.frequency_class AS frequencyClass,
           q.question_type AS questionType,
+          COALESCE(aa.is_correct, 0) AS isCorrect
+        FROM attempt_questions aq
+        JOIN attempts a ON a.id = aq.attempt_id
+        JOIN questions q ON q.id = aq.question_id
+        JOIN passages p ON p.id = q.passage_id
+        LEFT JOIN attempt_answers aa
+          ON aa.attempt_id = aq.attempt_id AND aa.question_id = aq.question_id
+        WHERE a.submitted_at IS NOT NULL
+        UNION ALL
+        SELECT
+          p.subject,
+          p.part,
+          p.frequency_class AS frequencyClass,
+          q.question_type AS questionType,
           aa.is_correct AS isCorrect
         FROM attempt_answers aa
         JOIN attempts a ON a.id = aa.attempt_id
         JOIN questions q ON q.id = aa.question_id
         JOIN passages p ON p.id = q.passage_id
         WHERE a.submitted_at IS NOT NULL
+          AND NOT EXISTS (
+            SELECT 1
+            FROM attempt_questions aq
+            WHERE aq.attempt_id = a.id
+          )
       `
       )
       .all() as AnswerAnalyticsRow[];
