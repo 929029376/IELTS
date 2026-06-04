@@ -104,6 +104,13 @@
       on their pre-import data.
     - Passed after successful imports notify the dashboard to refresh local
       study overview and intensive study preview data.
+- Mac manual frequency batch-row follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/frequencyCorrectionTable.test.tsx`
+    - Initially failed because the manual/OCR frequency correction UI exposed
+      only the initial row and could not add more corrected entries for one
+      frequency-table update.
+    - Passed after adding an `Add frequency row` action that appends another
+      editable row with the previous row's subject, part, and source month.
 
 ## Notes
 

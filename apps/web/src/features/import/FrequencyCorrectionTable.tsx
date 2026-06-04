@@ -23,6 +23,22 @@ export function FrequencyCorrectionTable({
     onRowsChange(rows.map((row, rowIndex) => (rowIndex === index ? { ...row, ...patch } : row)));
   }
 
+  function addRow() {
+    const previous = rows.at(-1);
+    onRowsChange([
+      ...rows,
+      {
+        subject: previous?.subject ?? "reading",
+        part: previous?.part ?? "P1",
+        englishTitle: "",
+        chineseTitle: "",
+        frequencyClass: "unknown",
+        difficulty: "",
+        sourceMonth: previous?.sourceMonth ?? ""
+      }
+    ]);
+  }
+
   return (
     <section aria-label="Frequency table correction">
       <table>
@@ -114,6 +130,9 @@ export function FrequencyCorrectionTable({
           ))}
         </tbody>
       </table>
+      <button type="button" onClick={addRow}>
+        Add frequency row
+      </button>
       <button type="button" onClick={() => onImport(rows)}>
         Import corrected frequency rows
       </button>

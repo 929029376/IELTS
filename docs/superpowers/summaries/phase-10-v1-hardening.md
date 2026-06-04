@@ -913,6 +913,12 @@
       sync path instead of the server's active Baidu Cloud JSONL sync folder.
     - Passed after App loads `/api/sync/config` and passes the live device name
       and sync folder path into the Sync settings panel.
+- Mac manual frequency batch-row hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/frequencyCorrectionTable.test.tsx`
+    - Initially failed because manual frequency correction was limited to the
+      seeded single row, making OCR/image frequency-table updates cumbersome.
+    - Passed after the correction table can append additional editable frequency
+      rows for batch updates.
 
 ## Remaining V1 Gaps
 
