@@ -286,6 +286,8 @@
     desktop-exposed local file path,
   - selecting a reading PDF can fill the single PDF path field from the
     desktop-exposed local file path,
+  - selecting a frequency CSV/XLSX can fill the frequency file path field from
+    the desktop-exposed local file path,
   - manual path entry remains available when a browser environment does not
     expose a local path.
 - Added Mac post-mock dashboard refresh hardening:
@@ -383,6 +385,12 @@
       controls to populate import paths in packaged local use.
     - Passed after adding listening ZIP and reading PDF file selectors that read
       desktop-exposed local `File.path` values into the matching import fields.
+- Mac frequency-file picker import follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
+    - Initially failed because the frequency CSV/XLSX card had no file picker to
+      populate the import path in packaged local use.
+    - Passed after adding a frequency file selector that reads desktop-exposed
+      local `File.path` values into the frequency import field.
 - Mac mock-start UI follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the dashboard exam preview had no `Start reading mock`

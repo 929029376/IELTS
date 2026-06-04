@@ -115,7 +115,7 @@ describe("QuestionBankImportPanel", () => {
     });
   });
 
-  it("fills single-file import paths from packaged file picker selections", () => {
+  it("fills file import paths from packaged file picker selections", () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ importedCount: 1 })
@@ -144,6 +144,17 @@ describe("QuestionBankImportPanel", () => {
     });
     expect(screen.getByLabelText("Reading PDF path")).toHaveValue(
       "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - Tea.pdf"
+    );
+
+    const frequencyFile = new File(["title,frequency"], "reading-frequency.csv", { type: "text/csv" });
+    Object.defineProperty(frequencyFile, "path", {
+      value: "/Users/musheng/Desktop/IELTS/reading/frequency/reading-frequency.csv"
+    });
+    fireEvent.change(screen.getByLabelText("Choose frequency CSV or XLSX file"), {
+      target: { files: [frequencyFile] }
+    });
+    expect(screen.getByLabelText("Frequency CSV/XLSX path")).toHaveValue(
+      "/Users/musheng/Desktop/IELTS/reading/frequency/reading-frequency.csv"
     );
   });
 });

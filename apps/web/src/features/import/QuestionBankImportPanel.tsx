@@ -230,6 +230,21 @@ export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete
               onChange={(event) => setFrequencyFilePath(event.target.value)}
             />
           </label>
+          <label className="import-file-picker">
+            Choose frequency CSV or XLSX file
+            <input
+              accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+              aria-label="Choose frequency CSV or XLSX file"
+              type="file"
+              onChange={(event) =>
+                fillPathFromSelectedFile(
+                  "frequency file",
+                  event.currentTarget.files?.[0] ?? null,
+                  setFrequencyFilePath
+                )
+              }
+            />
+          </label>
           <button type="submit" disabled={isImporting || frequencyFilePath.trim().length === 0}>
             Import frequency file
           </button>
