@@ -186,6 +186,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [markedQuestions, setMarkedQuestions] = useState<Record<string, boolean>>({});
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
   const [practiceFilters, setPracticeFilters] = useState<PracticeFilters>(defaultPracticeFilters);
   const [isStarting, setIsStarting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -204,10 +205,12 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setAnswers({});
     setMarkedQuestions({});
     setActiveGroupId(null);
+    setActiveQuestionId(null);
     try {
       const started = await startAttempt(mode, subject, practiceFilters);
       setActiveMock(started);
       setActiveGroupId(started.questions[0]?.passageId ?? null);
+      setActiveQuestionId(started.questions[0]?.id ?? null);
     } catch {
       setStartError(`Could not start ${subjectLabel(subject)} ${mode} from the local question bank.`);
     } finally {
@@ -268,11 +271,26 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     }
   }
 
+  function selectQuestion(questionNumber: number) {
+    const question = activeQuestions.find((candidate) => candidate.questionNumber === questionNumber);
+    if (!question) {
+      return;
+    }
+
+    setActiveGroupId(question.passageId);
+    setActiveQuestionId(question.id);
+  }
+
+  function selectGroup(group: MockQuestionGroup) {
+    setActiveGroupId(group.id);
+    setActiveQuestionId(group.questions[0]?.id ?? null);
+  }
+
   const activeQuestions = activeMock?.questions ?? [];
   const questionGroups = groupQuestionsByPassage(activeQuestions);
   const activeGroup = questionGroups.find((group) => group.id === activeGroupId) ?? questionGroups[0];
   const activeGroupQuestions = activeGroup?.questions ?? [];
-  const currentQuestionId = activeGroupQuestions[0]?.id;
+  const currentQuestionId = activeQuestionId ?? activeGroupQuestions[0]?.id;
   const mockQuestionStates = activeQuestions.map((question, index) => ({
     questionNumber: question.questionNumber,
     answered: Boolean((answers[question.id] ?? "").trim()),
@@ -450,6 +468,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           durationSeconds={activeMock.subject === "reading" ? 3600 : 2400}
           questions={mockQuestionStates}
           onSubmit={() => void submitActiveMock()}
+          onSelectQuestion={selectQuestion}
           submitLabel={activeMock.mode === "mock" ? "Submit test" : "Submit practice"}
         >
           {activeMock.subject === "reading" ? (
@@ -460,7 +479,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                     <button
                       aria-selected={group.id === activeGroup?.id}
                       key={group.id}
-                      onClick={() => setActiveGroupId(group.id)}
+                      onClick={() => selectGroup(group)}
                       role="tab"
                       type="button"
                     >
@@ -495,7 +514,12 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                 title: groupLabel(group)
               }))}
               finalReviewSeconds={120}
-              onActiveSectionChange={setActiveGroupId}
+              onActiveSectionChange={(sectionId) => {
+                const group = questionGroups.find((candidate) => candidate.id === sectionId);
+                if (group) {
+                  selectGroup(group);
+                }
+              }}
             />
           )}
         </ExamShell>

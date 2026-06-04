@@ -103,6 +103,8 @@
   - save answers through the practice answer API,
   - mark questions for review and keep those marks visible in the local mock
     question navigation,
+  - jump from bottom question navigation items to the matching passage or
+    listening section,
   - persist the marked-for-review flag with answer-save requests,
   - save current answer field state immediately before submit,
   - stop submission when the pre-submit answer save fails,
@@ -327,6 +329,12 @@
       by part.
     - Passed after adding passage/section grouping, reading passage tabs, and
       per-section listening audio metadata.
+- Mac bottom-navigation jump follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because bottom question navigation buttons did not drive
+      the active local mock passage/section.
+    - Passed after adding a navigator selection callback and mapping clicked
+      question numbers to their local passage or listening section.
 - Mac practice-filter follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because supplied practice filters were ignored by the

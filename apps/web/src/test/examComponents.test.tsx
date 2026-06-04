@@ -276,6 +276,62 @@ describe("exam simulation components", () => {
     expect(screen.getByLabelText("Question 14, current")).toBeInTheDocument();
   });
 
+  it("switches local reading mock passages from the bottom question navigator", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-nav-switch-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "reading-nav-p1-q1",
+                part: "P1",
+                passageId: "reading-nav-p1",
+                passageText: "Navigator passage one text.",
+                passageTitle: "Navigator Passage One",
+                prompt: "What is in navigator passage one?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              },
+              {
+                answerRules: {},
+                id: "reading-nav-p2-q14",
+                part: "P2",
+                passageId: "reading-nav-p2",
+                passageText: "Navigator passage two text.",
+                passageTitle: "Navigator Passage Two",
+                prompt: "What is in navigator passage two?",
+                questionNumber: 14,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+
+    expect(await screen.findByText("Navigator passage one text.")).toBeInTheDocument();
+    expect(screen.queryByText("Navigator passage two text.")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Question 14, unanswered" }));
+
+    expect(screen.getByText("Navigator passage two text.")).toBeInTheDocument();
+    expect(screen.getByText("What is in navigator passage two?")).toBeInTheDocument();
+    expect(screen.getByLabelText("Question 14, current")).toBeInTheDocument();
+  });
+
   it("starts a local reading practice set without entering mock mode", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {

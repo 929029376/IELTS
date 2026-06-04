@@ -46,6 +46,8 @@
   - saves answers through `POST /api/practice/:attemptId/answer`,
   - supports marking local mock questions for review,
   - reflects marked questions in the bottom question navigation and submit warning,
+  - supports clicking bottom question navigation items to jump to the matching
+    local mock passage or listening section,
   - persists the marked-for-review flag with the saved answer payload,
   - saves current answer input state again before local mock submission,
   - stops submission and shows an error when pre-submit answer saving fails,
@@ -150,6 +152,13 @@
     - Passed after grouping local mock questions by passage id, adding reading
       passage tabs, and giving listening sections their own questions and audio
       metadata.
+- Mac bottom-navigation jump follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because clicking `Question 14` in the bottom navigator did
+      not switch the active local reading passage.
+    - Passed after adding question-select callbacks through `QuestionNavigator`
+      and `ExamShell`, then mapping selected question numbers back to the
+      correct local mock passage or section.
 - Mac local mock save-failure follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because a failed pre-submit answer save still allowed the
