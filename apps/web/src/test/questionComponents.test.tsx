@@ -63,6 +63,28 @@ describe("question components", () => {
     expect(onChange).toHaveBeenCalledWith("YES");
   });
 
+  it("normalizes saved judgment answers when rendering fixed choices", () => {
+    render(
+      <>
+        <AnswerInput
+          questionId="q-saved-tfng"
+          questionType="true_false_not_given"
+          value=" not given "
+          onChange={() => undefined}
+        />
+        <AnswerInput
+          questionId="q-saved-ynng"
+          questionType="yes_no_not_given"
+          value="yes"
+          onChange={() => undefined}
+        />
+      </>
+    );
+
+    expect(screen.getByLabelText("Answer for question q-saved-tfng")).toHaveValue("NOT GIVEN");
+    expect(screen.getByLabelText("Answer for question q-saved-ynng")).toHaveValue("YES");
+  });
+
   it("renders question navigation states", () => {
     render(
       <QuestionNavigator

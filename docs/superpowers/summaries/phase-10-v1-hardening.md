@@ -241,6 +241,11 @@
   - `YES/NO/NOT GIVEN` questions now use fixed answer choices,
   - the practice/mock UI avoids typo-prone free-text entry for these IELTS
     judgment question types.
+- Added Mac judgment-question saved-answer compatibility hardening:
+  - saved or synchronized lowercase judgment answers such as `true`, `yes`, and
+    `not given` now render as the matching fixed choice,
+  - surrounding whitespace in restored judgment answers no longer leaves the
+    select control visually blank.
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
@@ -1803,6 +1808,14 @@
       controls with standard IELTS answer values.
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionComponents.test.tsx`
     - Passed with all 4 question component tests.
+- Mac judgment-question saved-answer compatibility hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionComponents.test.tsx -t "normalizes saved judgment answers"`
+    - Initially failed because a restored `not given` value with surrounding
+      whitespace rendered as an empty fixed-choice select.
+    - Passed after matching saved judgment answers against fixed choices
+      case-insensitively and after trimming surrounding whitespace.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionComponents.test.tsx`
+    - Passed with all 5 question component tests.
 
 ## Remaining V1 Gaps
 

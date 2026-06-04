@@ -23,6 +23,15 @@ function fixedChoicesForQuestionType(questionType: QuestionType) {
   return null;
 }
 
+function normalizedFixedChoiceValue(value: string, fixedChoices: string[]) {
+  const normalizedValue = value.trim().toLowerCase();
+  if (!normalizedValue) {
+    return "";
+  }
+
+  return fixedChoices.find((choice) => choice.toLowerCase() === normalizedValue) ?? value;
+}
+
 export function AnswerInput({ questionId, questionType, value, onBlur, onChange }: AnswerInputProps) {
   const fixedChoices = fixedChoicesForQuestionType(questionType);
   if (fixedChoices) {
@@ -30,7 +39,7 @@ export function AnswerInput({ questionId, questionType, value, onBlur, onChange 
       <select
         aria-label={`Answer for question ${questionId}`}
         className="answer-input"
-        value={value}
+        value={normalizedFixedChoiceValue(value, fixedChoices)}
         onBlur={onBlur}
         onChange={(event) => onChange(event.target.value)}
       >
