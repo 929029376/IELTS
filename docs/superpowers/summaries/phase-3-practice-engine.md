@@ -123,6 +123,12 @@
       `timeSpentSeconds: 0` even after the practice elapsed timer was visible.
     - Passed after the Mac practice UI records the attempt start time and sends
       the elapsed answer time with local answer saves.
+- Mac practice score-denominator follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because short practice attempts displayed raw score as
+      `/40`, the same as a full mock test.
+    - Passed after practice score reports use the loaded practice question count
+      as the denominator while full mock reports keep `/40`.
 - Mac word-limit alias scoring follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because practice scoring only honored

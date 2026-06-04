@@ -489,6 +489,9 @@ describe("exam simulation components", () => {
     nowMs = 4_200;
     fireEvent.click(screen.getByRole("button", { name: "Submit local practice" }));
 
+    expect(await screen.findByRole("region", { name: "Score report" })).toBeInTheDocument();
+    expect(screen.getByText("1/1")).toBeInTheDocument();
+
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/practice/attempt-reading-practice-timed/answer",
       expect.objectContaining({

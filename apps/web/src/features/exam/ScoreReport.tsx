@@ -2,9 +2,10 @@ export interface ScoreReportProps {
   subject: "listening" | "reading";
   rawScore: number;
   estimatedBand: number;
+  totalQuestions?: number;
 }
 
-export function ScoreReport({ subject, rawScore, estimatedBand }: ScoreReportProps) {
+export function ScoreReport({ subject, rawScore, estimatedBand, totalQuestions = 40 }: ScoreReportProps) {
   return (
     <section className="score-report" aria-label="Score report">
       <h3>Score report</h3>
@@ -15,7 +16,9 @@ export function ScoreReport({ subject, rawScore, estimatedBand }: ScoreReportPro
         </div>
         <div>
           <dt>Raw score</dt>
-          <dd>{rawScore}/40</dd>
+          <dd>
+            {rawScore}/{totalQuestions}
+          </dd>
         </div>
         <div>
           <dt>Estimated band</dt>

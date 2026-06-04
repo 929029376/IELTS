@@ -874,6 +874,13 @@
       `timeSpentSeconds: 0`, weakening practice history timing evidence.
     - Passed after answer saves use the actual elapsed seconds since the current
       local attempt started.
+- Mac practice score-denominator hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because local practice score reports displayed short
+      practice sets as `/40`, which made one-question practice results look like
+      full IELTS mock scores.
+    - Passed after practice reports use the current practice set size while mock
+      reports continue to use the 40-question IELTS denominator.
 
 ## Remaining V1 Gaps
 

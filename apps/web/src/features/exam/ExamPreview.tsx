@@ -549,6 +549,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           subject={activeMock.subject}
           rawScore={scoreReport.rawScore}
           estimatedBand={scoreReport.estimatedBand}
+          totalQuestions={activeMock.mode === "practice" ? activeQuestions.length : undefined}
         />
       ) : null}
       {mockReview?.reviewItems.length ? (
