@@ -77,8 +77,9 @@ export function wordCountWithinLimit(answer: string, maxWords?: number, options:
 
 function choiceTokens(answer: string): string[] {
   return normalizeAnswer(answer)
-    .replace(/[;,/|]+/g, " ")
+    .replace(/[;,/|&+]+/g, " ")
     .split(/\s+/)
+    .filter((token) => token !== "and")
     .flatMap((token) => (/^[a-z]+$/.test(token) && token.length > 1 ? token.split("") : [token]))
     .filter(Boolean)
     .sort();

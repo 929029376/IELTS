@@ -242,6 +242,8 @@
   - answers such as `C A` can match an accepted answer recorded as `A C`,
   - compact accepted answers such as `AC` also match spaced user answers such as
     `C A`,
+  - connector-based user answers such as `A & C`, `A + C`, and `A and C` also
+    match the same selected option set,
   - incorrect option sets still fail instead of being over-accepted.
 - Added Mac optional-answer-word scoring hardening:
   - accepted answers with optional parenthesized words such as
@@ -1854,19 +1856,25 @@
     - Initially failed because `C A` did not match accepted answer `A C`.
     - A follow-up red run also failed because `C A` did not match compact
       accepted answer `AC`.
+    - A later red run failed because connector-based answers such as `A & C`,
+      `A + C`, and `A and C` were not tokenized as the same option set.
     - Passed after adding an `unorderedChoices` scoring option that tokenizes,
       splits compact option-letter tokens, normalizes, sorts, and compares
-      selected option sets.
+      selected option sets, with connector characters and `and` treated as
+      separators.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "multiple-choice answers"`
     - Initially failed because the practice API marked reversed multiple-choice
       option letters incorrect, then failed again when the accepted answer was
       stored as compact `AC`.
+    - A later red run failed because the practice API marked `A & C` incorrect
+      against accepted answer `AC`.
     - Passed after enabling unordered option scoring for `multiple_choice`
-      questions in the practice service.
+      questions in the practice service and sharing the connector-aware option
+      tokenizer.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 5 shared scoring tests.
+    - Passed with all 9 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
-    - Passed with all 9 practice route tests.
+    - Passed with all 12 practice route tests.
 - Mac optional-answer-word scoring hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "optional parenthesized"`
     - Initially failed because accepted answer `(the) green park` did not match

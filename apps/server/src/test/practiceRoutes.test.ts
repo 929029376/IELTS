@@ -917,7 +917,7 @@ describe("practice routes", () => {
         payload: {
           markedForReview: false,
           questionId: started.questions[0].id,
-          rawAnswer: "C A",
+          rawAnswer: "A & C",
           timeSpentSeconds: 12
         }
       });
@@ -925,7 +925,7 @@ describe("practice routes", () => {
       expect(answer.statusCode).toBe(200);
       expect(answer.json()).toMatchObject({
         isCorrect: true,
-        normalizedAnswer: "c a"
+        normalizedAnswer: "a & c"
       });
     } finally {
       await server.close();
