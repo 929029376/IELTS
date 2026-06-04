@@ -1,4 +1,4 @@
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ExamShell } from "../features/exam/ExamShell";
 import { ExamPreview } from "../features/exam/ExamPreview";
@@ -220,6 +220,62 @@ describe("exam simulation components", () => {
     expect(screen.getByText(pdfPath)).toBeInTheDocument();
   });
 
+  it("keeps local reading mock passages separated by part and switches the active passage", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-multi-passage-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "reading-p1-q1",
+                part: "P1",
+                passageId: "reading-p1",
+                passageText: "Reading passage one text.",
+                passageTitle: "Reading Passage One",
+                prompt: "What is in passage one?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              },
+              {
+                answerRules: {},
+                id: "reading-p2-q1",
+                part: "P2",
+                passageId: "reading-p2",
+                passageText: "Reading passage two text.",
+                passageTitle: "Reading Passage Two",
+                prompt: "What is in passage two?",
+                questionNumber: 14,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+
+    expect(await screen.findByText("Reading passage one text.")).toBeInTheDocument();
+    expect(screen.queryByText("Reading passage two text.")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "P2 Reading Passage Two" }));
+
+    expect(screen.getByText("Reading passage two text.")).toBeInTheDocument();
+    expect(screen.getByText("What is in passage two?")).toBeInTheDocument();
+    expect(screen.getByLabelText("Question 14, current")).toBeInTheDocument();
+  });
+
   it("starts a local reading practice set without entering mock mode", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
@@ -320,6 +376,71 @@ describe("exam simulation components", () => {
     expect(await screen.findByText("Loaded local listening mock")).toBeInTheDocument();
     expect(screen.getByText("/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3")).toBeInTheDocument();
     expect(screen.getByText("Duration: 05:20")).toBeInTheDocument();
+  });
+
+  it("keeps local listening mock sections separated with their own audio metadata", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-listening-multi-section-1",
+            questions: [
+              {
+                answerRules: {},
+                assetPaths: [],
+                audioDurationSeconds: 120,
+                audioPath: "/Users/musheng/Desktop/IELTS/listening/p1.mp3",
+                id: "listening-p1-q1",
+                part: "P1",
+                passageId: "listening-p1",
+                passageText: null,
+                passageTitle: "Listening Section One",
+                prompt: "What is in section one?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              },
+              {
+                answerRules: {},
+                assetPaths: [],
+                audioDurationSeconds: 240,
+                audioPath: "/Users/musheng/Desktop/IELTS/listening/p2.mp3",
+                id: "listening-p2-q1",
+                part: "P2",
+                passageId: "listening-p2",
+                passageText: null,
+                passageTitle: "Listening Section Two",
+                prompt: "What is in section two?",
+                questionNumber: 11,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start listening mock" }));
+
+    expect(await screen.findByRole("heading", { name: "Listening Section One" })).toBeInTheDocument();
+    const listeningView = screen.getByLabelText("Listening mock view");
+    expect(screen.getByText("Duration: 02:00")).toBeInTheDocument();
+    expect(within(listeningView).queryByText("What is in section two?")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "P2 Listening Section Two" }));
+
+    expect(screen.getByRole("heading", { name: "Listening Section Two" })).toBeInTheDocument();
+    expect(screen.getByText("Duration: 04:00")).toBeInTheDocument();
+    expect(within(listeningView).getByText(/What is in section two/)).toBeInTheDocument();
+    expect(screen.getByLabelText("Question 11, current")).toBeInTheDocument();
   });
 
   it("renders a real local audio element while keeping mock controls strict", () => {

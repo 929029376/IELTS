@@ -118,6 +118,13 @@
   - the Mac reading mock pane renders imported passage text when available,
   - the Mac listening mock player displays the selected local audio path and
     duration metadata.
+- Added Mac full-set mock grouping hardening:
+  - local reading mock attempts group returned questions by passage id and part,
+  - reading passage tabs switch the active passage text, PDF asset, and visible
+    question group,
+  - local listening mock attempts group returned questions by section/passage,
+  - listening section tabs switch the visible questions plus the selected local
+    audio title, path, and duration metadata.
 - Added Mac local asset playback hardening:
   - imported local audio can be streamed through `GET /api/assets/local`,
   - the Mac listening mock player now renders a real audio element that uses the
@@ -313,6 +320,13 @@
     - Passed after adding the mark toggle, bottom-navigation marked state,
       marked-question submit warning, and `markedForReview` persistence in the
       local answer-save request.
+- Mac full-set passage/section grouping follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because local reading mocks only rendered the first
+      passage and local listening mocks did not isolate section questions/audio
+      by part.
+    - Passed after adding passage/section grouping, reading passage tabs, and
+      per-section listening audio metadata.
 - Mac practice-filter follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because supplied practice filters were ignored by the

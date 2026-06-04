@@ -3,6 +3,9 @@ import { useState } from "react";
 import { formatTimer } from "./questionNav";
 
 export interface ListeningSection {
+  audioDurationSeconds?: number | null;
+  audioPath?: string | null;
+  audioTitle?: string | null;
   id: string;
   title: string;
   questions: ReactNode;
@@ -15,6 +18,7 @@ export interface ListeningExamViewProps {
   audioTitle: string;
   sections: ListeningSection[];
   finalReviewSeconds: number;
+  onActiveSectionChange?: (sectionId: string) => void;
 }
 
 function localAssetUrl(path: string): string {
@@ -27,28 +31,32 @@ export function ListeningExamView({
   mode,
   audioTitle,
   sections,
-  finalReviewSeconds
+  finalReviewSeconds,
+  onActiveSectionChange
 }: ListeningExamViewProps) {
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id);
   const activeSection = sections.find((section) => section.id === activeSectionId) ?? sections[0];
   const isMock = mode === "mock";
+  const activeAudioTitle = activeSection?.audioTitle ?? audioTitle;
+  const activeAudioPath = activeSection?.audioPath ?? audioPath;
+  const activeAudioDurationSeconds = activeSection?.audioDurationSeconds ?? audioDurationSeconds;
 
   return (
     <section className="listening-exam-view" aria-label="Listening mock view">
       <div className="listening-player" aria-label="Listening player">
         <div>
           <p className="player-label">Audio</p>
-          <h3>{audioTitle}</h3>
-          {audioPath ? <p className="audio-resource-path">{audioPath}</p> : null}
-          {audioDurationSeconds ? <p>Duration: {formatTimer(audioDurationSeconds)}</p> : null}
+          <h3>{activeAudioTitle}</h3>
+          {activeAudioPath ? <p className="audio-resource-path">{activeAudioPath}</p> : null}
+          {activeAudioDurationSeconds ? <p>Duration: {formatTimer(activeAudioDurationSeconds)}</p> : null}
           <p>Final review time: {formatTimer(finalReviewSeconds)}</p>
-          {audioPath ? (
+          {activeAudioPath ? (
             <audio
               aria-label="Local listening audio"
               autoPlay={isMock}
               controls={!isMock}
               preload="metadata"
-              src={localAssetUrl(audioPath)}
+              src={localAssetUrl(activeAudioPath)}
             />
           ) : null}
         </div>
@@ -70,7 +78,10 @@ export function ListeningExamView({
           <button
             aria-selected={section.id === activeSectionId}
             key={section.id}
-            onClick={() => setActiveSectionId(section.id)}
+            onClick={() => {
+              setActiveSectionId(section.id);
+              onActiveSectionChange?.(section.id);
+            }}
             role="tab"
             type="button"
           >

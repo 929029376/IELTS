@@ -62,6 +62,12 @@
     placeholder when available,
   - the Mac listening player shows the selected local audio resource path and
     duration metadata.
+- Added Mac full-set mock grouping:
+  - started reading mock questions are grouped by imported passage id and part,
+  - the reading mock pane provides passage tabs for P1/P2/P3 full-set switching,
+  - started listening mock questions are grouped by imported section/passage,
+  - the listening mock section tabs now switch both the visible questions and
+    the selected local audio metadata.
 - Added Mac local listening audio playback:
   - the listening mock view renders a real `<audio>` element when imported audio
     is available,
@@ -136,6 +142,14 @@
     - Passed after adding local question mark toggles, marked navigation state,
       submit warnings for marked local questions, and `markedForReview`
       persistence in answer-save payloads.
+- Mac full-set passage/section grouping follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because local reading mocks had no P2 passage tab and
+      local listening mocks rendered later-section questions in the first
+      section instead of isolating them by section.
+    - Passed after grouping local mock questions by passage id, adding reading
+      passage tabs, and giving listening sections their own questions and audio
+      metadata.
 - Mac local mock save-failure follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because a failed pre-submit answer save still allowed the

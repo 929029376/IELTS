@@ -66,6 +66,13 @@ interface MockReview {
   reviewItems: MockReviewItem[];
 }
 
+interface MockQuestionGroup {
+  id: string;
+  part: string;
+  title: string;
+  questions: StartedMockQuestion[];
+}
+
 interface ExamPreviewProps {
   onMockSubmitted?: () => void;
 }
@@ -152,10 +159,33 @@ function conflictsForQuestion(review: MockReview, questionId: string): MockRevie
   return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
 }
 
+function groupQuestionsByPassage(questions: StartedMockQuestion[]): MockQuestionGroup[] {
+  return questions.reduce<MockQuestionGroup[]>((groups, question) => {
+    const existing = groups.find((group) => group.id === question.passageId);
+    if (existing) {
+      existing.questions.push(question);
+      return groups;
+    }
+
+    groups.push({
+      id: question.passageId,
+      part: question.part,
+      questions: [question],
+      title: question.passageTitle
+    });
+    return groups;
+  }, []);
+}
+
+function groupLabel(group: MockQuestionGroup): string {
+  return `${group.part} ${group.title}`;
+}
+
 export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [markedQuestions, setMarkedQuestions] = useState<Record<string, boolean>>({});
+  const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
   const [practiceFilters, setPracticeFilters] = useState<PracticeFilters>(defaultPracticeFilters);
   const [isStarting, setIsStarting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -173,8 +203,11 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setScoreReport(null);
     setAnswers({});
     setMarkedQuestions({});
+    setActiveGroupId(null);
     try {
-      setActiveMock(await startAttempt(mode, subject, practiceFilters));
+      const started = await startAttempt(mode, subject, practiceFilters);
+      setActiveMock(started);
+      setActiveGroupId(started.questions[0]?.passageId ?? null);
     } catch {
       setStartError(`Could not start ${subjectLabel(subject)} ${mode} from the local question bank.`);
     } finally {
@@ -236,15 +269,21 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   }
 
   const activeQuestions = activeMock?.questions ?? [];
+  const questionGroups = groupQuestionsByPassage(activeQuestions);
+  const activeGroup = questionGroups.find((group) => group.id === activeGroupId) ?? questionGroups[0];
+  const activeGroupQuestions = activeGroup?.questions ?? [];
+  const currentQuestionId = activeGroupQuestions[0]?.id;
   const mockQuestionStates = activeQuestions.map((question, index) => ({
     questionNumber: question.questionNumber,
     answered: Boolean((answers[question.id] ?? "").trim()),
     markedForReview: Boolean(markedQuestions[question.id]),
-    current: index === 0 && !markedQuestions[question.id]
+    current:
+      (currentQuestionId ? question.id === currentQuestionId : index === 0) &&
+      !markedQuestions[question.id]
   }));
-  const mockQuestionList = (
+  const renderMockQuestionList = (questions: StartedMockQuestion[]) => (
     <div className="local-mock-questions">
-      {activeQuestions.map((question) => (
+      {questions.map((question) => (
         <div className="local-mock-question-card" key={question.id}>
           <span>{question.part}</span>
           <strong>
@@ -281,6 +320,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
       ))}
     </div>
   );
+  const activeReadingQuestion = activeGroupQuestions[0] ?? activeQuestions[0];
 
   return (
     <section className="exam-preview-band" aria-label="IELTS-style exam preview">
@@ -413,30 +453,49 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           submitLabel={activeMock.mode === "mock" ? "Submit test" : "Submit practice"}
         >
           {activeMock.subject === "reading" ? (
-            <ReadingExamView
-              passageTitle={activeQuestions[0]?.passageTitle ?? "Reading passage"}
-              passageText={
-                activeQuestions[0]?.passageText ??
-                "Use the imported local passage asset for close reading. Structured passage text will appear here when the source provides it."
-              }
-              pdfPath={findPdfAssetPath(activeQuestions[0])}
-              highlightedText={activeQuestions[0]?.passageText ? undefined : "Structured passage text"}
-              questions={mockQuestionList}
-            />
+            <>
+              {questionGroups.length > 1 ? (
+                <div className="section-tabs reading-part-tabs" role="tablist" aria-label="Reading passages">
+                  {questionGroups.map((group) => (
+                    <button
+                      aria-selected={group.id === activeGroup?.id}
+                      key={group.id}
+                      onClick={() => setActiveGroupId(group.id)}
+                      role="tab"
+                      type="button"
+                    >
+                      {groupLabel(group)}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <ReadingExamView
+                passageTitle={activeReadingQuestion?.passageTitle ?? "Reading passage"}
+                passageText={
+                  activeReadingQuestion?.passageText ??
+                  "Use the imported local passage asset for close reading. Structured passage text will appear here when the source provides it."
+                }
+                pdfPath={findPdfAssetPath(activeReadingQuestion)}
+                highlightedText={activeReadingQuestion?.passageText ? undefined : "Structured passage text"}
+                questions={renderMockQuestionList(activeGroupQuestions)}
+              />
+            </>
           ) : (
             <ListeningExamView
               mode="mock"
-              audioDurationSeconds={activeQuestions[0]?.audioDurationSeconds}
-              audioPath={activeQuestions[0]?.audioPath}
-              audioTitle={activeQuestions[0]?.passageTitle ?? "Listening section audio"}
-              sections={[
-                {
-                  id: "local-listening",
-                  title: activeQuestions[0]?.part ?? "Section",
-                  questions: mockQuestionList
-                }
-              ]}
+              audioDurationSeconds={activeGroupQuestions[0]?.audioDurationSeconds}
+              audioPath={activeGroupQuestions[0]?.audioPath}
+              audioTitle={activeGroupQuestions[0]?.passageTitle ?? "Listening section audio"}
+              sections={questionGroups.map((group) => ({
+                audioDurationSeconds: group.questions[0]?.audioDurationSeconds,
+                audioPath: group.questions[0]?.audioPath,
+                audioTitle: group.questions[0]?.passageTitle,
+                id: group.id,
+                questions: renderMockQuestionList(group.questions),
+                title: groupLabel(group)
+              }))}
               finalReviewSeconds={120}
+              onActiveSectionChange={setActiveGroupId}
             />
           )}
         </ExamShell>
