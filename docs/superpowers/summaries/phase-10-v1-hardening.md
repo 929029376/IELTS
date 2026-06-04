@@ -227,6 +227,11 @@
   - submit confirmation now lists unanswered question numbers,
   - submit confirmation now lists marked-for-review question numbers,
   - the final mock/practice check is easier to use under exam-time pressure.
+- Added Mac exam submit-warning jump hardening:
+  - unanswered and marked question numbers in the submit warning are actionable
+    review buttons,
+  - selecting a warning question jumps back to that question and closes the
+    warning so the answer can be fixed before submission.
 - Added submitted-mock review hardening:
   - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
   - the Mac dashboard renders correctness, user answer, accepted answer, answer
@@ -1342,6 +1347,12 @@
       marked counts, not the exact question numbers to review before submission.
     - Passed after rendering unanswered and marked-for-review question-number
       lists in the submit warning.
+- Mac exam submit-warning jump hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "renders timer"`
+    - Initially failed because submit-warning question numbers were rendered as
+      plain text and could not return the user to the matching question.
+    - Passed after rendering actionable warning question buttons that call the
+      existing question-selection handler and close the warning.
 
 ## Remaining V1 Gaps
 

@@ -21,6 +21,7 @@ describe("exam simulation components", () => {
 
   it("renders timer, help, settings, review marker, bottom nav, and submit warning", () => {
     const onSubmit = vi.fn();
+    const onSelectQuestion = vi.fn();
 
     const { container } = render(
       <ExamShell
@@ -31,6 +32,7 @@ describe("exam simulation components", () => {
           { questionNumber: 2, answered: false, markedForReview: true }
         ]}
         onSubmit={onSubmit}
+        onSelectQuestion={onSelectQuestion}
       >
         <p>Exam body</p>
       </ExamShell>
@@ -53,9 +55,15 @@ describe("exam simulation components", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Submit test" }));
 
-    expect(screen.getByText("1 unanswered question and 1 marked question remain.")).toBeInTheDocument();
-    expect(screen.getByText("Unanswered: 2")).toBeInTheDocument();
-    expect(screen.getByText("Marked for review: 2")).toBeInTheDocument();
+    const submitWarning = screen.getByRole("alert");
+    expect(submitWarning).toHaveTextContent("1 unanswered question and 1 marked question remain.");
+    expect(submitWarning).toHaveTextContent("Unanswered: 2");
+    expect(submitWarning).toHaveTextContent("Marked for review: 2");
+    fireEvent.click(screen.getByRole("button", { name: "Review unanswered question 2" }));
+    expect(onSelectQuestion).toHaveBeenCalledWith(2);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Submit test" }));
     fireEvent.click(screen.getByRole("button", { name: "Submit anyway" }));
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });

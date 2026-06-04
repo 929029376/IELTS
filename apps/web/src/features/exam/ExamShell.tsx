@@ -25,6 +25,13 @@ function questionNumberList(questions: ExamQuestionState[], predicate: (question
   return questions.filter(predicate).map((question) => question.questionNumber).join(", ");
 }
 
+function filteredQuestionNumbers(
+  questions: ExamQuestionState[],
+  predicate: (question: ExamQuestionState) => boolean
+) {
+  return questions.filter(predicate).map((question) => question.questionNumber);
+}
+
 export function ExamShell({
   title,
   durationSeconds,
@@ -45,6 +52,8 @@ export function ExamShell({
   const markedCount = questions.filter((question) => question.markedForReview).length;
   const unansweredNumbers = questionNumberList(questions, (question) => !question.answered);
   const markedNumbers = questionNumberList(questions, (question) => question.markedForReview);
+  const unansweredQuestionNumbers = filteredQuestionNumbers(questions, (question) => !question.answered);
+  const markedQuestionNumbers = filteredQuestionNumbers(questions, (question) => question.markedForReview);
   const navItems = useMemo(() => createQuestionNavItems(questions), [questions]);
 
   function submit(reason: ExamSubmitEvent["reason"]) {
@@ -90,6 +99,11 @@ export function ExamShell({
       return;
     }
     submit("manual");
+  }
+
+  function selectWarningQuestion(questionNumber: number) {
+    onSelectQuestion?.(questionNumber);
+    setShowWarning(false);
   }
 
   return (
@@ -155,8 +169,40 @@ export function ExamShell({
             {unansweredCount} unanswered question{unansweredCount === 1 ? "" : "s"} and {markedCount} marked
             question{markedCount === 1 ? "" : "s"} remain.
           </p>
-          {unansweredNumbers ? <p>Unanswered: {unansweredNumbers}</p> : null}
-          {markedNumbers ? <p>Marked for review: {markedNumbers}</p> : null}
+          {unansweredNumbers ? (
+            <p>
+              Unanswered:{" "}
+              {unansweredQuestionNumbers.map((questionNumber, index) => (
+                <span key={questionNumber}>
+                  {index > 0 ? ", " : null}
+                  <button
+                    aria-label={`Review unanswered question ${questionNumber}`}
+                    type="button"
+                    onClick={() => selectWarningQuestion(questionNumber)}
+                  >
+                    {questionNumber}
+                  </button>
+                </span>
+              ))}
+            </p>
+          ) : null}
+          {markedNumbers ? (
+            <p>
+              Marked for review:{" "}
+              {markedQuestionNumbers.map((questionNumber, index) => (
+                <span key={questionNumber}>
+                  {index > 0 ? ", " : null}
+                  <button
+                    aria-label={`Review marked question ${questionNumber}`}
+                    type="button"
+                    onClick={() => selectWarningQuestion(questionNumber)}
+                  >
+                    {questionNumber}
+                  </button>
+                </span>
+              ))}
+            </p>
+          ) : null}
           <button type="button" onClick={() => submit("manual")}>
             Submit anyway
           </button>
