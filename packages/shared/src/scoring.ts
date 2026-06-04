@@ -51,6 +51,11 @@ export interface WordLimitOptions {
   allowNumber?: boolean;
 }
 
+export interface AnswerCorrectOptions extends WordLimitOptions {
+  maxWords?: number;
+  unorderedChoices?: boolean;
+}
+
 function isNumberToken(token: string): boolean {
   return /^[+-]?\d[\d,.:/-]*(st|nd|rd|th)?$/i.test(token);
 }
@@ -69,15 +74,37 @@ export function wordCountWithinLimit(answer: string, maxWords?: number, options:
   return words.length <= maxWords;
 }
 
+function choiceTokens(answer: string): string[] {
+  return normalizeAnswer(answer)
+    .replace(/[;,/|]+/g, " ")
+    .split(/\s+/)
+    .filter(Boolean)
+    .sort();
+}
+
+function unorderedChoiceMatch(rawAnswer: string, acceptedAnswer: string): boolean {
+  const rawTokens = choiceTokens(rawAnswer);
+  const acceptedTokens = choiceTokens(acceptedAnswer);
+  if (rawTokens.length === 0 || rawTokens.length !== acceptedTokens.length) {
+    return false;
+  }
+
+  return rawTokens.every((token, index) => token === acceptedTokens[index]);
+}
+
 export function isAnswerCorrect(
   rawAnswer: string,
   acceptedAnswers: string[],
-  options: { allowNumber?: boolean; maxWords?: number } = {}
+  options: AnswerCorrectOptions = {}
 ): boolean {
   if (!wordCountWithinLimit(rawAnswer, options.maxWords, { allowNumber: options.allowNumber })) {
     return false;
   }
 
   const normalizedAnswer = normalizeAnswer(rawAnswer);
+  if (options.unorderedChoices) {
+    return acceptedAnswers.some((acceptedAnswer) => unorderedChoiceMatch(rawAnswer, acceptedAnswer));
+  }
+
   return acceptedAnswers.some((acceptedAnswer) => normalizeAnswer(acceptedAnswer) === normalizedAnswer);
 }

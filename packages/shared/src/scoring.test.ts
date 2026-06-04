@@ -23,4 +23,10 @@ describe("answer scoring", () => {
     expect(wordCountWithinLimit("green park station", 2, { allowNumber: true })).toBe(false);
     expect(isAnswerCorrect("green park 24", ["green park 24"], { allowNumber: true, maxWords: 2 })).toBe(true);
   });
+
+  it("can score multiple-choice letter answers without requiring order", () => {
+    expect(isAnswerCorrect("C A", ["A C"], { unorderedChoices: true })).toBe(true);
+    expect(isAnswerCorrect("A, D", ["A C"], { unorderedChoices: true })).toBe(false);
+    expect(isAnswerCorrect("C A", ["A C"])).toBe(false);
+  });
 });

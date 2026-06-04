@@ -236,6 +236,11 @@
   - `NO MORE THAN TWO WORDS AND/OR A NUMBER` allows the number outside the word
     count,
   - practice and mock answers use the shared scoring behavior.
+- Added Mac multiple-choice scoring hardening:
+  - multiple-choice option-letter answers are scored without requiring option
+    order,
+  - answers such as `C A` can match an accepted answer recorded as `A C`,
+  - incorrect option sets still fail instead of being over-accepted.
 - Added Mac IELTS judgment-question input hardening:
   - `TRUE/FALSE/NOT GIVEN` questions now use fixed answer choices,
   - `YES/NO/NOT GIVEN` questions now use fixed answer choices,
@@ -1816,6 +1821,20 @@
       case-insensitively and after trimming surrounding whitespace.
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionComponents.test.tsx`
     - Passed with all 5 question component tests.
+- Mac multiple-choice scoring hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "without requiring order"`
+    - Initially failed because `C A` did not match accepted answer `A C`.
+    - Passed after adding an `unorderedChoices` scoring option that tokenizes,
+      normalizes, sorts, and compares selected option sets.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "multiple-choice answers"`
+    - Initially failed because the practice API marked reversed multiple-choice
+      option letters incorrect.
+    - Passed after enabling unordered option scoring for `multiple_choice`
+      questions in the practice service.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Passed with all 5 shared scoring tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 9 practice route tests.
 
 ## Remaining V1 Gaps
 

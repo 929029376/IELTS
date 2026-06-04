@@ -179,6 +179,45 @@ function seedNumberAllowedWordLimitQuestion(databasePath: string) {
   }
 }
 
+function seedMultipleChoiceQuestion(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: "seed/multiple-choice.json",
+      checksum: "multiple-choice-seed",
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "reading",
+      part: "P1",
+      title: "Multiple Choice Practice",
+      frequencyClass: "high"
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "multiple_choice",
+      prompt: "Which TWO options are correct?",
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["A C"],
+      answerSentence: "The passage supports options A and C.",
+      explanation: "Both options must be selected, but their order does not matter.",
+      synonyms: []
+    });
+  } finally {
+    db.close();
+  }
+}
+
 function seedPracticeMistakeLabelCandidates(databasePath: string) {
   const db = openDatabase(databasePath);
   migrate(db);
@@ -601,6 +640,52 @@ describe("practice routes", () => {
       expect(answer.json()).toMatchObject({
         isCorrect: true,
         normalizedAnswer: "green park 24"
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("scores multiple-choice answers without requiring option order", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-multiple-choice-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedMultipleChoiceQuestion(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", questionType: "multiple_choice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string; questionType: string }>;
+      }>();
+      expect(started.questions).toEqual([
+        expect.objectContaining({
+          questionType: "multiple_choice"
+        })
+      ]);
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId: started.questions[0].id,
+          rawAnswer: "C A",
+          timeSpentSeconds: 12
+        }
+      });
+
+      expect(answer.statusCode).toBe(200);
+      expect(answer.json()).toMatchObject({
+        isCorrect: true,
+        normalizedAnswer: "c a"
       });
     } finally {
       await server.close();
