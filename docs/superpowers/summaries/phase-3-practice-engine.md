@@ -117,6 +117,12 @@
       countdown timer and could auto-submit on timeout.
     - Passed after practice attempts switched to elapsed time tracking while
       mock attempts retained countdown auto-submit behavior.
+- Mac practice answer-time follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because local practice answer saves still sent
+      `timeSpentSeconds: 0` even after the practice elapsed timer was visible.
+    - Passed after the Mac practice UI records the attempt start time and sends
+      the elapsed answer time with local answer saves.
 - Mac word-limit alias scoring follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because practice scoring only honored

@@ -868,6 +868,12 @@
       timer and did not expose a free-practice elapsed timer.
     - Passed after wiring practice attempts to elapsed time tracking while
       keeping mock attempts on strict countdown and timeout submit.
+- Mac practice answer-time hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because saved local answers always used
+      `timeSpentSeconds: 0`, weakening practice history timing evidence.
+    - Passed after answer saves use the actual elapsed seconds since the current
+      local attempt started.
 
 ## Remaining V1 Gaps
 

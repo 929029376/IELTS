@@ -183,6 +183,7 @@ function groupLabel(group: MockQuestionGroup): string {
 
 export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
+  const [attemptStartedAtMs, setAttemptStartedAtMs] = useState<number | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [markedQuestions, setMarkedQuestions] = useState<Record<string, boolean>>({});
   const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
@@ -206,9 +207,11 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setMarkedQuestions({});
     setActiveGroupId(null);
     setActiveQuestionId(null);
+    setAttemptStartedAtMs(null);
     try {
       const started = await startAttempt(mode, subject, practiceFilters);
       setActiveMock(started);
+      setAttemptStartedAtMs(Date.now());
       setActiveGroupId(started.questions[0]?.passageId ?? null);
       setActiveQuestionId(started.questions[0]?.id ?? null);
     } catch {
@@ -224,12 +227,14 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     }
 
     const rawAnswer = answers[questionId] ?? "";
+    const timeSpentSeconds =
+      attemptStartedAtMs === null ? 0 : Math.max(0, Math.round((Date.now() - attemptStartedAtMs) / 1000));
     const response = await fetch(`/api/practice/${activeMock.attemptId}/answer`, {
       body: JSON.stringify({
         markedForReview: Boolean(markedQuestions[questionId]),
         questionId,
         rawAnswer,
-        timeSpentSeconds: 0
+        timeSpentSeconds
       }),
       headers: {
         "Content-Type": "application/json"

@@ -431,6 +431,78 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("saves elapsed practice time with local answers", async () => {
+    vi.useRealTimers();
+    let nowMs = 1_000;
+    vi.spyOn(Date, "now").mockImplementation(() => nowMs);
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const path = String(input);
+      if (path === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-practice-timed",
+            questions: [
+              {
+                answerRules: {},
+                id: "practice-timed-question-1",
+                part: "P2",
+                passageId: "practice-timed-passage-1",
+                passageTitle: "Timed Reading Practice",
+                prompt: "Which detail should be timed?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-practice-timed/answer") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (path === "/api/practice/attempt-reading-practice-timed/submit") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-practice-timed",
+            estimatedBand: 4,
+            rawScore: 1,
+            submittedAt: "2026-06-04T09:00:00.000Z"
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading practice" }));
+    const answer = await screen.findByRole("textbox", { name: "Answer for question practice-timed-question-1" });
+    fireEvent.change(answer, { target: { value: "routes" } });
+    nowMs = 4_200;
+    fireEvent.click(screen.getByRole("button", { name: "Submit local practice" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-practice-timed/answer",
+      expect.objectContaining({
+        body: JSON.stringify({
+          markedForReview: false,
+          questionId: "practice-timed-question-1",
+          rawAnswer: "routes",
+          timeSpentSeconds: 3
+        }),
+        method: "POST"
+      })
+    );
+  });
+
   it("shows local listening audio metadata returned by the practice API", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
