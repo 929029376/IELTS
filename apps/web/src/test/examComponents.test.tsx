@@ -1204,6 +1204,92 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("auto-submits a timed local mock with the current answers saved first", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const path = String(input);
+      if (path === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-timeout-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-timeout-1",
+                part: "P1",
+                passageId: "passage-timeout-1",
+                passageTitle: "Timed Auto Submit Set",
+                prompt: "Which word is still unsaved when time expires?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-timeout-1/answer") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (path === "/api/practice/attempt-reading-timeout-1/submit") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-timeout-1",
+            estimatedBand: 4,
+            rawScore: 1,
+            submittedAt: "2026-06-04T09:00:00.000Z"
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-timeout-1/review") {
+        return {
+          ok: true,
+          json: async () => ({ reviewItems: [] })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    });
+    const answer = screen.getByRole("textbox", { name: "Answer for question question-timeout-1" });
+    fireEvent.change(answer, { target: { value: "still saved" } });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(3600 * 1000);
+    });
+    await act(async () => {});
+
+    expect(screen.getByRole("region", { name: "Score report" })).toBeInTheDocument();
+    expect(screen.getByText("Time expired. The local mock attempt was submitted automatically.")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-timeout-1/answer",
+      expect.objectContaining({
+        body: JSON.stringify({
+          markedForReview: false,
+          questionId: "question-timeout-1",
+          rawAnswer: "still saved",
+          timeSpentSeconds: 3600
+        }),
+        method: "POST"
+      })
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-timeout-1/submit",
+      expect.objectContaining({ method: "POST" })
+    );
+  });
+
   it("persists marked-for-review state for local mock questions before submission", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {

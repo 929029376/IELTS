@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Flag } from "lucide-react";
 import type { QuestionType } from "@ielts/shared/questionTypes";
 import { AnswerInput } from "../questions/AnswerInput";
-import { ExamShell } from "./ExamShell";
+import { ExamShell, type ExamSubmitEvent } from "./ExamShell";
 import { ListeningExamView } from "./ListeningExamView";
 import { ReadingExamView } from "./ReadingExamView";
 import { ScoreReport } from "./ScoreReport";
@@ -254,6 +254,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [startError, setStartError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitNotice, setSubmitNotice] = useState<string | null>(null);
   const [mockReview, setMockReview] = useState<MockReview | null>(null);
   const [scoreReport, setScoreReport] = useState<MockSubmitResult | null>(null);
 
@@ -261,6 +262,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setIsStarting(true);
     setStartError(null);
     setSubmitError(null);
+    setSubmitNotice(null);
     setMockReview(null);
     setScoreReport(null);
     setActiveMock(null);
@@ -307,13 +309,14 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     }
   }
 
-  async function submitActiveMock() {
+  async function submitActiveMock(reason: ExamSubmitEvent["reason"] = "manual") {
     if (!activeMock || isSubmitting) {
       return;
     }
 
     setIsSubmitting(true);
     setSubmitError(null);
+    setSubmitNotice(null);
     try {
       await Promise.all(activeQuestions.map((question) => saveMockAnswer(question.id)));
       const response = await fetch(`/api/practice/${activeMock.attemptId}/submit`, {
@@ -323,6 +326,9 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
         throw new Error("Could not submit mock");
       }
       setScoreReport((await response.json()) as MockSubmitResult);
+      if (reason === "time_expired") {
+        setSubmitNotice("Time expired. The local mock attempt was submitted automatically.");
+      }
       onMockSubmitted?.();
       const reviewResponse = await fetch(`/api/practice/${activeMock.attemptId}/review`, {
         method: "GET"
@@ -539,6 +545,11 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
       ) : null}
       {startError ? <p className="mock-start-error">{startError}</p> : null}
       {submitError ? <p className="mock-start-error">{submitError}</p> : null}
+      {submitNotice ? (
+        <p className="score-estimate-note" role="status">
+          {submitNotice}
+        </p>
+      ) : null}
       {activeMock && activeQuestions.length > 0 ? (
         <ExamShell
           title={`${activeMock.subject === "reading" ? "Reading" : "Listening"} Local ${
@@ -546,7 +557,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
           }`}
           durationSeconds={activeMock.subject === "reading" ? 3600 : 2400}
           questions={mockQuestionStates}
-          onSubmit={() => void submitActiveMock()}
+          onSubmit={(event) => void submitActiveMock(event.reason)}
           onSelectQuestion={selectQuestion}
           onToggleCurrentQuestionMark={toggleCurrentQuestionMark}
           submitLabel={activeMock.mode === "mock" ? "Submit test" : "Submit practice"}

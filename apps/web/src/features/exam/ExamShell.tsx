@@ -83,7 +83,6 @@ export function ExamShell({
 
         if (current <= 1) {
           window.clearInterval(timerId);
-          submit("time_expired");
           return 0;
         }
         return current - 1;
@@ -92,6 +91,14 @@ export function ExamShell({
 
     return () => window.clearInterval(timerId);
   }, [isSubmitted, timerMode]);
+
+  useEffect(() => {
+    if (timerMode !== "countdown" || isSubmitted || timerSeconds > 0) {
+      return;
+    }
+
+    submit("time_expired");
+  }, [isSubmitted, timerMode, timerSeconds]);
 
   function handleSubmitClick() {
     if (unansweredCount > 0 || markedCount > 0) {

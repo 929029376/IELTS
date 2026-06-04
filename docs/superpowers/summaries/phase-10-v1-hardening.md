@@ -252,6 +252,8 @@
     section,
   - persist the marked-for-review flag with answer-save requests,
   - save current answer field state immediately before submit,
+  - save current answer field state before countdown auto-submit,
+  - show a time-expired auto-submit notice after a timed local mock is submitted,
   - stop submission when the pre-submit answer save fails,
   - submit through the practice submit API,
   - show the returned raw score and estimated band report.
@@ -1766,6 +1768,18 @@
       rendered as a malformed history-review conflict source label.
     - Passed after trimming reopened history conflict device ids and falling
       back to `Unknown device`.
+- Mac timed mock auto-submit hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "auto-submits a timed local mock"`
+    - Initially failed because a countdown-expired local mock reached the score
+      report without a visible time-expired auto-submit notice.
+    - The red test also exposed that the timer submitted from inside a state
+      updater, producing a React warning during the auto-submit path.
+    - Passed after moving time-expired submission into an effect, preserving the
+      pre-submit answer save, and rendering the auto-submit notice.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Passed with 39 exam simulation component tests, including manual submit,
+      elapsed practice timing, strict listening mock playback, and timed local
+      mock auto-submit coverage.
 
 ## Remaining V1 Gaps
 
