@@ -116,11 +116,15 @@ export function CloseReadingView({
         </button>
         <section aria-label="Synonym notes">
           <h4>Synonym notes</h4>
-          <ul>
-            {synonyms.map((synonym) => (
-              <li key={synonym}>{synonym}</li>
-            ))}
-          </ul>
+          {synonyms.length > 0 ? (
+            <ul>
+              {synonyms.map((synonym) => (
+                <li key={synonym}>{synonym}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-state">No synonym notes recorded yet.</p>
+          )}
         </section>
         <details open>
           <summary>Explanation</summary>

@@ -106,6 +106,10 @@
     `questions.answer_rules_json.keywords`,
   - the Mac close-reading panel can highlight imported or manually curated
     keyword evidence instead of relying only on fallback sample data.
+- Added Mac close-reading synonym-note empty state:
+  - the synonym notes panel now shows `No synonym notes recorded yet.` when no
+    synonym evidence is available,
+  - imported reading previews no longer render a visually empty synonym list.
 - Added Mac close-reading multiple-keyword highlight support:
   - `CloseReadingView` now renders every supplied keyword highlight,
   - answer-sentence highlights remain first priority when highlight spans overlap.
@@ -299,6 +303,12 @@
       enabled even when no `answerKeyId` was loaded.
     - Passed after `CloseReadingView` accepts a disabled state and
       `IntensivePracticePreview` disables the action without a local answer key.
+- Mac close-reading synonym-note empty-state follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because close-reading synonym notes rendered an empty
+      list when no synonym evidence existed.
+    - Passed after `CloseReadingView` shows a clear empty-state message for
+      missing synonym notes.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

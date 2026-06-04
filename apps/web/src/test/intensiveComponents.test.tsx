@@ -581,6 +581,25 @@ describe("intensive study components", () => {
     expect(onMistakeLabel).toHaveBeenCalledWith("定位失败");
   });
 
+  it("shows an empty state when close-reading synonym notes are unavailable", () => {
+    render(
+      <CloseReadingView
+        passageText="The answer sentence identifies the key evidence."
+        answerSentence="answer sentence"
+        keywords={[]}
+        synonyms={[]}
+        explanation="The sentence directly supports the answer."
+        question={<p>Question 1</p>}
+        isWrongAnswer={false}
+        onSelectAnswerSentence={() => undefined}
+        onMistakeLabel={() => undefined}
+      />
+    );
+
+    expect(screen.getByText("Synonym notes")).toBeInTheDocument();
+    expect(screen.getByText("No synonym notes recorded yet.")).toBeInTheDocument();
+  });
+
   it("highlights answer evidence and keywords when imported passage casing differs", () => {
     render(
       <CloseReadingView
