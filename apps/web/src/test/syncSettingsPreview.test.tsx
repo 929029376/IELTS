@@ -196,6 +196,49 @@ describe("SyncSettingsPreview", () => {
     expect(screen.getByLabelText("Backup file path")).toHaveValue("");
   });
 
+  it("clears stale backup import results when a later import fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          importedTables: 16,
+          rowCounts: {
+            attempt_answers: 40,
+            attempts: 1
+          }
+        })
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({})
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Backup file path"), {
+      target: { value: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-2026-06-04.json" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Import backup" }));
+
+    expect(await screen.findByText("Backup imported")).toBeInTheDocument();
+    expect(screen.getByText("16 tables")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Import backup" }));
+
+    expect(await screen.findByText("Could not import local backup.")).toBeInTheDocument();
+    expect(screen.queryByText("Backup imported")).not.toBeInTheDocument();
+    expect(screen.queryByText("16 tables")).not.toBeInTheDocument();
+  });
+
   it("saves an edited Baidu sync folder path", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/sync/config") {

@@ -511,6 +511,10 @@
   - selecting a backup JSON file can fill the import path from the
     desktop-exposed local file path,
   - restore feedback shows imported tables and row counts.
+- Added Mac backup import failure-state hardening:
+  - starting a new backup import clears previously imported restore feedback,
+  - a failed later backup import no longer leaves stale old restore counts
+    visible in the manual backup panel.
 - Added Mac backup export path fallback hardening:
   - whitespace-only backup export paths are trimmed before they fill the restore
     path input,
@@ -997,6 +1001,26 @@
       an empty status row and left an unusable blank restore path value.
     - Passed after trimming the exported backup path before filling the restore
       input and rendering `Backup path unavailable` for blank export paths.
+- Mac backup import failure-state hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "stale backup import results"`
+    - Initially failed because a failed second backup import left the first
+      restore's old imported-table counts visible in the manual backup panel.
+    - Passed after clearing backup import result state at the start of each new
+      backup import attempt.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - 10 tests passed.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Web TypeScript and Vite production build passed.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed on macOS while Windows evidence remains intentionally deferred.
+    - Shared: 4 tests passed.
+    - Server: 73 tests passed.
+    - Web: 127 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed, including Rust runtime diagnostics.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
 - Mac backup file-picker follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
     - Initially failed because backup restore required manually pasting a full

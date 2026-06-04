@@ -176,6 +176,7 @@ export function SyncSettingsPreview({
 
     setIsBackingUp(true);
     setBackupError(null);
+    setBackupImportResult(null);
     try {
       const response = await fetch("/api/backups/import", {
         body: JSON.stringify({ filePath: backupFilePath.trim() }),
