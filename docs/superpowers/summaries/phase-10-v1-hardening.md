@@ -121,6 +121,12 @@
     local asset API,
   - unsupported local file extensions are rejected so the route only serves
     expected media, PDF, and image assets.
+- Added Mac reading PDF viewing hardening:
+  - reading mock attempts use imported PDF assets when structured passage text is
+    missing,
+  - embedded PDF previews use `GET /api/assets/local` instead of raw filesystem
+    paths,
+  - the reading passage pane keeps a stable PDF preview height.
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
@@ -659,6 +665,12 @@
       then because it used the raw filesystem path as `src`.
     - Passed after the Mac listening mock player rendered an audio element whose
       source uses the local asset API.
+- Mac reading PDF viewing hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the active reading mock pane ignored returned PDF
+      asset paths when no extracted passage text existed.
+    - Passed after the Mac reading exam view embedded the PDF through
+      `GET /api/assets/local`.
 
 ## Remaining V1 Gaps
 

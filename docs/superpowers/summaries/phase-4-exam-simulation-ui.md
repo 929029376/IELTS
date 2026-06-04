@@ -66,6 +66,11 @@
     and speed controls remain disabled,
   - audio source URLs are served through a local asset API instead of exposing
     raw filesystem paths as browser URLs.
+- Added Mac local reading PDF viewing:
+  - reading mock attempts can render the first imported PDF asset when extracted
+    passage text is missing,
+  - PDF preview URLs are served through the same local asset API,
+  - the preview uses stable dimensions inside the reading passage pane.
 - Added unit coverage for:
   - shell controls,
   - timer auto-submit,
@@ -158,6 +163,12 @@
       files.
     - A second red test confirmed unsupported local file types were rejected
       before adding a media/PDF whitelist.
+- Mac local reading PDF viewing follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because reading mock attempts with a PDF asset and no
+      extracted passage text did not render a PDF preview.
+    - Passed after wiring PDF asset paths into the reading exam view and using
+      the local asset API as the embedded PDF source.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.

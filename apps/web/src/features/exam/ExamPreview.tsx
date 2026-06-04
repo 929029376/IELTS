@@ -132,6 +132,10 @@ function renderReviewEvidence(item: MockReviewItem) {
   return <mark className="ielts-highlight">{item.answerSentence}</mark>;
 }
 
+function findPdfAssetPath(question?: StartedMockQuestion): string | null {
+  return question?.assetPaths?.find((path) => path.toLowerCase().endsWith(".pdf")) ?? null;
+}
+
 export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -381,6 +385,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                 activeQuestions[0]?.passageText ??
                 "Use the imported local passage asset for close reading. Structured passage text will appear here when the source provides it."
               }
+              pdfPath={findPdfAssetPath(activeQuestions[0])}
               highlightedText={activeQuestions[0]?.passageText ? undefined : "Structured passage text"}
               questions={mockQuestionList}
             />

@@ -177,6 +177,48 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("renders a local reading PDF asset when structured passage text is unavailable", async () => {
+    vi.useRealTimers();
+    const pdfPath = "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/P1-history-of-tea.pdf";
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-pdf-1",
+            questions: [
+              {
+                answerRules: {},
+                assetPaths: [pdfPath],
+                id: "question-pdf-1",
+                part: "P1",
+                passageId: "passage-pdf-1",
+                passageText: null,
+                passageTitle: "PDF Reading P1 High",
+                prompt: "What does the PDF passage say?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+
+    const pdfPreview = await screen.findByTitle("Local reading PDF");
+    expect(pdfPreview).toHaveAttribute("data", `/api/assets/local?path=${encodeURIComponent(pdfPath)}`);
+    expect(screen.getByText(pdfPath)).toBeInTheDocument();
+  });
+
   it("starts a local reading practice set without entering mock mode", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {

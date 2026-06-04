@@ -4,8 +4,13 @@ import { useMemo, useState } from "react";
 export interface ReadingExamViewProps {
   passageTitle: string;
   passageText: string;
+  pdfPath?: string | null;
   highlightedText?: string;
   questions: ReactNode;
+}
+
+function localAssetUrl(path: string): string {
+  return `/api/assets/local?path=${encodeURIComponent(path)}`;
 }
 
 function renderHighlightedText(text: string, highlightedText?: string) {
@@ -30,6 +35,7 @@ function renderHighlightedText(text: string, highlightedText?: string) {
 export function ReadingExamView({
   passageTitle,
   passageText,
+  pdfPath,
   highlightedText,
   questions
 }: ReadingExamViewProps) {
@@ -59,6 +65,19 @@ export function ReadingExamView({
       >
         <article className="reading-passage" aria-label="Reading Passage">
           <h3>{passageTitle}</h3>
+          {pdfPath ? (
+            <div className="reading-pdf-asset" aria-label="Local reading PDF asset">
+              <p>{pdfPath}</p>
+              <object
+                className="reading-pdf-object"
+                data={localAssetUrl(pdfPath)}
+                title="Local reading PDF"
+                type="application/pdf"
+              >
+                Local reading PDF
+              </object>
+            </div>
+          ) : null}
           <p>{renderedText}</p>
         </article>
         <button
