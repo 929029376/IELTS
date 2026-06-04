@@ -256,6 +256,48 @@ describe("history and reports preview", () => {
     );
   });
 
+  it("clears stale exported report paths when a later export fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          mistakesCsv: "/Users/musheng/Desktop/IELTS/data/exports/mistakes-old.csv",
+          mockCsv: "/Users/musheng/Desktop/IELTS/data/exports/mock-report-old.csv",
+          mockJson: "/Users/musheng/Desktop/IELTS/data/exports/mock-report-old.json"
+        })
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({})
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export mock report" }));
+
+    expect(await screen.findByText("/Users/musheng/Desktop/IELTS/data/exports/mock-report-old.json")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Export mock report" }));
+
+    expect(await screen.findByText("Could not export local reports.")).toBeInTheDocument();
+    expect(screen.queryByText("/Users/musheng/Desktop/IELTS/data/exports/mock-report-old.json")).not.toBeInTheDocument();
+    expect(screen.queryByText("Reports exported")).not.toBeInTheDocument();
+  });
+
   it("reopens a completed attempt from history and renders detailed review evidence", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/practice/attempt-1/review") {

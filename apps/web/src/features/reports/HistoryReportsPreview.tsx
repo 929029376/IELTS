@@ -237,6 +237,7 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
     setIsExporting(true);
     setCopyStatus(null);
     setExportError(null);
+    setExportedFiles(null);
     try {
       const response = await fetch("/api/reports/export", { method: "POST" });
       if (!response.ok) {
