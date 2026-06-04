@@ -266,10 +266,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       | { id: string; normalizedAnswer: string; rawAnswer: string; submittedAt: string | null }
       | undefined;
 
-    if (
-      existing?.submittedAt &&
-      (existing.rawAnswer !== payload.rawAnswer || existing.normalizedAnswer !== payload.normalizedAnswer)
-    ) {
+    function insertAnswerConflict(localAnswerId: string) {
       db.prepare(
         `
         INSERT OR IGNORE INTO attempt_answer_conflicts (
@@ -302,7 +299,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       ).run({
         attemptId: payload.attemptId,
         id: randomUUID(),
-        localAnswerId: existing.id,
+        localAnswerId,
         questionId: payload.questionId,
         remoteAnswerId: payload.id,
         remoteCreatedAt: event.createdAt,
@@ -311,6 +308,63 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
         remoteNormalizedAnswer: payload.normalizedAnswer,
         remoteRawAnswer: payload.rawAnswer
       });
+    }
+
+    if (
+      existing?.submittedAt &&
+      (existing.rawAnswer !== payload.rawAnswer || existing.normalizedAnswer !== payload.normalizedAnswer)
+    ) {
+      insertAnswerConflict(existing.id);
+      return { conflict: true };
+    }
+
+    const submittedUnansweredQuestion = !existing
+      ? (db
+          .prepare(
+            `
+            SELECT a.submitted_at AS submittedAt
+            FROM attempts a
+            JOIN attempt_questions aq ON aq.attempt_id = a.id
+            WHERE a.id = ? AND aq.question_id = ? AND a.submitted_at IS NOT NULL
+          `
+          )
+          .get(payload.attemptId, payload.questionId) as { submittedAt: string } | undefined)
+      : undefined;
+
+    if (submittedUnansweredQuestion) {
+      const localAnswerId = randomUUID();
+      db.prepare(
+        `
+        INSERT OR IGNORE INTO attempt_answers (
+          id,
+          attempt_id,
+          question_id,
+          raw_answer,
+          normalized_answer,
+          is_correct,
+          time_spent_seconds,
+          marked_for_review,
+          updated_at
+        )
+        VALUES (
+          @id,
+          @attemptId,
+          @questionId,
+          '',
+          '',
+          0,
+          0,
+          0,
+          @updatedAt
+        )
+      `
+      ).run({
+        attemptId: payload.attemptId,
+        id: localAnswerId,
+        questionId: payload.questionId,
+        updatedAt: submittedUnansweredQuestion.submittedAt
+      });
+      insertAnswerConflict(localAnswerId);
       return { conflict: true };
     }
 

@@ -329,7 +329,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
           answerSentence: answerKeys.find((answerKey) => answerKey.answerSentence)?.answerSentence ?? null,
           acceptedAnswers: answerKeys.flatMap((answerKey) => answerKey.acceptedAnswers),
           explanation: answerKeys.find((answerKey) => answerKey.explanation)?.explanation ?? null,
-          isAnswered: Boolean(answer),
+          isAnswered: Boolean(answer?.rawAnswer.trim()),
           isCorrect: answer?.isCorrect ?? false,
           markedForReview: answer?.markedForReview ?? false,
           part: question?.part ?? null,

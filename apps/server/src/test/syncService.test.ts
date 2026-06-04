@@ -237,4 +237,56 @@ describe("sync service", () => {
       ]
     });
   });
+
+  it("keeps remote answers for submitted unanswered questions as conflicts", () => {
+    const question = seedQuestion();
+    const attempts = createAttemptRepo(db);
+    const attempt = attempts.createAttempt({
+      mode: "mock",
+      startedAt: "2026-06-01T08:00:00.000Z",
+      subject: "reading"
+    });
+    attempts.recordAttemptQuestions(attempt.id, [question.id]);
+    attempts.submitAttempt({
+      attemptId: attempt.id,
+      estimatedBand: 4,
+      rawScore: 0,
+      submittedAt: "2026-06-01T09:00:00.000Z"
+    });
+    const service = createSyncService(db, {
+      deviceId: "macbook",
+      deviceName: "MacBook",
+      platform: "darwin",
+      syncFolderPath: syncDir
+    });
+    service.ensureSyncFolder();
+    service.appendExternalEvent("answers", {
+      createdAt: "2026-06-01T09:02:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-unanswered-conflict",
+      payload: {
+        attemptId: attempt.id,
+        id: "remote-unanswered-conflict-row",
+        isCorrect: true,
+        markedForReview: false,
+        normalizedAnswer: "green park",
+        questionId: question.id,
+        rawAnswer: "Green Park",
+        timeSpentSeconds: 25
+      },
+      type: "answer.saved"
+    });
+
+    expect(service.importRemoteEvents()).toMatchObject({ conflicts: 1, imported: 1 });
+    expect(createAttemptRepo(db).getAttemptWithAnswers(attempt.id)).toMatchObject({
+      answers: [expect.objectContaining({ rawAnswer: "", isCorrect: false })],
+      conflicts: [
+        expect.objectContaining({
+          remoteRawAnswer: "Green Park",
+          status: "conflict"
+        })
+      ],
+      rawScore: 0
+    });
+  });
 });

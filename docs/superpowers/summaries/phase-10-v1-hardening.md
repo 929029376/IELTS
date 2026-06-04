@@ -457,6 +457,18 @@
     artificially high when a submitted attempt skipped questions,
   - older synced or restored attempts without `attempt_questions` still fall back
     to saved answer rows for compatibility.
+- Added Mac submitted-unanswered sync-conflict hardening:
+  - remote answer events for already submitted local unanswered questions now
+    create a conflict instead of writing the remote answer into the finalized
+    attempt,
+  - the local submitted raw score remains unchanged after those remote conflicts,
+  - a local empty-answer placeholder preserves the original unanswered state
+    while allowing the remote answer to appear in the conflict review data.
+- Added Mac blank-answer review-status hardening:
+  - whitespace-only saved answers now return `isAnswered: false` in submitted
+    reviews,
+  - synced empty-answer placeholders also render as unanswered rather than as a
+    regular incorrect answer.
 - Added Mac review-attempt integrity hardening:
   - review requests for missing attempt ids now return `404`,
   - invalid history/review links no longer surface as server errors,
@@ -1943,6 +1955,22 @@
     - Passed with all 5 analytics service tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test`
     - Passed with all 95 server tests.
+- Mac submitted-unanswered sync-conflict hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts -t "submitted unanswered"`
+    - Initially failed because a remote answer for a locally submitted
+      unanswered question imported as a normal answer with `conflicts: 0`.
+    - Passed after sync creates a local empty-answer placeholder and stores the
+      remote answer in `attempt_answer_conflicts` without changing the submitted
+      raw score.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "blank saved answers"`
+    - Initially failed because whitespace-only saved answers still returned
+      `isAnswered: true` in submitted reviews.
+    - Passed after submitted review generation treats blank or whitespace-only
+      raw answers as unanswered.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts src/test/practiceRoutes.test.ts`
+    - Passed with all 36 sync and practice route tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 97 server tests.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

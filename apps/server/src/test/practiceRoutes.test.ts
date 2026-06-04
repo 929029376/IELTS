@@ -1109,6 +1109,69 @@ describe("practice routes", () => {
     }
   });
 
+  it("treats blank saved answers as unanswered in submitted attempt reviews", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-review-blank-answer-unanswered-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string }>;
+      }>();
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          questionId: started.questions[0].id,
+          rawAnswer: "   ",
+          timeSpentSeconds: 11,
+          markedForReview: false
+        }
+      });
+      expect(answer.statusCode).toBe(200);
+
+      const submit = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/submit`
+      });
+      expect(submit.statusCode).toBe(200);
+
+      const review = await server.inject({
+        method: "GET",
+        url: `/api/practice/${started.attemptId}/review`
+      });
+
+      expect(review.statusCode).toBe(200);
+      const reviewed = review.json<{
+        reviewItems: Array<{
+          isAnswered: boolean;
+          isCorrect: boolean;
+          questionId: string;
+          rawAnswer: string;
+        }>;
+      }>();
+      expect(reviewed.reviewItems[0]).toMatchObject({
+        isAnswered: false,
+        isCorrect: false,
+        questionId: started.questions[0].id,
+        rawAnswer: "   "
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("returns not found instead of writing answers for a missing attempt", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-answer-missing-attempt-"));
     const databasePath = join(tempDir, "ielts.db");
