@@ -42,6 +42,7 @@ export function normalizeAnswer(answer: string): string {
     .trim()
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, "\"")
+    .replace(/[‐‑‒–—―]/g, "-")
     .replace(/\s*-\s*/g, "-")
     .replace(/\s+/g, " ")
     .toLowerCase();

@@ -251,6 +251,13 @@
   - unrelated alternatives such as `a green park` still fail,
   - practice and mock scoring can handle imported answer-key notation that marks
     articles or short words as optional.
+- Added Mac Unicode-dash answer normalization hardening:
+  - imported answers containing dash characters such as `well–known` now
+    normalize to the same answer as typed keyboard hyphen answers such as
+    `well-known`,
+  - spaced Unicode dash forms still use the existing hyphen-spacing rule,
+  - practice and mock scoring can handle answer keys copied from PDFs or DOCX
+    files that use typographic dash characters.
 - Added Mac slash-alias answer-key scoring hardening:
   - accepted answers with slash-separated aliases such as `centre/center` now
     match either spelling,
@@ -1880,6 +1887,21 @@
     - Passed with all 6 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 10 practice route tests.
+- Mac Unicode-dash answer normalization hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "unicode dash"`
+    - Initially failed because accepted answer `well–known` was not normalized
+      to match typed answer `well-known`.
+    - Passed after common Unicode dash characters were normalized to ASCII
+      hyphen before applying the existing hyphen-spacing rule.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "unicode dash"`
+    - Initially failed because the practice API marked `well-known` incorrect
+      against imported accepted answer `well–known`.
+    - Passed after the shared answer normalization was used by practice answer
+      scoring.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Passed with all 9 shared scoring tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 12 practice route tests.
 - Mac slash-alias answer-key scoring hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
     - Initially failed because accepted answer `centre/center` was compared as
@@ -1898,9 +1920,9 @@
     - Passed after the shared slash-alias answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 8 shared scoring tests.
+    - Passed with all 9 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
-    - Passed with all 11 practice route tests.
+    - Passed with all 12 practice route tests.
 
 ## Remaining V1 Gaps
 

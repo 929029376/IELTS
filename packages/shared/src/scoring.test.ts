@@ -6,11 +6,17 @@ describe("answer scoring", () => {
     expect(normalizeAnswer("  Green   Park  ")).toBe("green park");
     expect(normalizeAnswer("John’s  car")).toBe("john's car");
     expect(normalizeAnswer("well - known")).toBe("well-known");
+    expect(normalizeAnswer("well–known")).toBe("well-known");
   });
 
   it("accepts answer aliases after normalization", () => {
     expect(isAnswerCorrect(" green park ", ["Green Park", "Park Green"])).toBe(true);
     expect(isAnswerCorrect("blue park", ["Green Park", "Park Green"])).toBe(false);
+  });
+
+  it("matches imported unicode dash answers with typed hyphen answers", () => {
+    expect(isAnswerCorrect("well-known", ["well–known"])).toBe(true);
+    expect(isAnswerCorrect("well known", ["well–known"])).toBe(false);
   });
 
   it("expands slash-separated aliases in accepted answers", () => {
