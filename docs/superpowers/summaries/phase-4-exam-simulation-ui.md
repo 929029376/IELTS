@@ -40,6 +40,7 @@
   - renders returned local questions as answer inputs,
   - saves answers through `POST /api/practice/:attemptId/answer`,
   - saves current answer input state again before local mock submission,
+  - stops submission and shows an error when pre-submit answer saving fails,
   - submits through `POST /api/practice/:attemptId/submit`,
   - displays the returned raw score and estimated band report.
 - Added a submitted-mock review panel that loads `GET /api/practice/:attemptId/review`
@@ -96,6 +97,16 @@
       endpoint.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the local mock submit-save follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac local mock save-failure follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because a failed pre-submit answer save still allowed the
+      mock submit flow to continue.
+    - Passed after checking answer-save responses and surfacing the submit error
+      when saving fails.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the local mock save-failure follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - Mac local mock review follow-up:

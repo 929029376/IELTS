@@ -88,6 +88,7 @@
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
   - save current answer field state immediately before submit,
+  - stop submission when the pre-submit answer save fails,
   - submit through the practice submit API,
   - show the returned raw score and estimated band report.
 - Added submitted-mock review hardening:
@@ -331,6 +332,15 @@
     - Passed after saving all active mock answers before submission.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the Mac local mock submit-save hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac local mock save-failure follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because a failed answer-save response did not stop local
+      mock submission.
+    - Passed after treating failed answer saves as submission-blocking errors.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the local mock save-failure follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - Mac detailed mock review follow-up:

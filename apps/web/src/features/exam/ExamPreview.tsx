@@ -115,7 +115,7 @@ export function ExamPreview() {
     }
 
     const rawAnswer = answers[questionId] ?? "";
-    await fetch(`/api/practice/${activeMock.attemptId}/answer`, {
+    const response = await fetch(`/api/practice/${activeMock.attemptId}/answer`, {
       body: JSON.stringify({
         markedForReview: false,
         questionId,
@@ -127,6 +127,9 @@ export function ExamPreview() {
       },
       method: "POST"
     });
+    if (!response.ok) {
+      throw new Error("Could not save mock answer");
+    }
   }
 
   async function submitActiveMock() {
@@ -177,7 +180,11 @@ export function ExamPreview() {
             questionId={question.id}
             questionType={question.questionType as QuestionType}
             value={answers[question.id] ?? ""}
-            onBlur={() => void saveMockAnswer(question.id)}
+            onBlur={() => {
+              void saveMockAnswer(question.id).catch(() => {
+                setSubmitError("Could not save the local mock answer.");
+              });
+            }}
             onChange={(value) => setAnswers((current) => ({ ...current, [question.id]: value }))}
           />
         </label>
