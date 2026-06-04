@@ -204,6 +204,54 @@ describe("intensive study components", () => {
     );
   });
 
+  it("saves a selected close-reading answer sentence through the local study API", async () => {
+    const fetchMock = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({
+        answerKeyId: "answer-key-1",
+        answerSentence: "The selected sentence proves the answer."
+      })
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    vi.spyOn(window, "getSelection").mockReturnValue({
+      toString: () => "The selected sentence proves the answer."
+    } as Selection);
+
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: null,
+          reading: {
+            answerKeyId: "answer-key-1",
+            answerSentence: null,
+            attemptAnswerId: null,
+            explanation: "Select the sentence that proves the answer.",
+            keywords: [],
+            passageText: "The first sentence is a distractor. The selected sentence proves the answer.",
+            passageTitle: "Reading intensive review",
+            questionPrompt: "Question 1: Select the evidence.",
+            synonyms: []
+          }
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Use selected sentence as answer evidence" }));
+
+    expect(await screen.findByText("Answer evidence saved.")).toBeInTheDocument();
+    expect(screen.getByText("The selected sentence proves the answer.")).toHaveClass("ielts-highlight");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/study/answer-sentence",
+      expect.objectContaining({
+        body: JSON.stringify({
+          answerKeyId: "answer-key-1",
+          answerSentence: "The selected sentence proves the answer."
+        }),
+        method: "POST"
+      })
+    );
+  });
+
   it("renders close reading evidence, manual answer sentence selection, and mistake labels", () => {
     const onSelectAnswerSentence = vi.fn();
     const onMistakeLabel = vi.fn();

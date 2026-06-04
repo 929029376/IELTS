@@ -74,6 +74,11 @@
   - mistake-label buttons persist through `POST /api/study/mistake-labels`,
   - saved labels can be appended to Baidu Cloud `mistakes.jsonl` when sync is
     configured.
+- Added Mac close-reading answer-evidence hardening:
+  - intensive reading preview now exposes the local reading `answerKeyId`,
+  - selected passage text persists through `POST /api/study/answer-sentence`,
+  - saved evidence immediately becomes the highlighted answer sentence in the
+    Mac close-reading panel.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -238,6 +243,20 @@
     - Initially failed because close-reading mistake-label buttons were still
       no-ops.
     - Passed after wiring the buttons to local persistence and saved-status UI.
+- Mac close-reading answer-evidence follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because the intensive reading preview did not expose the
+      `answerKeyId` required to update `answer_keys.answer_sentence`.
+    - Passed after adding the answer-sentence update route and returning the key
+      id from the intensive preview API.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx src/test/dashboard.test.tsx`
+    - Initially failed because the Mac close-reading evidence selection button
+      did not call a local API or update the highlight.
+    - Passed after wiring selected text persistence and saved-status rendering.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the close-reading answer-evidence hardening follow-up,
+      including unit/component tests, Playwright, production build, desktop
+      diagnostics, and Mac DMG packaging.
 - Mac mock-start hardening follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because mock start loaded sequential questions and included

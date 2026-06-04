@@ -359,6 +359,8 @@ Answer normalization:
   - explanation drawer.
 - [x] Store answer sentence references in `answer_keys`.
 - [x] Support manual answer-sentence selection when imported PDFs do not provide structured answer locations.
+- [x] Connect manual answer-sentence selection in the Mac close-reading panel to
+  local answer-key persistence.
 - [x] Add mistake label selection after each wrong answer.
 - [x] Add Mac dashboard wiring so the close-reading panel loads local answer
   sentence, explanation, synonym, keyword, and passage text evidence when

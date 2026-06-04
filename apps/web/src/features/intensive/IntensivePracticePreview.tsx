@@ -17,6 +17,7 @@ export interface IntensiveStudyPreviewView {
   } | null;
   reading: {
     attemptAnswerId?: string | null;
+    answerKeyId?: string | null;
     answerSentence: string | null;
     explanation: string | null;
     keywords: string[];
@@ -39,6 +40,7 @@ const sampleCues = [
 
 const sampleReading = {
   attemptAnswerId: null,
+  answerKeyId: null,
   answerSentence: "answer sentence",
   explanation: "The sentence directly supports the answer.",
   keywords: ["trade routes"],
@@ -79,6 +81,8 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
   const [cueStatus, setCueStatus] = useState<string | null>(null);
   const [dictationStatus, setDictationStatus] = useState<string | null>(null);
   const [mistakeStatus, setMistakeStatus] = useState<string | null>(null);
+  const [answerSentenceStatus, setAnswerSentenceStatus] = useState<string | null>(null);
+  const [savedAnswerSentence, setSavedAnswerSentence] = useState<string | null>(null);
   const [savedCues, setSavedCues] = useState<NonNullable<IntensiveStudyPreviewView["listening"]>["cues"]>([]);
 
   const listening = preview?.listening
@@ -91,8 +95,9 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
         audioTitle: "Listening Part 1 Review",
         cues: normalizeCues([...sampleCues, ...savedCues]),
         passageId: undefined
-      };
+  };
   const reading = preview?.reading ?? sampleReading;
+  const answerSentence = savedAnswerSentence ?? reading.answerSentence ?? "";
 
   async function saveCue(cue: CueDraft) {
     if (!listening.passageId) {
@@ -148,6 +153,29 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
     }
   }
 
+  async function saveSelectedAnswerSentence() {
+    const selectedText = window.getSelection?.()?.toString().trim() ?? "";
+    if (!selectedText) {
+      setAnswerSentenceStatus("Select passage text before saving answer evidence.");
+      return;
+    }
+    if (!reading.answerKeyId) {
+      setAnswerSentenceStatus("Load a local answer key before saving answer evidence.");
+      return;
+    }
+
+    try {
+      const saved = await postJson<{ answerKeyId: string; answerSentence: string }>("/api/study/answer-sentence", {
+        answerKeyId: reading.answerKeyId,
+        answerSentence: selectedText
+      });
+      setSavedAnswerSentence(saved.answerSentence);
+      setAnswerSentenceStatus("Answer evidence saved.");
+    } catch {
+      setAnswerSentenceStatus("Could not save answer evidence.");
+    }
+  }
+
   return (
     <section className="intensive-preview-band" aria-label="Intensive practice preview">
       <div className="intensive-preview-grid">
@@ -169,17 +197,20 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
         </div>
         <CloseReadingView
           passageText={reading.passageText}
-          answerSentence={reading.answerSentence ?? ""}
+          answerSentence={answerSentence}
           keywords={reading.keywords}
           synonyms={reading.synonyms}
           explanation={reading.explanation ?? "No explanation recorded yet."}
           question={<p>{reading.questionPrompt}</p>}
           isWrongAnswer
-          onSelectAnswerSentence={() => undefined}
+          onSelectAnswerSentence={() => {
+            void saveSelectedAnswerSentence();
+          }}
           onMistakeLabel={(label) => {
             void saveMistakeLabel(label);
           }}
         />
+        {answerSentenceStatus ? <p className="import-status">{answerSentenceStatus}</p> : null}
         {mistakeStatus ? <p className="import-status">{mistakeStatus}</p> : null}
       </div>
     </section>

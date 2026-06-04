@@ -35,6 +35,7 @@ export interface IntensiveStudyPreview {
   } | null;
   reading: {
     attemptAnswerId: string | null;
+    answerKeyId: string;
     answerSentence: string | null;
     explanation: string | null;
     keywords: string[];
@@ -165,6 +166,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
       `
       SELECT
         aa.id AS attemptAnswerId,
+        ak.id AS answerKeyId,
         p.title AS passageTitle,
         q.prompt AS questionPrompt,
         ak.answer_sentence AS answerSentence,
@@ -202,6 +204,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
     .get() as
     | {
         attemptAnswerId: string | null;
+        answerKeyId: string;
         answerSentence: string | null;
         explanation: string | null;
         passageText: string;
@@ -217,6 +220,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
 
   return {
     attemptAnswerId: row.attemptAnswerId,
+    answerKeyId: row.answerKeyId,
     answerSentence: row.answerSentence,
     explanation: row.explanation,
     keywords: [],

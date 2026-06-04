@@ -53,6 +53,12 @@
     that answer,
   - clicking a close-reading mistake-label button in the Mac dashboard shows a
     saved status instead of being a no-op.
+- Added Mac manual answer-sentence persistence for close reading:
+  - `/api/study/intensive` now returns the reading `answerKeyId`,
+  - `POST /api/study/answer-sentence` updates `answer_keys.answer_sentence`,
+  - selecting passage text and clicking `Use selected sentence as answer
+    evidence` saves the evidence sentence, shows saved status, and immediately
+    updates the close-reading highlight.
 - Added focused unit tests for intensive server persistence and web components.
 
 ## Verification Evidence
@@ -88,6 +94,21 @@
       no-ops in the dashboard preview.
     - Passed after posting selected labels to the local study API and rendering
       saved status.
+- Mac manual answer-sentence follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because `/api/study/intensive` did not return the
+      `answerKeyId` needed to update an answer sentence.
+    - Passed after returning the key id and adding
+      `POST /api/study/answer-sentence`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx src/test/dashboard.test.tsx`
+    - Initially failed because `Use selected sentence as answer evidence` was a
+      no-op in the Mac close-reading panel.
+    - Passed after posting the selected browser text to the local study API and
+      rendering the saved highlight/status.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual answer-sentence persistence follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

@@ -353,4 +353,76 @@ describe("study overview routes", () => {
     });
     expect(attempts.listMistakeLabels(answer.id)).toEqual(["定位失败"]);
   });
+
+  it("updates a manually selected reading answer sentence for close reading", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-study-answer-sentence-"));
+    const server = buildServer({ databasePath: join(tempDir, "ielts.db") });
+    servers.push(server);
+    const db = (server as typeof server & { db: DatabaseHandle }).db;
+    const questions = createQuestionRepo(db);
+    const source = questions.createSource({
+      checksum: "study-answer-sentence-source",
+      importStatus: "imported",
+      originalPath: "seed/study-answer-sentence.json",
+      sourceType: "seed",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P1",
+      sourceId: source.id,
+      subject: "reading",
+      title: "Manual Answer Sentence Reading"
+    });
+    questions.createSourceAsset({
+      assetKind: "html",
+      checksum: "study-answer-sentence-html",
+      filePath: null,
+      originalName: "answer-sentence.html",
+      sourceId: source.id,
+      textContent: "The first sentence is a distractor. The selected sentence proves the answer."
+    });
+    const question = questions.createQuestion({
+      answerRules: {},
+      passageId: passage.id,
+      prompt: "Select the evidence sentence.",
+      questionNumber: 1,
+      questionType: "matching"
+    });
+    const answerKey = questions.createAnswerKey({
+      acceptedAnswers: ["selected sentence"],
+      answerSentence: null,
+      explanation: "Select the sentence that proves the answer.",
+      questionId: question.id,
+      synonyms: []
+    });
+
+    const preview = await server.inject({ method: "GET", url: "/api/study/intensive" });
+    expect(preview.statusCode).toBe(200);
+    expect(preview.json().reading).toMatchObject({
+      answerKeyId: answerKey.id,
+      answerSentence: null,
+      questionPrompt: "Select the evidence sentence."
+    });
+
+    const update = await server.inject({
+      method: "POST",
+      payload: {
+        answerKeyId: answerKey.id,
+        answerSentence: "The selected sentence proves the answer."
+      },
+      url: "/api/study/answer-sentence"
+    });
+    expect(update.statusCode).toBe(200);
+    expect(update.json()).toMatchObject({
+      answerKeyId: answerKey.id,
+      answerSentence: "The selected sentence proves the answer."
+    });
+
+    const updatedPreview = await server.inject({ method: "GET", url: "/api/study/intensive" });
+    expect(updatedPreview.json().reading).toMatchObject({
+      answerKeyId: answerKey.id,
+      answerSentence: "The selected sentence proves the answer."
+    });
+  });
 });

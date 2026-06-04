@@ -221,6 +221,18 @@ export function createQuestionRepo(db: DatabaseHandle) {
       return record;
     },
 
+    updateAnswerSentence(input: { answerKeyId: string; answerSentence: string }): {
+      answerKeyId: string;
+      answerSentence: string;
+    } {
+      db.prepare(`
+        UPDATE answer_keys
+        SET answer_sentence = @answerSentence
+        WHERE id = @answerKeyId
+      `).run(input);
+      return input;
+    },
+
     createListeningAudio(input: Omit<ListeningAudioRecord, "id">): ListeningAudioRecord {
       const record: ListeningAudioRecord = { id: randomUUID(), ...input };
       db.prepare(`

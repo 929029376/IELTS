@@ -3,6 +3,7 @@ import { z } from "zod";
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { createIntensiveRepo } from "../db/intensiveRepo";
+import { createQuestionRepo } from "../db/questionRepo";
 import { createStudyService } from "../services/studyService";
 import type { SyncService } from "../sync/syncService";
 
@@ -24,10 +25,16 @@ const createMistakeLabelBody = z.object({
   label: z.string().min(1)
 });
 
+const updateAnswerSentenceBody = z.object({
+  answerKeyId: z.string().min(1),
+  answerSentence: z.string().min(1)
+});
+
 export function registerStudyRoutes(server: FastifyInstance, db: DatabaseHandle, sync?: SyncService): void {
   const study = createStudyService(db);
   const intensive = createIntensiveRepo(db);
   const attempts = createAttemptRepo(db);
+  const questions = createQuestionRepo(db);
 
   server.get("/api/study/overview", async (_request, reply) => reply.send(study.getOverview()));
   server.get("/api/study/intensive", async (_request, reply) => reply.send(study.getIntensivePreview()));
@@ -55,5 +62,9 @@ export function registerStudyRoutes(server: FastifyInstance, db: DatabaseHandle,
     sync?.appendMistakeEvent({ ...label, attemptAnswerId: body.attemptAnswerId }, new Date().toISOString());
 
     return reply.code(201).send(label);
+  });
+  server.post("/api/study/answer-sentence", async (request, reply) => {
+    const body = updateAnswerSentenceBody.parse(request.body);
+    return reply.send(questions.updateAnswerSentence(body));
   });
 }
