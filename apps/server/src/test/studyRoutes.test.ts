@@ -426,4 +426,61 @@ describe("study overview routes", () => {
       answerSentence: "The selected sentence proves the answer."
     });
   });
+
+  it("returns reading questions with missing evidence so answer sentences can be selected manually", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-study-missing-evidence-"));
+    const server = buildServer({ databasePath: join(tempDir, "ielts.db") });
+    servers.push(server);
+    const db = (server as typeof server & { db: DatabaseHandle }).db;
+    const questions = createQuestionRepo(db);
+    const source = questions.createSource({
+      checksum: "study-missing-evidence-source",
+      importStatus: "needs_review",
+      originalPath: "reading/PDF/missing-evidence.pdf",
+      sourceType: "reading-pdf",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      frequencyClass: "medium",
+      part: "P2",
+      sourceId: source.id,
+      subject: "reading",
+      title: "Imported PDF Missing Evidence"
+    });
+    questions.createSourceAsset({
+      assetKind: "pdf",
+      checksum: "study-missing-evidence-pdf",
+      filePath: "/tmp/missing-evidence.pdf",
+      originalName: "missing-evidence.pdf",
+      sourceId: source.id,
+      textContent: "A distractor opens the paragraph. The manual evidence sentence supports the answer."
+    });
+    const question = questions.createQuestion({
+      answerRules: { keywords: ["manual evidence"] },
+      passageId: passage.id,
+      prompt: "Which sentence supports the answer?",
+      questionNumber: 2,
+      questionType: "matching"
+    });
+    const answerKey = questions.createAnswerKey({
+      acceptedAnswers: ["manual evidence sentence"],
+      answerSentence: null,
+      explanation: null,
+      questionId: question.id,
+      synonyms: []
+    });
+
+    const preview = await server.inject({ method: "GET", url: "/api/study/intensive" });
+
+    expect(preview.statusCode).toBe(200);
+    expect(preview.json().reading).toMatchObject({
+      answerKeyId: answerKey.id,
+      answerSentence: null,
+      explanation: null,
+      keywords: ["manual evidence"],
+      passageText: "A distractor opens the paragraph. The manual evidence sentence supports the answer.",
+      passageTitle: "Imported PDF Missing Evidence",
+      questionPrompt: "Which sentence supports the answer?"
+    });
+  });
 });

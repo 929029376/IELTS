@@ -579,6 +579,14 @@
     - Initially failed because the question-bank import panel regression clicked
       the next import action before the shared import lock released.
     - Passed after waiting for each sequential import action to become enabled.
+- Mac missing-evidence close-reading hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because a reading PDF import that had an answer key but
+      no answer sentence and no explanation returned `reading: null` from
+      `/api/study/intensive`.
+    - Passed after the intensive preview started surfacing those incomplete
+      reading questions, keeping manual answer-sentence selection usable for
+      imported PDF material that still needs review.
 
 ## Remaining V1 Gaps
 

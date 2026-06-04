@@ -150,6 +150,13 @@
     - Passed after the repeated keyword highlight follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac missing-evidence close-reading follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because imported reading questions with an answer key but
+      no `answer_sentence` and no explanation were excluded from
+      `/api/study/intensive`.
+    - Passed after allowing those questions into the close-reading preview so
+      the Mac UI can manually save the selected answer sentence.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

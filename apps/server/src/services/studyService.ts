@@ -204,13 +204,17 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
         AND sa.text_content IS NOT NULL
         AND TRIM(sa.text_content) != ''
       WHERE p.subject = 'reading'
-        AND (
-          (ak.answer_sentence IS NOT NULL AND TRIM(ak.answer_sentence) != '')
-          OR (ak.explanation IS NOT NULL AND TRIM(ak.explanation) != '')
-        )
       ORDER BY
         CASE WHEN aa.id IS NOT NULL THEN 0 ELSE 1 END,
         aa.updated_at DESC,
+        CASE
+          WHEN ak.answer_sentence IS NULL OR TRIM(ak.answer_sentence) = '' THEN 0
+          ELSE 1
+        END,
+        CASE
+          WHEN ak.explanation IS NULL OR TRIM(ak.explanation) = '' THEN 0
+          ELSE 1
+        END,
         CASE p.frequency_class
           WHEN 'high' THEN 0
           WHEN 'medium' THEN 1
