@@ -77,6 +77,11 @@
     synonym-note evidence is missing,
   - whitespace-only explanation and synonym values are treated as missing instead
     of rendering blank review content.
+- Added Mac history review answer-field empty-state hardening:
+  - whitespace-only user answers now display as `No answer`,
+  - blank accepted-answer lists display as `Not configured`,
+  - blank answer-sentence evidence displays the existing answer-sentence empty
+    state instead of a blank highlight.
 - Added Mac frequency-accuracy report grouping:
   - backend `byFrequencyClass` analytics are mapped into dedicated report rows,
   - the Mac reports panel shows a separate Frequency accuracy group instead of
@@ -136,6 +141,12 @@
       explanation paragraphs and blank synonym list items.
     - Passed after trimming explanation and synonym-note evidence before the
       empty-state decision.
+- Mac history review answer-field empty-state follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because blank user answers, accepted answers, and answer
+      sentences rendered as empty text or empty highlights.
+    - Passed after trimming review answer fields and filtering accepted-answer
+      values before rendering.
 - Mac frequency-accuracy grouping follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
     - Initially failed because frequency-class accuracy rows were not rendered

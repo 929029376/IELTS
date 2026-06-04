@@ -370,4 +370,71 @@ describe("history and reports preview", () => {
     expect(screen.getByText("No synonym notes recorded for this question.")).toBeInTheDocument();
     expect(reviewRegion.querySelectorAll(".mock-review-synonyms li")).toHaveLength(0);
   });
+
+  it("shows empty states for blank history review answers and answer sentences", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/attempt-blank-answers/review") {
+        return {
+          ok: true,
+          json: async () => ({
+            id: "attempt-blank-answers",
+            reviewItems: [
+              {
+                acceptedAnswers: ["   ", ""],
+                answerSentence: "   ",
+                explanation: "Question was imported without answer evidence.",
+                isCorrect: false,
+                part: "P2",
+                passageTitle: "Transport",
+                prompt: "Where did the route end?",
+                questionId: "q-blank-answers",
+                questionNumber: 12,
+                rawAnswer: "   ",
+                synonyms: ["station = stop"]
+              }
+            ]
+          })
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[
+          {
+            durationSeconds: 2400,
+            estimatedBand: 6.5,
+            id: "attempt-blank-answers",
+            mode: "mock",
+            rawScore: 28,
+            startedAt: "2026-06-04T10:00:00.000Z",
+            subject: "listening",
+            submittedAt: "2026-06-04T10:40:00.000Z"
+          }
+        ]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "Listening 28/40, Band 6.5",
+          predictedListening: "6.0-7.0",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Review listening P2",
+          weakestQuestionType: "short_answer"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Review attempt attempt-blank-answers" }));
+
+    const reviewRegion = await screen.findByRole("region", { name: "History review details" });
+    expect(reviewRegion).toBeInTheDocument();
+    expect(screen.getByText("Your answer: No answer")).toBeInTheDocument();
+    expect(screen.getByText("Accepted: Not configured")).toBeInTheDocument();
+    expect(screen.getByText("No answer sentence recorded for this question.")).toBeInTheDocument();
+  });
 });

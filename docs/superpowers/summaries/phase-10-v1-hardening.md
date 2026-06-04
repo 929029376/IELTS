@@ -144,6 +144,11 @@
     missing-synonym-note messages,
   - whitespace-only imported review evidence no longer renders blank paragraphs
     or blank synonym list items.
+- Added Mac history review answer-field empty-state hardening:
+  - reopened historical reviews treat whitespace-only user answers, accepted
+    answers, and answer sentences as missing,
+  - review panels now show clear answer empty states instead of blank text or
+    empty highlighted marks.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1139,6 +1144,11 @@
       explanations and blank synonym list items.
     - Passed after trimming historical review evidence before rendering explicit
       empty-state messages.
+- Mac history review answer-field empty-state hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because whitespace-only user answers, accepted answers,
+      and answer sentences rendered as blank review content.
+    - Passed after trimming answer fields and filtering accepted-answer values.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

@@ -97,12 +97,22 @@ function formatDuration(seconds: number | null) {
   return `${minutes} min`;
 }
 
+function formatUserAnswer(rawAnswer: string) {
+  return rawAnswer.trim() || "No answer";
+}
+
+function formatAcceptedAnswers(acceptedAnswers: string[]) {
+  const answers = acceptedAnswers.map((answer) => answer.trim()).filter(Boolean);
+  return answers.length > 0 ? answers.join(", ") : "Not configured";
+}
+
 function renderAnswerSentence(item: HistoryReviewItem) {
-  if (!item.answerSentence) {
+  const answerSentence = item.answerSentence?.trim();
+  if (!answerSentence) {
     return <p className="empty-state">No answer sentence recorded for this question.</p>;
   }
 
-  return <mark className="ielts-highlight">{item.answerSentence}</mark>;
+  return <mark className="ielts-highlight">{answerSentence}</mark>;
 }
 
 function renderExplanation(item: HistoryReviewItem) {
@@ -302,8 +312,8 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
                       {item.questionNumber ?? "Question"} {item.prompt ?? "Review question"}
                     </strong>
                   </div>
-                  <p>Your answer: {item.rawAnswer || "No answer"}</p>
-                  <p>Accepted: {item.acceptedAnswers.join(", ") || "Not configured"}</p>
+                  <p>Your answer: {formatUserAnswer(item.rawAnswer)}</p>
+                  <p>Accepted: {formatAcceptedAnswers(item.acceptedAnswers)}</p>
                   <div className="answer-sentence-preview">{renderAnswerSentence(item)}</div>
                   {renderExplanation(item)}
                   {renderSynonymNotes(item)}
