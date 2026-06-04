@@ -29,6 +29,23 @@ export interface PracticeQuestionResponse {
   part: string;
 }
 
+function getMaxWords(answerRules: Record<string, unknown>): number | undefined {
+  for (const key of ["maxWords", "wordLimit", "max_words"]) {
+    const value = answerRules[key];
+    if (typeof value === "number") {
+      return value;
+    }
+    if (typeof value === "string") {
+      const parsed = Number.parseInt(value, 10);
+      if (Number.isFinite(parsed)) {
+        return parsed;
+      }
+    }
+  }
+
+  return undefined;
+}
+
 export function createPracticeService(db: DatabaseHandle, options: TestBuilderOptions = {}) {
   const attempts = createAttemptRepo(db);
   const questions = createQuestionRepo(db);
@@ -118,8 +135,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
       }
 
       const acceptedAnswers = question.answerKeys.flatMap((answerKey) => answerKey.acceptedAnswers);
-      const maxWords =
-        typeof question.answerRules.maxWords === "number" ? question.answerRules.maxWords : undefined;
+      const maxWords = getMaxWords(question.answerRules);
       const normalizedAnswer = normalizeAnswer(input.rawAnswer);
       const isCorrect = isAnswerCorrect(input.rawAnswer, acceptedAnswers, { maxWords });
 

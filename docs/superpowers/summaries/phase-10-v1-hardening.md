@@ -612,6 +612,12 @@
       or repeated spaces prevented answer-sentence and keyword highlights.
     - Passed after the close-reading highlighter began treating whitespace in
       stored evidence and imported passage text as equivalent.
+- Mac word-limit alias scoring hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because manually authored or imported `wordLimit` rules
+      did not enforce IELTS answer word limits.
+    - Passed after practice scoring recognized common word-limit aliases before
+      deciding whether a matched answer is correct.
 
 ## Remaining V1 Gaps
 

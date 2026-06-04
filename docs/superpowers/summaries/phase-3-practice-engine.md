@@ -96,6 +96,13 @@
     - Passed after the Mac practice-filter follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
+- Mac word-limit alias scoring follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because practice scoring only honored
+      `answerRules.maxWords`; a matched answer with `answerRules.wordLimit`
+      could bypass the IELTS word-limit rule.
+    - Passed after practice scoring accepted `maxWords`, `wordLimit`, and
+      `max_words` rule keys before correctness is calculated.
 
 ## Notes
 
