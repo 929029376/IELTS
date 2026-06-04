@@ -123,6 +123,12 @@
     evidence metadata,
   - unresolved remote answer-key updates are skipped instead of crashing manual
     sync.
+- Added Mac frequency-table sync hardening:
+  - frequency CSV/XLSX imports and manually corrected rows append
+    `frequency.entry.upserted` events,
+  - remote frequency events update local `frequency_entries`,
+  - frequency sync keeps high-frequency-first random test building aligned across
+    devices.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -353,6 +359,15 @@
     - Passed after the close-reading answer-sentence sync hardening follow-up,
       including unit/component tests, Playwright, production build, desktop
       diagnostics, and Mac DMG packaging.
+- Mac frequency-table sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because frequency imports were local-only and remote
+      frequency events were ignored.
+    - Passed after wiring `frequency.entry.upserted` append/import behavior.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the frequency-table sync hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac readiness follow-up:
   - `node scripts/mac-readiness-check.mjs`
     - Initially failed because the question-bank import panel regression clicked

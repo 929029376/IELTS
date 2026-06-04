@@ -49,7 +49,8 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
 
   server.get("/health", async () => ({ ok: true }));
   registerImportRoutes(server, db, {
-    assetRoot: options.assetRoot ?? `${dataDir}/assets`
+    assetRoot: options.assetRoot ?? `${dataDir}/assets`,
+    sync
   });
   registerPracticeRoutes(server, db, sync, {
     random: options.testBuilderRandom

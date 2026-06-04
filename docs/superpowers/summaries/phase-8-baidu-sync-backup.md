@@ -29,6 +29,11 @@
 - Added append-only JSONL sync events for Mac close-reading evidence writes:
   - manual answer-sentence updates are written as
     `answer_key.answer_sentence.updated` events in `imports.jsonl`.
+- Added append-only JSONL sync events for frequency table writes:
+  - CSV/XLSX frequency imports append `frequency.entry.upserted` events,
+  - manually corrected frequency rows append `frequency.entry.upserted` events,
+  - remote frequency events update local `frequency_entries` so
+    high-frequency-first test building stays consistent across devices.
 - Added defensive import handling for remote close-reading evidence sync events:
   - answer-sentence events wait until the referenced answer key exists locally,
   - manual sync skips unresolved answer-key events instead of crashing when
@@ -97,6 +102,15 @@
     - Passed after the close-reading answer-sentence sync follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac frequency-table sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because local frequency-row imports left `frequency.jsonl`
+      empty and remote frequency events were ignored.
+    - Passed after appending and importing `frequency.entry.upserted` events.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the frequency-table sync follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
   - Initially failed because the Manual sync button did not call the sync API or
     render a completion status.

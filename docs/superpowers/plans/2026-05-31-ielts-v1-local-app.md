@@ -429,6 +429,8 @@ Answer normalization:
   `stats.jsonl` sync events.
 - [x] Append Mac close-reading answer-sentence updates to Baidu Cloud
   `imports.jsonl` sync events.
+- [x] Append frequency table imports and manual corrections to Baidu Cloud
+  `frequency.jsonl` sync events.
 - [x] Import remote events on startup and on manual sync.
 - [x] Connect the Mac dashboard Manual sync action to `POST /api/sync/import`
   and render imported, skipped, and conflict counts.

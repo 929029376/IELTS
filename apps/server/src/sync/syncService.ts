@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import type { AttemptAnswerRecord, AttemptRecord } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
+import type { FrequencyEntryRecord } from "../db/frequencyRepo";
 import type { DictationAttemptRecord, ListeningCueRecord } from "../db/intensiveRepo";
 import { createSyncRepo } from "../db/syncRepo";
 
@@ -172,6 +173,10 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
 
   function appendAnswerSentenceEvent(update: AnswerSentencePayload, createdAt: string) {
     return appendEvent("answer_key.answer_sentence.updated", update, createdAt);
+  }
+
+  function appendFrequencyEntryEvent(entry: FrequencyEntryRecord, createdAt: string) {
+    return appendEvent("frequency.entry.upserted", entry, createdAt);
   }
 
   function appendExternalEvent(group: SyncGroup, event: SyncEnvelope) {
@@ -385,6 +390,40 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     return result.changes > 0;
   }
 
+  function upsertFrequencyEntry(payload: FrequencyEntryRecord) {
+    db.prepare(
+      `
+      INSERT INTO frequency_entries (
+        id,
+        source_month,
+        subject,
+        part,
+        english_title,
+        chinese_title,
+        frequency_class,
+        difficulty,
+        updated_at
+      )
+      VALUES (
+        @id,
+        @sourceMonth,
+        @subject,
+        @part,
+        @englishTitle,
+        @chineseTitle,
+        @frequencyClass,
+        @difficulty,
+        CURRENT_TIMESTAMP
+      )
+      ON CONFLICT(source_month, subject, part, english_title) DO UPDATE SET
+        chinese_title = excluded.chinese_title,
+        frequency_class = excluded.frequency_class,
+        difficulty = excluded.difficulty,
+        updated_at = CURRENT_TIMESTAMP
+    `
+    ).run(payload);
+  }
+
   function applyEvent(event: SyncEnvelope) {
     if (syncRepo.hasSyncEvent(event.eventId)) {
       return { conflict: false, inserted: false };
@@ -409,6 +448,8 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       if (!updateAnswerSentence(event.payload as AnswerSentencePayload)) {
         return { conflict: false, inserted: false };
       }
+    } else if (event.type === "frequency.entry.upserted") {
+      upsertFrequencyEntry(event.payload as FrequencyEntryRecord);
     }
 
     syncRepo.recordSyncEvent({
@@ -452,6 +493,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     appendAttemptEvent,
     appendDictationAttemptEvent,
     appendExternalEvent,
+    appendFrequencyEntryEvent,
     appendListeningCueEvent,
     appendMistakeEvent,
     ensureSyncFolder,

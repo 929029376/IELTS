@@ -5,6 +5,7 @@ import type { DatabaseHandle } from "../db/database";
 import { importFrequencyCsv, importFrequencyRows, importFrequencyXlsx } from "../importers/frequencyImporter";
 import { importListeningDirectory, importListeningZip } from "../importers/listeningZipImporter";
 import { importReadingDirectory, importReadingPdf } from "../importers/readingPdfImporter";
+import type { SyncService } from "../sync/syncService";
 
 const localPathSchema = z.string().min(1);
 
@@ -25,7 +26,11 @@ function withImportedCount<T>(imported: T[]) {
   };
 }
 
-export function registerImportRoutes(server: FastifyInstance, db: DatabaseHandle, options: { assetRoot: string }): void {
+export function registerImportRoutes(
+  server: FastifyInstance,
+  db: DatabaseHandle,
+  options: { assetRoot: string; sync?: SyncService }
+): void {
   server.post("/api/import/listening-zip", async (request, reply) => {
     const input = z.object({ zipPath: localPathSchema }).parse(request.body);
     const result = await importListeningZip(db, {
@@ -69,6 +74,10 @@ export function registerImportRoutes(server: FastifyInstance, db: DatabaseHandle
       extension === ".xlsx" || extension === ".xls"
         ? await importFrequencyXlsx(db, { xlsxPath: input.filePath })
         : await importFrequencyCsv(db, { csvPath: input.filePath });
+    const createdAt = new Date().toISOString();
+    for (const entry of result.entries) {
+      options.sync?.appendFrequencyEntryEvent(entry, createdAt);
+    }
     return reply.send({
       importedCount: result.entries.length,
       entries: result.entries
@@ -78,6 +87,10 @@ export function registerImportRoutes(server: FastifyInstance, db: DatabaseHandle
   server.post("/api/import/frequency-rows", async (request, reply) => {
     const input = z.object({ rows: z.array(frequencyRowSchema).min(1) }).parse(request.body);
     const result = importFrequencyRows(db, input.rows);
+    const createdAt = new Date().toISOString();
+    for (const entry of result.entries) {
+      options.sync?.appendFrequencyEntryEvent(entry, createdAt);
+    }
     return reply.send({
       importedCount: result.entries.length,
       entries: result.entries

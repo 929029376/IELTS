@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { openDatabase, type DatabaseHandle } from "../db/database";
+import { createFrequencyRepo } from "../db/frequencyRepo";
 import { migrate } from "../db/migrate";
 import { createQuestionRepo } from "../db/questionRepo";
 import { buildServer } from "../server";
@@ -412,6 +413,102 @@ describe("sync routes", () => {
       const sync = await server.inject({ method: "POST", url: "/api/sync/import" });
       expect(sync.statusCode).toBe(200);
       expect(sync.json()).toMatchObject({ imported: 0, skipped: 2 });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
+  it("appends frequency row updates to sync JSONL files", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-frequency-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const response = await server.inject({
+        method: "POST",
+        payload: {
+          rows: [
+            {
+              chineseTitle: "剑桥高频阅读",
+              difficulty: 3,
+              englishTitle: "Cambridge high frequency reading",
+              frequencyClass: "high",
+              part: "P1",
+              sourceMonth: "2026-06",
+              subject: "reading"
+            }
+          ]
+        },
+        url: "/api/import/frequency-rows"
+      });
+      expect(response.statusCode).toBe(200);
+
+      const frequencyJsonl = readFileSync(join(syncFolderPath, "frequency.jsonl"), "utf8");
+      expect(frequencyJsonl).toContain("frequency.entry.upserted");
+      expect(frequencyJsonl).toContain("Cambridge high frequency reading");
+      expect(frequencyJsonl).toContain("high");
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
+  it("imports remote frequency row updates on startup", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-remote-frequency-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    mkdirSync(syncFolderPath, { recursive: true });
+    writeFileSync(
+      join(syncFolderPath, "frequency.jsonl"),
+      `${JSON.stringify({
+        createdAt: "2026-06-04T08:00:00.000Z",
+        deviceId: "windows-pc",
+        eventId: "remote-frequency-entry",
+        payload: {
+          chineseTitle: "远端高频阅读",
+          difficulty: 2.5,
+          englishTitle: "Remote high frequency reading",
+          frequencyClass: "high",
+          id: "remote-frequency-entry-id",
+          part: "P2",
+          sourceMonth: "2026-06",
+          subject: "reading"
+        },
+        type: "frequency.entry.upserted"
+      })}\n`
+    );
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const db = (server as typeof server & { db: DatabaseHandle }).db;
+      expect(createFrequencyRepo(db).listFrequencyEntries()).toEqual([
+        expect.objectContaining({
+          chineseTitle: "远端高频阅读",
+          englishTitle: "Remote high frequency reading",
+          frequencyClass: "high",
+          sourceMonth: "2026-06"
+        })
+      ]);
     } finally {
       await server.close();
       rmSync(tempDir, { force: true, recursive: true });
