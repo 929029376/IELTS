@@ -218,6 +218,26 @@ describe("intensive study components", () => {
     expect(input).toHaveValue("");
   });
 
+  it("prevents blank dictation submissions", () => {
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath={null}
+        cues={[{ id: "cue-1", startSeconds: 1, endSeconds: 4, label: "Sentence 1", transcript: "Green Park" }]}
+        onDictationSubmit={() => undefined}
+      />
+    );
+
+    const submit = screen.getByRole("button", { name: "Submit dictation" });
+    expect(submit).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Dictation input"), { target: { value: "   " } });
+    expect(submit).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText("Dictation input"), { target: { value: "green park" } });
+    expect(submit).toBeEnabled();
+  });
+
   it("edits listening cue fields", () => {
     const onSave = vi.fn();
     render(<CueEditor onSave={onSave} />);

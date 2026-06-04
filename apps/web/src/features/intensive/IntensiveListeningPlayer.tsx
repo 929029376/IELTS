@@ -36,6 +36,7 @@ export function IntensiveListeningPlayer({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [dictationText, setDictationText] = useState("");
   const activeCue = cues.find((cue) => cue.id === activeCueId) ?? cues[0];
+  const canSubmitDictation = Boolean(activeCue && dictationText.trim());
 
   function localAssetUrl(path: string): string {
     return `/api/assets/local?path=${encodeURIComponent(path)}`;
@@ -115,7 +116,7 @@ export function IntensiveListeningPlayer({
   }
 
   function submitDictation() {
-    if (!activeCue) {
+    if (!activeCue || !dictationText.trim()) {
       return;
     }
 
@@ -192,7 +193,7 @@ export function IntensiveListeningPlayer({
       </label>
       <button
         type="button"
-        disabled={!activeCue}
+        disabled={!canSubmitDictation}
         onClick={submitDictation}
       >
         Submit dictation

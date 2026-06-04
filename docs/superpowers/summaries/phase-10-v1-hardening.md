@@ -100,6 +100,10 @@
   - the intensive listening dictation box clears after submit,
   - consecutive sentence practice no longer carries the previous typed answer
     into the next attempt.
+- Added Mac blank-dictation hardening:
+  - the intensive listening Submit dictation action requires non-blank text,
+  - whitespace-only attempts are blocked before they can create empty local
+    dictation records.
 - Added Mac close-reading mistake-label hardening:
   - intensive reading preview now exposes the latest wrong reading answer id,
   - mistake-label buttons persist through `POST /api/study/mistake-labels`,
@@ -1060,6 +1064,11 @@
     - Initially failed because submitted dictation text remained in the textarea.
     - Passed after the intensive player clears the text after dispatching the
       dictation submit action.
+- Mac blank-dictation hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because blank dictation text could still submit.
+    - Passed after the submit control requires trimmed text and the handler
+      ignores whitespace-only attempts.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

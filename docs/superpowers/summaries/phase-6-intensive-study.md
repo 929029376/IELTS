@@ -70,6 +70,10 @@
   - submitting a dictation attempt now clears the text box,
   - continuous sentence practice can move to the next cue without carrying the
     previous typed answer forward.
+- Added Mac blank-dictation guard:
+  - the dictation submit action stays disabled until non-blank text is entered,
+  - whitespace-only attempts are blocked before they can create empty practice
+    history.
 - Added Mac close-reading mistake-label persistence:
   - `/api/study/intensive` now returns the latest wrong reading
     `attemptAnswerId` when available,
@@ -258,6 +262,11 @@
     - Initially failed because the dictation textarea kept the submitted answer.
     - Passed after dictation submit clears the local textarea for continuous
       sentence practice.
+- Mac blank-dictation guard follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because `Submit dictation` stayed enabled for empty text.
+    - Passed after the button requires non-blank dictation text and the submit
+      handler ignores whitespace-only input.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.
