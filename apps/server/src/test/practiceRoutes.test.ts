@@ -1023,6 +1023,29 @@ describe("practice routes", () => {
     }
   });
 
+  it("returns not found when submitting a missing attempt", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-submit-missing-attempt-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const submit = await server.inject({
+        method: "POST",
+        url: "/api/practice/missing-attempt-id/submit"
+      });
+
+      expect(submit.statusCode).toBe(404);
+      expect(submit.json()).toMatchObject({
+        error: "Attempt not found."
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("applies common word-limit aliases before marking a matched answer correct", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-word-limit-alias-"));
     const databasePath = join(tempDir, "ielts.db");

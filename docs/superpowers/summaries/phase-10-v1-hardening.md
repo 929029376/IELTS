@@ -406,6 +406,10 @@
   - invalid attempt ids no longer surface as database/server errors,
   - no answer row or Baidu Cloud answer sync event is written for a missing
     attempt.
+- Added Mac submit-attempt integrity hardening:
+  - submit requests for missing attempt ids now return `404`,
+  - invalid submit requests no longer surface as server errors,
+  - no submitted-attempt sync event is appended for a missing attempt.
 - Added Mac local exam metadata fallback hardening:
   - blank imported passage titles now render as `Untitled passage` in loaded
     mock/practice lists, reading passage headers, and listening section labels,
@@ -1813,6 +1817,13 @@
       and saving the answer, and the route maps missing attempts to `404`.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 22 practice route tests.
+- Mac submit-attempt integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "submitting a missing attempt"`
+    - Initially failed because submitting a missing attempt id returned `500`.
+    - Passed after submit uses the same typed attempt-not-found error and the
+      practice route maps it to `404`.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 23 practice route tests.
 - Mac practice local-resource hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because free practice attempts did not receive imported

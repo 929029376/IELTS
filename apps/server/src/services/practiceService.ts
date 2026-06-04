@@ -251,7 +251,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
     submitPractice(attemptId: string) {
       const attempt = attempts.getAttemptWithAnswers(attemptId);
       if (!attempt) {
-        throw new Error("Attempt not found.");
+        throw new PracticeAttemptNotFoundError();
       }
 
       const rawScore = attempt.answers.filter((answer) => answer.isCorrect).length;

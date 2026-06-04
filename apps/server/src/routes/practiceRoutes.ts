@@ -78,7 +78,15 @@ export function registerPracticeRoutes(
 
   server.post("/api/practice/:attemptId/submit", async (request, reply) => {
     const params = z.object({ attemptId: z.string().min(1) }).parse(request.params);
-    const result = practice.submitPractice(params.attemptId);
+    let result: ReturnType<typeof practice.submitPractice>;
+    try {
+      result = practice.submitPractice(params.attemptId);
+    } catch (error) {
+      if (error instanceof PracticeAttemptNotFoundError) {
+        return reply.code(404).send({ error: error.message });
+      }
+      throw error;
+    }
     const attempt = attempts.getAttemptWithAnswers(params.attemptId);
     if (attempt) {
       sync?.appendAttemptEvent("attempt.submitted", attempt, result.submittedAt);
