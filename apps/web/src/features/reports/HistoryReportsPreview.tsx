@@ -147,14 +147,26 @@ function renderSynonymNotes(item: HistoryReviewItem) {
   );
 }
 
+function formatAccuracyLabel(label: string) {
+  return label.trim() || "Unknown accuracy group";
+}
+
+function formatMistakeLabel(label: string) {
+  return label.trim() || "Unlabeled mistake";
+}
+
+function formatWeakestQuestionType(value: string) {
+  return value.trim() || "No data";
+}
+
 function conflictsForQuestion(review: HistoryReview, questionId: string): HistoryReviewConflict[] {
   return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
 }
 
 function renderAccuracyRows(rows: AccuracyRowView[]) {
-  return rows.map((row) => (
-    <div className="accuracy-row" key={row.label}>
-      <span>{row.label}</span>
+  return rows.map((row, index) => (
+    <div className="accuracy-row" key={`${formatAccuracyLabel(row.label)}-${index}`}>
+      <span>{formatAccuracyLabel(row.label)}</span>
       <strong>{formatAccuracy(row.accuracy)}</strong>
       <small>
         {row.correct}/{row.total}
@@ -422,13 +434,13 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
             <p className="empty-state">Accuracy appears after submitted answers</p>
           )}
           <h4>Weakest type</h4>
-          <p>{dashboard.weakestQuestionType}</p>
+          <p>{formatWeakestQuestionType(dashboard.weakestQuestionType)}</p>
           <h4>Mistake labels</h4>
           {analytics.mistakeLabels.length > 0 ? (
             <div className="mistake-chip-list">
-              {analytics.mistakeLabels.map((label) => (
-                <span className="mistake-chip" key={label.label}>
-                  <span>{label.label}</span>
+              {analytics.mistakeLabels.map((label, index) => (
+                <span className="mistake-chip" key={`${formatMistakeLabel(label.label)}-${index}`}>
+                  <span>{formatMistakeLabel(label.label)}</span>
                   <strong>{label.count}</strong>
                 </span>
               ))}

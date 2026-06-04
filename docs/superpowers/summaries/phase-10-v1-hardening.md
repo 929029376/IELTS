@@ -161,6 +161,12 @@
     and weakest question type are treated as missing,
   - dashboard report cards now keep clear empty-state copy instead of rendering
     blank values.
+- Added Mac report analytics label fallback hardening:
+  - accuracy rows with whitespace-only labels now render as
+    `Unknown accuracy group`,
+  - mistake chips with whitespace-only labels now render as `Unlabeled mistake`,
+  - the weakest-question-type field falls back to `No data` when report data is
+    blank.
 - Added Mac study queue title fallback hardening:
   - recommended mock passages with whitespace-only imported titles now render as
     `Untitled passage`,
@@ -1263,6 +1269,12 @@
       report cards.
     - Passed after trimming dashboard report strings before applying fallback
       copy.
+- Mac report analytics label fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "blank accuracy"`
+    - Initially failed because whitespace-only accuracy, mistake-label, and
+      weakest-type labels rendered as blank report content.
+    - Passed after trimming report analytics labels and falling back to
+      `Unknown accuracy group`, `Unlabeled mistake`, and `No data`.
 - Mac study queue title fallback hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/studyOverviewPanel.test.tsx`
     - Initially failed because whitespace-only recommended mock passage titles

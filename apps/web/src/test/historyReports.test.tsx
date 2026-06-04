@@ -83,6 +83,31 @@ describe("history and reports preview", () => {
     expect(screen.getByText("33%")).toBeInTheDocument();
   });
 
+  it("shows clear fallbacks for blank accuracy and mistake labels", () => {
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{
+          frequencyRows: [{ accuracy: 0.5, correct: 1, label: "   ", total: 2 }],
+          mistakeLabels: [{ count: 2, label: "   " }],
+          partRows: [{ accuracy: 0.25, correct: 1, label: "   ", total: 4 }],
+          questionTypeRows: [{ accuracy: 0.75, correct: 3, label: "   ", total: 4 }]
+        }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "   "
+        }}
+      />
+    );
+
+    expect(screen.getAllByText("Unknown accuracy group")).toHaveLength(3);
+    expect(screen.getByText("Unlabeled mistake")).toBeInTheDocument();
+    expect(screen.getByText("No data")).toBeInTheDocument();
+  });
+
   it("exports local report files through the reports API", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: true,
