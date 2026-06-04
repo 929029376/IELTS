@@ -164,10 +164,14 @@ function expandSlashAliases(variant: string): string[] {
   return variants.map((parts) => normalizeAnswer(parts.join(" ")));
 }
 
+function stripImportedAnswerNumberingPrefix(acceptedAnswer: string): string {
+  return acceptedAnswer.replace(/^(?:q\s*)?\d{1,2}[.):]\s+/i, "");
+}
+
 function acceptedAnswerVariants(acceptedAnswer: string): string[] {
   const optionalPattern = /\(([^()]+)\)/;
   const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
-  const variants = [normalizedAcceptedAnswer];
+  const variants = [normalizedAcceptedAnswer, stripImportedAnswerNumberingPrefix(normalizedAcceptedAnswer)];
 
   for (let index = 0; index < variants.length; index += 1) {
     const variant = variants[index];

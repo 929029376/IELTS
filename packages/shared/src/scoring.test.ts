@@ -26,6 +26,13 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("john's car", ["‘John’s car’"])).toBe(true);
   });
 
+  it("ignores imported answer numbering prefixes without stripping numeric answers", () => {
+    expect(isAnswerCorrect("green park", ["1. green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["Q1: green park"])).toBe(true);
+    expect(isAnswerCorrect("3.5 million", ["3.5 million"])).toBe(true);
+    expect(isAnswerCorrect("million", ["3.5 million"])).toBe(false);
+  });
+
   it("matches imported unicode dash answers with typed hyphen answers", () => {
     expect(isAnswerCorrect("well-known", ["well–known"])).toBe(true);
     expect(isAnswerCorrect("well known", ["well–known"])).toBe(false);
