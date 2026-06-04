@@ -96,6 +96,11 @@
     practice attempt,
   - user highlights render separately from answer-sentence evidence highlights,
   - highlights can be cleared from the reading toolbar.
+- Added Mac reading answer-evidence highlight hardening:
+  - answer-sentence evidence in the reading exam view matches imported passage
+    text without requiring identical casing,
+  - repeated spaces and line-break differences between stored evidence and
+    imported text no longer prevent the evidence highlight.
 - Removed the static sample exam from the dashboard Mock Exam Center so the
   primary exam surface only renders real local attempts started from the question
   bank.
@@ -257,6 +262,12 @@
     - Passed after the selected-text highlight follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac reading answer-evidence highlight follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because stored evidence such as `answer sentence` did not
+      highlight imported reading text such as `Answer   Sentence`.
+    - Passed after the reading exam highlighter began treating casing and
+      whitespace differences as equivalent.
 - Mac listening practice playback-controls follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because listening practice still rendered the local audio

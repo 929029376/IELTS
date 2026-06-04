@@ -126,6 +126,21 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("separator", { name: "Resize reading panes" })).toBeInTheDocument();
   });
 
+  it("highlights reading answer evidence when imported passage casing or whitespace differs", () => {
+    const { container } = render(
+      <ReadingExamView
+        passageTitle="The History of Tea"
+        passageText={"Tea became popular because the Answer   Sentence explains the trade."}
+        highlightedText="answer sentence"
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+
+    const highlight = container.querySelector(".ielts-highlight");
+
+    expect(highlight).toHaveTextContent("Answer Sentence");
+  });
+
   it("highlights user-selected reading passage text during a local exam", () => {
     vi.spyOn(window, "getSelection").mockReturnValue({
       toString: () => "popular because"

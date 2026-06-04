@@ -19,18 +19,34 @@ interface HighlightRange {
   start: number;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function buildTargetPattern(target: string): RegExp | null {
+  const parts = target.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return null;
+  }
+
+  return new RegExp(parts.map(escapeRegExp).join("\\s+"), "i");
+}
+
 function addHighlightRange(ranges: HighlightRange[], text: string, target: string, className: string) {
-  const trimmedTarget = target.trim();
-  if (!trimmedTarget) {
+  const pattern = buildTargetPattern(target);
+
+  if (!pattern) {
     return;
   }
 
-  const start = text.indexOf(trimmedTarget);
-  if (start === -1) {
+  const match = pattern.exec(text);
+  if (!match) {
     return;
   }
 
-  const end = start + trimmedTarget.length;
+  const start = match.index;
+  const end = start + match[0].length;
   if (ranges.some((range) => start < range.end && end > range.start)) {
     return;
   }

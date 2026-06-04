@@ -181,6 +181,9 @@
   - user highlights use a distinct style from answer-sentence evidence
     highlights,
   - reading highlights can be cleared from the toolbar.
+- Added Mac reading answer-evidence highlight hardening:
+  - reading mock/practice answer-sentence evidence highlights now tolerate
+    casing differences and repeated whitespace from imported passage text.
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
@@ -1065,6 +1068,12 @@
       copied as a ready-to-use local path list.
     - Passed after adding the `Copy report paths` action and clipboard write
       coverage.
+- Mac reading answer-evidence highlight hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because reading exam answer-sentence evidence required
+      exact casing and spacing to highlight imported passage text.
+    - Passed after making reading exam evidence matching case-insensitive and
+      whitespace-flexible.
 
 ## Remaining V1 Gaps
 
