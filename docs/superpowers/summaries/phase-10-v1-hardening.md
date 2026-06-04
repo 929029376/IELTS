@@ -166,6 +166,11 @@
   - successful local mock submissions now refresh report history, latest mock
     score, score prediction cards, and the local study overview without requiring
     a manual page reload.
+- Added Mac manual backup UI hardening:
+  - the Sync settings panel can export a local backup JSON,
+  - the generated backup path and key row counts are shown in the UI,
+  - a pasted backup path can be imported through the local backup API,
+  - restore feedback shows imported tables and row counts.
 
 ## Verification Evidence
 
@@ -397,6 +402,15 @@
     - Passed after the manual backup intensive-listening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac manual backup UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because the dashboard Sync settings panel had no backup
+      export/import controls.
+    - Passed after adding manual backup export/import controls and row-count
+      feedback for the Mac UI.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual backup UI follow-up, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - Mac intensive listening sync follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
     - Initially failed because the cue and dictation study routes persisted local

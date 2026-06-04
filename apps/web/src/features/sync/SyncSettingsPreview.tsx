@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FolderSync, RefreshCw } from "lucide-react";
+import { Download, FolderSync, RefreshCw, Upload } from "lucide-react";
 import { DesktopAssetVerifier } from "../desktop/DesktopAssetVerifier";
 import { DesktopRuntimeDiagnostics, type DesktopRuntimeStatus } from "../desktop/DesktopRuntimeDiagnostics";
 
@@ -17,6 +17,16 @@ interface ManualSyncResult {
   skipped: number;
 }
 
+interface BackupResult {
+  filePath?: string;
+  importedTables?: number;
+  rowCounts: Record<string, number>;
+}
+
+function backupCount(result: BackupResult | null, key: string) {
+  return result?.rowCounts[key] ?? 0;
+}
+
 export function SyncSettingsPreview({
   deviceName,
   lastSyncAt,
@@ -27,6 +37,11 @@ export function SyncSettingsPreview({
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncResult, setSyncResult] = useState<ManualSyncResult | null>(null);
+  const [backupError, setBackupError] = useState<string | null>(null);
+  const [backupFilePath, setBackupFilePath] = useState("");
+  const [backupImportResult, setBackupImportResult] = useState<BackupResult | null>(null);
+  const [backupExportResult, setBackupExportResult] = useState<BackupResult | null>(null);
+  const [isBackingUp, setIsBackingUp] = useState(false);
 
   async function runManualSync() {
     setIsSyncing(true);
@@ -41,6 +56,51 @@ export function SyncSettingsPreview({
       setSyncError("Could not complete manual sync.");
     } finally {
       setIsSyncing(false);
+    }
+  }
+
+  async function exportBackup() {
+    setIsBackingUp(true);
+    setBackupError(null);
+    try {
+      const response = await fetch("/api/backups/export", { method: "POST" });
+      if (!response.ok) {
+        throw new Error("Could not export backup");
+      }
+      const result = (await response.json()) as BackupResult;
+      setBackupExportResult(result);
+      setBackupFilePath(result.filePath ?? "");
+    } catch {
+      setBackupError("Could not export local backup.");
+    } finally {
+      setIsBackingUp(false);
+    }
+  }
+
+  async function importBackup() {
+    if (!backupFilePath.trim()) {
+      setBackupError("Enter a backup file path before importing.");
+      return;
+    }
+
+    setIsBackingUp(true);
+    setBackupError(null);
+    try {
+      const response = await fetch("/api/backups/import", {
+        body: JSON.stringify({ filePath: backupFilePath.trim() }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "POST"
+      });
+      if (!response.ok) {
+        throw new Error("Could not import backup");
+      }
+      setBackupImportResult((await response.json()) as BackupResult);
+    } catch {
+      setBackupError("Could not import local backup.");
+    } finally {
+      setIsBackingUp(false);
     }
   }
 
@@ -96,6 +156,59 @@ export function SyncSettingsPreview({
         </section>
       ) : null}
       {syncError ? <p className="mock-start-error">{syncError}</p> : null}
+      <section className="backup-tools-panel" aria-label="Manual backup">
+        <div className="backup-tools-header">
+          <div>
+            <p className="eyebrow">Local safety copy</p>
+            <h3>Manual backup</h3>
+          </div>
+          <button className="icon-command" disabled={isBackingUp} onClick={() => void exportBackup()} type="button">
+            <Download size={16} aria-hidden="true" />
+            Export backup
+          </button>
+        </div>
+        <label className="backup-path-control">
+          <span>Backup file path</span>
+          <input
+            aria-label="Backup file path"
+            onChange={(event) => setBackupFilePath(event.target.value)}
+            placeholder="/Users/musheng/Desktop/IELTS/data/backups/ielts-backup.json"
+            value={backupFilePath}
+          />
+        </label>
+        <button
+          className="icon-command"
+          disabled={isBackingUp || !backupFilePath.trim()}
+          onClick={() => void importBackup()}
+          type="button"
+        >
+          <Upload size={16} aria-hidden="true" />
+          Import backup
+        </button>
+        {backupExportResult ? (
+          <section className="sync-status-panel" role="status">
+            <h3>Backup exported</h3>
+            {backupExportResult.filePath ? <p className="backup-file-path">{backupExportResult.filePath}</p> : null}
+            <div>
+              <span>{backupCount(backupExportResult, "attempts")} attempts</span>
+              <span>{backupCount(backupExportResult, "attempt_answers")} answers</span>
+              <span>{backupCount(backupExportResult, "listening_cues")} cues</span>
+              <span>{backupCount(backupExportResult, "dictation_attempts")} dictations</span>
+            </div>
+          </section>
+        ) : null}
+        {backupImportResult ? (
+          <section className="sync-status-panel" role="status">
+            <h3>Backup imported</h3>
+            <div>
+              <span>{backupImportResult.importedTables ?? 0} tables</span>
+              <span>{backupCount(backupImportResult, "attempts")} attempts</span>
+              <span>{backupCount(backupImportResult, "attempt_answers")} answers</span>
+            </div>
+          </section>
+        ) : null}
+        {backupError ? <p className="mock-start-error">{backupError}</p> : null}
+      </section>
       <DesktopRuntimeDiagnostics status={runtimeStatus} />
       <DesktopAssetVerifier />
     </section>

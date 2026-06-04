@@ -73,6 +73,11 @@
   - `POST /api/backups/export`,
   - `POST /api/backups/import`.
 - Backup export writes restore-ready JSON into `data/backups` by default and includes question-bank skeleton, attempts, answers, mistake labels, conflicts, sync events, stats, frequency, devices, listening cues, and dictation attempts.
+- Connected the Mac dashboard Sync settings panel to manual backup operations:
+  - export backup through `POST /api/backups/export`,
+  - display the generated backup JSON path and key row counts,
+  - import a pasted backup JSON path through `POST /api/backups/import`,
+  - display imported table and row counts after restore.
 
 ## Verification Evidence
 
@@ -168,6 +173,15 @@
       and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupRoutes.test.ts`
   - Manual backup API test passed.
+- Mac manual backup UI follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because the Sync settings panel exposed manual sync but
+      did not expose backup export/import actions.
+    - Passed after adding export/import backup controls, local backup path input,
+      and exported/imported row-count feedback.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual backup UI follow-up, including unit/component tests,
+      Playwright, production build, desktop diagnostics, and Mac DMG packaging.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

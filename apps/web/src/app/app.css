@@ -970,6 +970,58 @@ h1 {
   font-weight: 700;
 }
 
+.backup-tools-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #d6dfeb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.backup-tools-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.backup-tools-header h3 {
+  margin: 0;
+  color: #172033;
+  font-size: 17px;
+}
+
+.backup-path-control {
+  display: grid;
+  gap: 6px;
+}
+
+.backup-path-control span {
+  color: #66768c;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.backup-path-control input {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #20314a;
+}
+
+.backup-file-path {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #405169;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+}
+
 .desktop-runtime-panel {
   margin-top: 16px;
   padding: 16px;
@@ -1533,6 +1585,10 @@ h1 {
   }
 
   .reports-header {
+    flex-direction: column;
+  }
+
+  .backup-tools-header {
     flex-direction: column;
   }
 
