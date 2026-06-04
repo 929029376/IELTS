@@ -294,6 +294,8 @@
     separate answer variants,
   - pipe-delimited answer cells such as `green park | green parks` also expand
     into separate accepted variants,
+  - `or`-delimited answer cells such as `green park or green parks` also expand
+    into separate accepted variants,
   - unrelated answers such as `blue park` still fail instead of being
     over-accepted.
 - Added Mac slash-alias answer-key scoring hardening:
@@ -2038,11 +2040,15 @@
     - Initially failed because accepted answer `green park; green parks` was
       compared as one literal answer and did not match typed answer
       `green parks`.
-    - Passed after semicolon- and pipe-delimited accepted-answer cells were
-      split into separate answer variants.
+    - A follow-up red run failed because `green park or green parks` still
+      compared as one literal answer.
+    - Passed after semicolon-, pipe-, and `or`-delimited accepted-answer cells
+      were split into separate answer variants.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "multi-answer"`
     - Initially failed because the practice API marked `green parks` incorrect
       against imported accepted answer `green park; green parks`.
+    - A follow-up red run failed when the practice API saw imported accepted
+      answer `green park or green parks`.
     - Passed after the shared multi-answer cell expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "multiple-choice"`
