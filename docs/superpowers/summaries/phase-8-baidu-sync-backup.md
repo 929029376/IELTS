@@ -1,6 +1,6 @@
 # Phase 8 Baidu Cloud Sync and Backup Summary
 
-**Date:** 2026-06-01
+**Date:** 2026-06-01 to 2026-06-04
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -35,6 +35,12 @@
   - manually corrected frequency rows append `frequency.entry.upserted` events,
   - remote frequency events update local `frequency_entries` so
     high-frequency-first test building stays consistent across devices.
+- Added remote frequency classification hardening:
+  - imported `frequency.entry.upserted` events now also update matching local
+    passage `frequency_class` values,
+  - a Mac that has already imported the matching PDF/listening passage can pick
+    up frequency-class corrections from another device through Baidu Cloud
+    sync without rescanning the question-bank folder.
 - Added defensive import handling for remote close-reading evidence sync events:
   - answer-sentence events wait until the referenced answer key exists locally,
   - manual sync skips unresolved answer-key events instead of crashing when
@@ -188,6 +194,11 @@
     - Initially failed because local frequency-row imports left `frequency.jsonl`
       empty and remote frequency events were ignored.
     - Passed after appending and importing `frequency.entry.upserted` events.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because a remote high-frequency row updated
+      `frequency_entries` but left the matching local passage at `unknown`.
+    - Passed after remote frequency imports apply the same passage
+      classification update used by local frequency imports.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the frequency-table sync follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG

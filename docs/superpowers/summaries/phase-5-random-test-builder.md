@@ -1,6 +1,6 @@
 # Phase 5 Frequency-Weighted Random Test Builder Summary
 
-**Date:** 2026-05-31
+**Date:** 2026-05-31 to 2026-06-04
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -52,6 +52,14 @@
     `Untitled passage`,
   - the local study queue no longer shows blank recommendation rows when source
     metadata is incomplete.
+- Added frequency-table passage classification hardening:
+  - importing CSV/XLSX or manually corrected frequency rows now updates matching
+    local passage `frequency_class` values,
+  - reading PDFs first imported as `unknown` can become high/medium/low
+    frequency after the frequency table is imported,
+  - frequency-weighted mock and practice selection now reflects later frequency
+    table corrections instead of relying only on the original passage import
+    metadata.
 - Wired `POST /api/practice/start` in `mock` mode to the frequency-weighted full-set
   builder so real mock attempts use one selected passage per IELTS part instead
   of taking the first sequential questions from the database.
@@ -96,6 +104,12 @@
       title rendered as a blank row in the study queue.
     - Passed after trimming recommended passage titles and falling back to
       `Untitled passage`.
+- Frequency-table passage classification follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/importers.test.ts`
+    - Initially failed because importing a matching high-frequency row left an
+      existing reading passage at `unknown`.
+    - Passed after applying imported frequency entries to matching local passages
+      by subject, part, and title.
 - Mock-start integration follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because a reading mock start included both a high-frequency

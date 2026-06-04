@@ -336,6 +336,7 @@
   - frequency CSV/XLSX imports and manually corrected rows append
     `frequency.entry.upserted` events,
   - remote frequency events update local `frequency_entries`,
+  - local and remote frequency entries update matching passage frequency classes,
   - frequency sync keeps high-frequency-first random test building aligned across
     devices.
 - Added sync forward-compatibility hardening:
@@ -868,6 +869,16 @@
     - Initially failed because frequency imports were local-only and remote
       frequency events were ignored.
     - Passed after wiring `frequency.entry.upserted` append/import behavior.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/importers.test.ts`
+    - Initially failed because a matching imported frequency row did not update
+      the existing passage frequency class used by mock/practice selection.
+    - Passed after local frequency imports apply frequency classes to matching
+      passages.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because a remote frequency event updated
+      `frequency_entries` but left the matching local passage at `unknown`.
+    - Passed after remote frequency imports reuse the same passage
+      classification update.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the frequency-table sync hardening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,

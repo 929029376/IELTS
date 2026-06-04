@@ -177,6 +177,40 @@ describe("question bank importers", () => {
     });
   });
 
+  it("updates matching passage frequency classes after frequency rows are imported", () => {
+    const repo = createQuestionRepo(db);
+    const source = repo.createSource({
+      checksum: "reading-tea-frequency",
+      importStatus: "needs_review",
+      originalPath: "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/The History of Tea.pdf",
+      sourceType: "reading_pdf",
+      version: 1
+    });
+    const passage = repo.createPassage({
+      frequencyClass: "unknown",
+      part: "P1",
+      sourceId: source.id,
+      subject: "reading",
+      title: "The History of Tea"
+    });
+
+    importFrequencyRows(db, [
+      {
+        subject: "reading",
+        part: "P1",
+        englishTitle: "The History of Tea",
+        chineseTitle: "茶叶的历史",
+        frequencyClass: "high",
+        difficulty: 2.5,
+        sourceMonth: "2026-05"
+      }
+    ]);
+
+    expect(repo.getPassageWithQuestions(passage.id)).toMatchObject({
+      frequencyClass: "high"
+    });
+  });
+
   it("imports structured frequency XLSX rows and manually corrected rows", async () => {
     const xlsxPath = join(tempDir, "frequency.xlsx");
     const workbook = XLSX.utils.book_new();

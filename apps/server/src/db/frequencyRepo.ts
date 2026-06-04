@@ -13,6 +13,24 @@ export interface FrequencyEntryRecord {
   difficulty: number | null;
 }
 
+export function applyFrequencyEntryToMatchingPassages(db: DatabaseHandle, entry: FrequencyEntryRecord) {
+  db.prepare(
+    `
+    UPDATE passages
+    SET frequency_class = @frequencyClass
+    WHERE subject = @subject
+      AND part = @part
+      AND (
+        lower(trim(title)) = lower(trim(@englishTitle))
+        OR (
+          @chineseTitle IS NOT NULL
+          AND lower(trim(title)) = lower(trim(@chineseTitle))
+        )
+      )
+  `
+  ).run(entry);
+}
+
 export function createFrequencyRepo(db: DatabaseHandle) {
   return {
     upsertFrequencyEntry(input: Omit<FrequencyEntryRecord, "id">): FrequencyEntryRecord {
@@ -58,6 +76,8 @@ export function createFrequencyRepo(db: DatabaseHandle) {
           difficulty = excluded.difficulty,
           updated_at = CURRENT_TIMESTAMP
       `).run(record);
+
+      applyFrequencyEntryToMatchingPassages(db, record);
       return record;
     },
 

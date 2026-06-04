@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import type { AttemptAnswerRecord, AttemptRecord } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
-import type { FrequencyEntryRecord } from "../db/frequencyRepo";
+import { applyFrequencyEntryToMatchingPassages, type FrequencyEntryRecord } from "../db/frequencyRepo";
 import type { DictationAttemptRecord, ListeningCueRecord } from "../db/intensiveRepo";
 import { createSyncRepo } from "../db/syncRepo";
 
@@ -492,6 +492,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
         updated_at = CURRENT_TIMESTAMP
     `
     ).run(payload);
+    applyFrequencyEntryToMatchingPassages(db, payload);
   }
 
   function applyEvent(event: SyncEnvelope) {

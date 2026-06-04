@@ -606,6 +606,24 @@ describe("sync routes", () => {
     const databasePath = join(tempDir, "ielts.db");
     const syncFolderPath = join(tempDir, "IELTS-Sync");
     mkdirSync(syncFolderPath, { recursive: true });
+    const setupDb = openDatabase(databasePath);
+    migrate(setupDb);
+    const questions = createQuestionRepo(setupDb);
+    const source = questions.createSource({
+      checksum: "remote-frequency-passage",
+      importStatus: "needs_review",
+      originalPath: "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/Remote high frequency reading.pdf",
+      sourceType: "reading_pdf",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      frequencyClass: "unknown",
+      part: "P2",
+      sourceId: source.id,
+      subject: "reading",
+      title: "Remote high frequency reading"
+    });
+    setupDb.close();
     writeFileSync(
       join(syncFolderPath, "frequency.jsonl"),
       `${JSON.stringify({
@@ -646,6 +664,9 @@ describe("sync routes", () => {
           sourceMonth: "2026-06"
         })
       ]);
+      expect(createQuestionRepo(db).getPassageWithQuestions(passage.id)).toMatchObject({
+        frequencyClass: "high"
+      });
     } finally {
       await server.close();
       rmSync(tempDir, { force: true, recursive: true });
