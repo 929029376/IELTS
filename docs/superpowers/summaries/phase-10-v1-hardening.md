@@ -100,6 +100,9 @@
   - the intensive listening dictation box clears after submit,
   - consecutive sentence practice no longer carries the previous typed answer
     into the next attempt.
+- Added Mac cue-switch dictation hardening:
+  - selecting another sentence repeat cue clears the current dictation text,
+  - focused listening on the next cue starts from a blank input state.
 - Added Mac blank-dictation hardening:
   - the intensive listening Submit dictation action requires non-blank text,
   - whitespace-only attempts are blocked before they can create empty local
@@ -1064,6 +1067,12 @@
     - Initially failed because submitted dictation text remained in the textarea.
     - Passed after the intensive player clears the text after dispatching the
       dictation submit action.
+- Mac cue-switch dictation hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because selecting `Repeat Sentence 2` kept the typed
+      answer from Sentence 1 in the dictation box.
+    - Passed after repeat-cue selection clears the dictation input before
+      playback starts from the new cue.
 - Mac blank-dictation hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
     - Initially failed because blank dictation text could still submit.

@@ -58,6 +58,7 @@ export function IntensiveListeningPlayer({
   function repeatCue(cue: ListeningCue) {
     setActiveCueId(cue.id);
     setLoopRange({ endSeconds: cue.endSeconds, startSeconds: cue.startSeconds });
+    setDictationText("");
     playFrom(cue.startSeconds);
   }
 

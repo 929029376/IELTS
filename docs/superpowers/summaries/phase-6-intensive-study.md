@@ -70,6 +70,10 @@
   - submitting a dictation attempt now clears the text box,
   - continuous sentence practice can move to the next cue without carrying the
     previous typed answer forward.
+- Added Mac cue-switch dictation reset:
+  - switching to another sentence repeat cue clears the current dictation text,
+  - the next cue starts with a blank input instead of the previous sentence's
+    answer.
 - Added Mac blank-dictation guard:
   - the dictation submit action stays disabled until non-blank text is entered,
   - whitespace-only attempts are blocked before they can create empty practice
@@ -262,6 +266,12 @@
     - Initially failed because the dictation textarea kept the submitted answer.
     - Passed after dictation submit clears the local textarea for continuous
       sentence practice.
+- Mac cue-switch dictation reset follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because switching from one repeat cue to another kept the
+      previous sentence's typed dictation text.
+    - Passed after `Repeat Sentence N` clears the dictation input while switching
+      the active cue.
 - Mac blank-dictation guard follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
     - Initially failed because `Submit dictation` stayed enabled for empty text.

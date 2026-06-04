@@ -238,6 +238,27 @@ describe("intensive study components", () => {
     expect(submit).toBeEnabled();
   });
 
+  it("clears dictation text when switching sentence repeat cues", () => {
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath="/Users/musheng/Desktop/IELTS/listening/intensive-p1.mp3"
+        cues={[
+          { id: "cue-1", startSeconds: 1, endSeconds: 4, label: "Sentence 1", transcript: "Green Park" },
+          { id: "cue-2", startSeconds: 5, endSeconds: 8, label: "Sentence 2", transcript: "Nine thirty" }
+        ]}
+        onDictationSubmit={() => undefined}
+      />
+    );
+
+    const input = screen.getByLabelText("Dictation input");
+
+    fireEvent.change(input, { target: { value: "green park" } });
+    fireEvent.click(screen.getByRole("button", { name: "Repeat Sentence 2" }));
+
+    expect(input).toHaveValue("");
+  });
+
   it("edits listening cue fields", () => {
     const onSave = vi.fn();
     render(<CueEditor onSave={onSave} />);
