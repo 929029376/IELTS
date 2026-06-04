@@ -41,7 +41,11 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("green park", ["1. green park"])).toBe(true);
     expect(isAnswerCorrect("green park", ["(1) green park"])).toBe(true);
     expect(isAnswerCorrect("green park", ["Q1: green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["Q1：green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["1、green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["1．green park"])).toBe(true);
     expect(isAnswerCorrect("3.5 million", ["3.5 million"])).toBe(true);
+    expect(isAnswerCorrect("3:30 pm", ["3:30 pm"])).toBe(true);
     expect(isAnswerCorrect("million", ["3.5 million"])).toBe(false);
   });
 

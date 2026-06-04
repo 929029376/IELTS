@@ -166,7 +166,12 @@ function expandSlashAliases(variant: string): string[] {
 }
 
 function stripImportedAnswerNumberingPrefix(acceptedAnswer: string): string {
-  return acceptedAnswer.replace(/^(?:q\s*)?\d{1,2}[.):]\s+/i, "");
+  return acceptedAnswer
+    .replace(/^\(\s*\d{1,2}\s*\)\s*/i, "")
+    .replace(/^q\s*\d{1,2}\s*[.):：．、]\s*/i, "")
+    .replace(/^\d{1,2}[.)]\s+/i, "")
+    .replace(/^\d{1,2}\s*[:：]\s+/i, "")
+    .replace(/^\d{1,2}\s*[．、]\s*/i, "");
 }
 
 function stripImportedAnswerLabelPrefix(acceptedAnswer: string): string {

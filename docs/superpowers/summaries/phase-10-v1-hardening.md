@@ -287,10 +287,13 @@
     match typed answers such as `green park`,
   - `Q1: green park` style prefixes from answer-key sheets are also removed
     from accepted answer variants,
+  - localized/OCR list prefixes such as `Q1：green park`, `1、green park`, and
+    `1．green park` are also removed from accepted answer variants,
   - answer-label prefixes such as `Answer: green park`, `Ans. green park`, and
     `答案：green park` are removed from accepted answer variants,
-  - real numeric answers such as `3.5 million` remain intact instead of being
-    stripped as question numbers, and real answer text `answer` stays intact.
+  - real numeric answers such as `3.5 million` and `3:30 pm` remain intact
+    instead of being stripped as question numbers, and real answer text
+    `answer` stays intact.
 - Added Mac imported multi-answer cell hardening:
   - accepted-answer cells such as `green park; green parks` now expand into
     separate answer variants,
@@ -2018,9 +2021,12 @@
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "numbering prefixes"`
     - Initially failed because accepted answer `1. green park` was compared as
       one literal answer and did not match typed answer `green park`.
+    - A later red run failed because localized/OCR prefixes such as
+      `Q1：green park`, `1、green park`, and `1．green park` were not removed
+      from accepted answer variants.
     - Passed after accepted-answer variants strip safe question-number prefixes
-      such as `1. ` and `Q1: ` while preserving real numeric answers such as
-      `3.5 million`.
+      such as `1. `, `Q1: `, `Q1：`, `1、`, and `1．` while preserving real
+      numeric answers such as `3.5 million` and `3:30 pm`.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "label prefixes"`
     - Initially failed because accepted answer `Answer: green park` was
       compared as one literal answer and did not match typed answer
@@ -2035,6 +2041,8 @@
       against imported accepted answer `1. green park`.
     - A follow-up red run failed when the practice API saw imported accepted
       answer `Answer: green park`.
+    - A later red run failed when the practice API saw imported accepted answer
+      `Q1：green park`.
     - Passed after the shared accepted-answer prefix cleanup was used by
       practice answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "surrounding punctuation"`
