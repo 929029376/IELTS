@@ -178,6 +178,41 @@ describe("exam simulation components", () => {
     expect(split).toHaveStyle({ gridTemplateColumns: "70% 8px minmax(0, 1fr)" });
   });
 
+  it("keeps reading notes separated by active passage", () => {
+    const { rerender } = render(
+      <ReadingExamView
+        passageTitle="Reading Passage One"
+        passageText="Passage one text."
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+    const notes = screen.getByRole("textbox", { name: "Notes" });
+
+    fireEvent.change(notes, { target: { value: "Review paragraph two." } });
+
+    rerender(
+      <ReadingExamView
+        passageTitle="Reading Passage Two"
+        passageText="Passage two text."
+        questions={<p>Questions 14-26</p>}
+      />
+    );
+
+    expect(screen.getByRole("textbox", { name: "Notes" })).toHaveValue("");
+
+    fireEvent.change(screen.getByRole("textbox", { name: "Notes" }), { target: { value: "Check the map label." } });
+
+    rerender(
+      <ReadingExamView
+        passageTitle="Reading Passage One"
+        passageText="Passage one text."
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+
+    expect(screen.getByRole("textbox", { name: "Notes" })).toHaveValue("Review paragraph two.");
+  });
+
   it("highlights reading answer evidence when imported passage casing or whitespace differs", () => {
     const { container } = render(
       <ReadingExamView

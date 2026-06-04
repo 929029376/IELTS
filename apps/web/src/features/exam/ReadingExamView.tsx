@@ -102,7 +102,9 @@ export function ReadingExamView({
   const splitRef = useRef<HTMLDivElement | null>(null);
   const [fontScale, setFontScale] = useState<"small" | "regular" | "large">("regular");
   const [leftPanePercent, setLeftPanePercent] = useState(52);
+  const [notesByPassage, setNotesByPassage] = useState<Record<string, string>>({});
   const [userHighlights, setUserHighlights] = useState<string[]>([]);
+  const passageNoteKey = `${passageTitle}\n${passageText}`;
   const renderedText = useMemo(
     () => renderHighlightedText(passageText, highlightedText, userHighlights),
     [passageText, highlightedText, userHighlights]
@@ -243,7 +245,15 @@ export function ReadingExamView({
           {questions}
           <label className="notes-label">
             Notes
-            <textarea aria-label="Notes" rows={6} />
+            <textarea
+              aria-label="Notes"
+              rows={6}
+              value={notesByPassage[passageNoteKey] ?? ""}
+              onChange={(event) => {
+                const nextValue = event.target.value;
+                setNotesByPassage((current) => ({ ...current, [passageNoteKey]: nextValue }));
+              }}
+            />
           </label>
         </aside>
       </div>

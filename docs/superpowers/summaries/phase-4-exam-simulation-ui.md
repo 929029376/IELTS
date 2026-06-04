@@ -24,7 +24,7 @@
   - Draggable and keyboard-adjustable divider for pane-width changes, with a
     retained click shortcut.
   - Answer text highlighting.
-  - Notes panel.
+  - Notes panel with per-passage local note separation.
   - Font size controls.
 - Implemented `ListeningExamView`.
   - Section tabs.
@@ -101,6 +101,12 @@
   - the reading exam divider can be dragged to resize passage and question panes,
   - the divider can also be adjusted with ArrowLeft, ArrowRight, Home, and End,
   - the divider keeps accessible separator metadata and the existing click shortcut.
+- Added Mac reading notes hardening:
+  - reading notes are kept separately for each active passage inside the local
+    exam view,
+  - switching passages no longer carries a previous passage note into the next
+    passage,
+  - returning to a passage restores its local note.
 - Added Mac reading answer-evidence highlight hardening:
   - answer-sentence evidence in the reading exam view matches imported passage
     text without requiring identical casing,
@@ -285,6 +291,12 @@
       value but did not respond to keyboard resizing commands.
     - Passed after ArrowLeft, ArrowRight, Home, and End began updating the
       passage/question pane split.
+- Mac reading notes follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because notes typed in one reading passage were still
+      visible after switching to another passage.
+    - Passed after notes were keyed by active passage and restored when returning
+      to that passage.
 - Mac listening practice playback-controls follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because listening practice still rendered the local audio

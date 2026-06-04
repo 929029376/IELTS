@@ -185,6 +185,10 @@
   - the reading exam divider can be dragged to resize passage and question panes,
   - the divider keeps a click shortcut and accessible separator metadata,
   - ArrowLeft, ArrowRight, Home, and End can adjust the split from the keyboard.
+- Added Mac reading notes hardening:
+  - reading notes are scoped to the active passage inside the local exam view,
+  - switching to another passage starts with its own note state and returning to
+    the previous passage restores its note.
 - Added Mac reading answer-evidence highlight hardening:
   - reading mock/practice answer-sentence evidence highlights now tolerate
     casing differences and repeated whitespace from imported passage text.
@@ -1089,6 +1093,12 @@
     - Initially failed because the reading divider exposed separator value
       metadata but did not support keyboard resizing.
     - Passed after adding ArrowLeft, ArrowRight, Home, and End handling.
+- Mac reading notes hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because notes from one reading passage remained visible
+      after switching to a different passage.
+    - Passed after making notes local to each active passage in the reading exam
+      view.
 
 ## Remaining V1 Gaps
 
