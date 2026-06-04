@@ -450,6 +450,8 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       }
     } else if (event.type === "frequency.entry.upserted") {
       upsertFrequencyEntry(event.payload as FrequencyEntryRecord);
+    } else {
+      return { conflict: false, inserted: false };
     }
 
     syncRepo.recordSyncEvent({

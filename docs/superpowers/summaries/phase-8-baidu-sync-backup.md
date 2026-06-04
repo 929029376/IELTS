@@ -46,6 +46,10 @@
 - Added remote JSONL import:
   - on server startup when sync is configured,
   - through `POST /api/sync/import`.
+- Added forward-compatible sync import handling:
+  - unknown future event types are skipped without recording them in
+    `sync_events`,
+  - later app versions can still process those events once support is added.
 - Added event dedupe through `sync_events.event_id`.
 - Added merge behavior for attempts and answers.
 - Added conflict preservation for submitted local attempts:
@@ -111,6 +115,16 @@
     - Passed after the frequency-table sync follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
+- Sync forward-compatibility follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because unknown future sync events were recorded in
+      `sync_events` as already processed.
+    - Passed after treating unknown event types as skipped and leaving them
+      unrecorded for future app versions.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the sync forward-compatibility follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
   - Initially failed because the Manual sync button did not call the sync API or
     render a completion status.

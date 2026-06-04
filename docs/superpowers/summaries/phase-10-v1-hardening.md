@@ -129,6 +129,11 @@
   - remote frequency events update local `frequency_entries`,
   - frequency sync keeps high-frequency-first random test building aligned across
     devices.
+- Added sync forward-compatibility hardening:
+  - unknown future event types are skipped without recording a completed
+    `sync_events` row,
+  - future app versions can still process those events after new handlers are
+    added.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -366,6 +371,15 @@
     - Passed after wiring `frequency.entry.upserted` append/import behavior.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the frequency-table sync hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Sync forward-compatibility follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because unknown future event types were marked as
+      processed and would not be re-imported after an app upgrade.
+    - Passed after leaving unknown events unrecorded and counted as skipped.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the sync forward-compatibility hardening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - Mac readiness follow-up:

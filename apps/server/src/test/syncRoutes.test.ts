@@ -514,4 +514,51 @@ describe("sync routes", () => {
       rmSync(tempDir, { force: true, recursive: true });
     }
   });
+
+  it("leaves unknown future sync events unrecorded so upgrades can process them later", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-unknown-event-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    mkdirSync(syncFolderPath, { recursive: true });
+    writeFileSync(
+      join(syncFolderPath, "imports.jsonl"),
+      `${JSON.stringify({
+        createdAt: "2026-06-04T08:00:00.000Z",
+        deviceId: "future-device",
+        eventId: "future-event-id",
+        payload: {
+          reason: "A newer app version can understand this later."
+        },
+        type: "future.event.type"
+      })}\n`
+    );
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const db = (server as typeof server & { db: DatabaseHandle }).db;
+      expect(
+        (
+          db
+            .prepare("SELECT COUNT(*) AS count FROM sync_events WHERE event_id = ?")
+            .get("future-event-id") as { count: number }
+        ).count
+      ).toBe(0);
+
+      const sync = await server.inject({ method: "POST", url: "/api/sync/import" });
+      expect(sync.statusCode).toBe(200);
+      expect(sync.json()).toMatchObject({ imported: 0, skipped: 1 });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
 });
