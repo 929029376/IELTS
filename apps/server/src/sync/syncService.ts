@@ -265,6 +265,10 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       if (question.attemptId !== payload.id) {
         continue;
       }
+      const localQuestion = db.prepare("SELECT id FROM questions WHERE id = ?").get(question.questionId);
+      if (!localQuestion) {
+        continue;
+      }
       statement.run(question);
     }
   }

@@ -471,6 +471,11 @@
     accuracy analytics on another device,
   - malformed question-list rows whose `attemptId` does not match the attempt are
     ignored during import.
+- Added Mac remote missing-question sync hardening:
+  - remote attempt question-list rows whose `questionId` is not present in the
+    local question bank are skipped instead of failing the entire sync import,
+  - the remote attempt record still imports so history can appear before the
+    matching question bank is available locally.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -1988,6 +1993,17 @@
     - Passed with all 7 sync service tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test`
     - Passed with all 98 server tests.
+- Mac remote missing-question sync hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts -t "local question is missing"`
+    - Initially failed with a SQLite foreign-key error when a remote attempt
+      question-list row referenced a question id missing from the local question
+      bank.
+    - Passed after sync checks local question existence and skips those missing
+      question-list rows while keeping the attempt import.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+    - Passed with all 8 sync service tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 99 server tests.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

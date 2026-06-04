@@ -225,6 +225,45 @@ describe("sync service", () => {
     });
   });
 
+  it("skips remote attempt question rows when the local question is missing", () => {
+    const service = createSyncService(db, {
+      deviceId: "macbook",
+      deviceName: "MacBook",
+      platform: "darwin",
+      syncFolderPath: syncDir
+    });
+    service.ensureSyncFolder();
+    service.appendExternalEvent("attempts", {
+      createdAt: "2026-06-01T09:00:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-attempt-missing-question",
+      payload: {
+        estimatedBand: null,
+        id: "remote-attempt-missing-question-list",
+        mode: "mock",
+        questions: [
+          {
+            attemptId: "remote-attempt-missing-question-list",
+            id: "remote-attempt-missing-question-row",
+            questionId: "missing-local-question",
+            questionOrder: 1
+          }
+        ],
+        rawScore: null,
+        startedAt: "2026-06-01T09:00:00.000Z",
+        subject: "reading",
+        submittedAt: null
+      },
+      type: "attempt.created"
+    });
+
+    expect(service.importRemoteEvents()).toMatchObject({ imported: 1, skipped: 0 });
+    expect(createAttemptRepo(db).getAttemptWithAnswers("remote-attempt-missing-question-list")).toMatchObject({
+      id: "remote-attempt-missing-question-list",
+      questions: []
+    });
+  });
+
   it("keeps remote answer conflicts for submitted local attempts instead of overwriting", () => {
     const question = seedQuestion();
     const attempts = createAttemptRepo(db);
