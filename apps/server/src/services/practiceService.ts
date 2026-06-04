@@ -36,6 +36,13 @@ export class EmptyPracticeStartError extends Error {
   }
 }
 
+export class PracticeAttemptNotFoundError extends Error {
+  constructor() {
+    super("Attempt not found.");
+    this.name = "PracticeAttemptNotFoundError";
+  }
+}
+
 const wordLimitNumbers: Record<string, number> = {
   eight: 8,
   five: 5,
@@ -195,6 +202,11 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
       timeSpentSeconds: number;
       markedForReview: boolean;
     }) {
+      const attempt = attempts.getAttemptWithAnswers(input.attemptId);
+      if (!attempt) {
+        throw new PracticeAttemptNotFoundError();
+      }
+
       const question = questions.getQuestionWithAnswerKeys(input.questionId);
       if (!question) {
         throw new Error("Question not found.");

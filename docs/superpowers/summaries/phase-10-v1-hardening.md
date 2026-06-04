@@ -401,6 +401,11 @@
   - missing-part mock starts no longer surface as server errors,
   - no attempt row is created until the frequency-weighted builder can assemble a
     complete part distribution.
+- Added Mac answer-write integrity hardening:
+  - answer-save requests for missing attempt ids now return `404`,
+  - invalid attempt ids no longer surface as database/server errors,
+  - no answer row or Baidu Cloud answer sync event is written for a missing
+    attempt.
 - Added Mac local exam metadata fallback hardening:
   - blank imported passage titles now render as `Untitled passage` in loaded
     mock/practice lists, reading passage headers, and listening section labels,
@@ -1800,6 +1805,14 @@
       and the practice route maps it to `409` before any attempt is inserted.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 21 practice route tests.
+- Mac answer-write integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "missing attempt"`
+    - Initially failed because saving an answer against a missing attempt id
+      returned `500` after hitting the database foreign-key boundary.
+    - Passed after the practice service checks attempt existence before scoring
+      and saving the answer, and the route maps missing attempts to `404`.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 22 practice route tests.
 - Mac practice local-resource hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because free practice attempts did not receive imported

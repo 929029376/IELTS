@@ -3,7 +3,11 @@ import { z } from "zod";
 import { frequencyClassSchema, partSchema, questionTypeSchema } from "@ielts/shared";
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
-import { createPracticeService, EmptyPracticeStartError } from "../services/practiceService";
+import {
+  createPracticeService,
+  EmptyPracticeStartError,
+  PracticeAttemptNotFoundError
+} from "../services/practiceService";
 import { MissingMockCandidateError, type TestBuilderOptions } from "../services/testBuilder";
 import type { SyncService } from "../sync/syncService";
 
@@ -56,10 +60,18 @@ export function registerPracticeRoutes(
   server.post("/api/practice/:attemptId/answer", async (request, reply) => {
     const params = z.object({ attemptId: z.string().min(1) }).parse(request.params);
     const input = answerSchema.parse(request.body);
-    const result = practice.answerQuestion({
+    let result: ReturnType<typeof practice.answerQuestion>;
+    try {
+      result = practice.answerQuestion({
         attemptId: params.attemptId,
         ...input
       });
+    } catch (error) {
+      if (error instanceof PracticeAttemptNotFoundError) {
+        return reply.code(404).send({ error: error.message });
+      }
+      throw error;
+    }
     sync?.appendAnswerEvent(result, new Date().toISOString());
     return reply.send(result);
   });
