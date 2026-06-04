@@ -41,6 +41,7 @@ const cards = [
 const emptyHistory: HistoryAttemptView[] = [];
 
 const emptyAnalytics: ReportsAnalyticsView = {
+  frequencyRows: [],
   mistakeLabels: [],
   partRows: [],
   questionTypeRows: []
@@ -124,6 +125,7 @@ interface ServerAnalytics {
   byFrequencyClass?: Record<string, AccuracyBucket>;
   byPart?: Record<string, Record<string, AccuracyBucket>>;
   byQuestionType?: Record<string, AccuracyBucket>;
+  frequencyRows?: ReportsAnalyticsView["frequencyRows"];
   mistakeLabels?: Array<{ count: number; label: string }>;
   partRows?: ReportsAnalyticsView["partRows"];
   questionTypeRows?: ReportsAnalyticsView["questionTypeRows"];
@@ -162,9 +164,24 @@ function bucketRows(prefix: string, buckets: Record<string, AccuracyBucket> | un
   }));
 }
 
+function frequencyLabel(label: string) {
+  const normalized = label.charAt(0).toUpperCase() + label.slice(1);
+  return `${normalized} frequency`;
+}
+
+function frequencyBucketRows(buckets: Record<string, AccuracyBucket> | undefined) {
+  return Object.entries(buckets ?? {}).map(([label, bucket]) => ({
+    accuracy: bucket.accuracy,
+    correct: bucket.correct,
+    label: frequencyLabel(label),
+    total: bucket.total
+  }));
+}
+
 function toAnalyticsView(analytics: ServerAnalytics): ReportsAnalyticsView {
   if (analytics.partRows && analytics.questionTypeRows) {
     return {
+      frequencyRows: analytics.frequencyRows ?? [],
       mistakeLabels: analytics.mistakeLabels ?? [],
       partRows: analytics.partRows,
       questionTypeRows: analytics.questionTypeRows
@@ -172,11 +189,11 @@ function toAnalyticsView(analytics: ServerAnalytics): ReportsAnalyticsView {
   }
 
   return {
+    frequencyRows: frequencyBucketRows(analytics.byFrequencyClass),
     mistakeLabels: analytics.mistakeLabels ?? [],
     partRows: [
       ...bucketRows("Listening", analytics.byPart?.listening),
-      ...bucketRows("Reading", analytics.byPart?.reading),
-      ...bucketRows("Frequency", analytics.byFrequencyClass)
+      ...bucketRows("Reading", analytics.byPart?.reading)
     ],
     questionTypeRows: bucketRows("", analytics.byQuestionType)
   };

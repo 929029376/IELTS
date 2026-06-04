@@ -19,6 +19,7 @@ export interface AccuracyRowView {
 }
 
 export interface ReportsAnalyticsView {
+  frequencyRows: AccuracyRowView[];
   mistakeLabels: Array<{ count: number; label: string }>;
   partRows: AccuracyRowView[];
   questionTypeRows: AccuracyRowView[];
@@ -97,6 +98,18 @@ function renderAnswerSentence(item: HistoryReviewItem) {
 
 function conflictsForQuestion(review: HistoryReview, questionId: string): HistoryReviewConflict[] {
   return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
+}
+
+function renderAccuracyRows(rows: AccuracyRowView[]) {
+  return rows.map((row) => (
+    <div className="accuracy-row" key={row.label}>
+      <span>{row.label}</span>
+      <strong>{formatAccuracy(row.accuracy)}</strong>
+      <small>
+        {row.correct}/{row.total}
+      </small>
+    </div>
+  ));
 }
 
 export function HistoryReportsPreview({ analytics, dashboard, history }: HistoryReportsPreviewProps) {
@@ -287,16 +300,27 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
 
         <section className="analytics-list" aria-label="Accuracy analytics">
           <h3>Accuracy</h3>
-          {[...analytics.partRows, ...analytics.questionTypeRows].length > 0 ? (
-            [...analytics.partRows, ...analytics.questionTypeRows].map((row) => (
-              <div className="accuracy-row" key={row.label}>
-                <span>{row.label}</span>
-                <strong>{formatAccuracy(row.accuracy)}</strong>
-                <small>
-                  {row.correct}/{row.total}
-                </small>
-              </div>
-            ))
+          {[...analytics.partRows, ...analytics.frequencyRows, ...analytics.questionTypeRows].length > 0 ? (
+            <>
+              {analytics.partRows.length > 0 ? (
+                <>
+                  <h4>Part accuracy</h4>
+                  {renderAccuracyRows(analytics.partRows)}
+                </>
+              ) : null}
+              {analytics.frequencyRows.length > 0 ? (
+                <>
+                  <h4>Frequency accuracy</h4>
+                  {renderAccuracyRows(analytics.frequencyRows)}
+                </>
+              ) : null}
+              {analytics.questionTypeRows.length > 0 ? (
+                <>
+                  <h4>Question type accuracy</h4>
+                  {renderAccuracyRows(analytics.questionTypeRows)}
+                </>
+              ) : null}
+            </>
           ) : (
             <p className="empty-state">Accuracy appears after submitted answers</p>
           )}

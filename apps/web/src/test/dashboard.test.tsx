@@ -151,6 +151,8 @@ describe("dashboard shell", () => {
     });
     expect(await screen.findByText("Reading 36/40, Band 8")).toBeInTheDocument();
     expect(screen.getByText("Review summary completion")).toBeInTheDocument();
+    expect(screen.getByText("Frequency accuracy")).toBeInTheDocument();
+    expect(screen.getByText("High frequency")).toBeInTheDocument();
     expect(screen.getByText("live/import.zip")).toBeInTheDocument();
     expect(screen.getByText("Live Airport Enquiry")).toBeInTheDocument();
     expect(screen.queryByText("reading/broken.pdf")).not.toBeInTheDocument();

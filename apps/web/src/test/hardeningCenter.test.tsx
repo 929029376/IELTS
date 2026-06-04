@@ -117,7 +117,7 @@ describe("V1 hardening center", () => {
   it("shows no-history empty states in reports", () => {
     render(
       <HistoryReportsPreview
-        analytics={{ mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
         dashboard={{
           latestMockScore: "No mock submitted",
           predictedListening: "Need history",

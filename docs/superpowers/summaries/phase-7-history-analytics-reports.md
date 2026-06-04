@@ -40,6 +40,7 @@
   - recommended next practice,
   - history table,
   - history-row review reopening,
+  - frequency-class accuracy group,
   - accuracy rows,
   - mistake-label chips,
   - report export actions.
@@ -66,6 +67,10 @@
   - selecting an attempt calls `GET /api/practice/:attemptId/review`,
   - the reports panel renders saved answer evidence, answer-sentence highlight,
     explanation, accepted answers, synonym notes, and saved sync conflicts.
+- Added Mac frequency-accuracy report grouping:
+  - backend `byFrequencyClass` analytics are mapped into dedicated report rows,
+  - the Mac reports panel shows a separate Frequency accuracy group instead of
+    mixing high/medium/low accuracy into part rows.
 
 ## Verification Evidence
 
@@ -105,6 +110,19 @@
       conflicts returned by the practice review API.
     - Passed after rendering remote conflicting answers with the source device
       inside the history review panel.
+- Mac frequency-accuracy grouping follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because frequency-class accuracy rows were not rendered
+      as a separate analytics group.
+    - Passed after adding `frequencyRows` to the report view and rendering a
+      dedicated Frequency accuracy section.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Passed after mapping live API `byFrequencyClass` data into the new
+      frequency accuracy report rows.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the frequency-accuracy grouping follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac post-mock dashboard refresh follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because submitting a local mock did not refetch dashboard

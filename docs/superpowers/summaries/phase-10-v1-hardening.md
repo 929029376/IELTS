@@ -169,6 +169,10 @@
   - mock score reports explicitly label IELTS band scores as estimates,
   - prediction cards explain that local predicted bands are estimates and
     official raw-score cutoffs can vary.
+- Added Mac frequency-accuracy report hardening:
+  - report analytics now keep frequency-class accuracy in its own group,
+  - live dashboard API data maps `byFrequencyClass` into high/medium/low
+    frequency rows for easier high-frequency review.
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
@@ -825,6 +829,18 @@
     - Initially failed because prediction cards did not explain that predicted
       bands are estimates.
     - Passed after adding the prediction estimate note.
+- Mac frequency-accuracy report hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because frequency-class accuracy rows were not shown as a
+      dedicated report group.
+    - Passed after adding `frequencyRows` to the report view.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Passed after mapping live API `byFrequencyClass` data into visible
+      frequency accuracy rows.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the frequency-accuracy report hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 
 ## Remaining V1 Gaps
 

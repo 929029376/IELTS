@@ -24,6 +24,7 @@ describe("history and reports preview", () => {
           }
         ]}
         analytics={{
+          frequencyRows: [],
           mistakeLabels: [{ count: 3, label: "定位失败" }],
           partRows: [
             { accuracy: 0.75, correct: 3, label: "Listening P1", total: 4 },
@@ -50,6 +51,31 @@ describe("history and reports preview", () => {
     expect(screen.getByText("Export mock report")).toBeInTheDocument();
   });
 
+  it("renders frequency class accuracy as its own analytics group", () => {
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{
+          frequencyRows: [{ accuracy: 1 / 3, correct: 1, label: "High frequency", total: 3 }],
+          mistakeLabels: [],
+          partRows: [{ accuracy: 0.75, correct: 3, label: "Reading P1", total: 4 }],
+          questionTypeRows: [{ accuracy: 0.5, correct: 2, label: "matching", total: 4 }]
+        }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Review high-frequency reading",
+          weakestQuestionType: "matching"
+        }}
+      />
+    );
+
+    expect(screen.getByText("Frequency accuracy")).toBeInTheDocument();
+    expect(screen.getByText("High frequency")).toBeInTheDocument();
+    expect(screen.getByText("33%")).toBeInTheDocument();
+  });
+
   it("exports local report files through the reports API", async () => {
     const fetchMock = vi.fn(async () => ({
       ok: true,
@@ -64,7 +90,7 @@ describe("history and reports preview", () => {
     render(
       <HistoryReportsPreview
         history={[]}
-        analytics={{ mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
         dashboard={{
           latestMockScore: "No mock submitted",
           predictedListening: "Need history",
@@ -131,7 +157,7 @@ describe("history and reports preview", () => {
             submittedAt: "2026-05-30T11:00:00.000Z"
           }
         ]}
-        analytics={{ mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
         dashboard={{
           latestMockScore: "Reading 31/40, Band 7",
           predictedListening: "Need history",
@@ -213,7 +239,7 @@ describe("history and reports preview", () => {
             submittedAt: "2026-06-04T10:40:00.000Z"
           }
         ]}
-        analytics={{ mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
         dashboard={{
           latestMockScore: "Listening 28/40, Band 6.5",
           predictedListening: "6.0-7.0",
