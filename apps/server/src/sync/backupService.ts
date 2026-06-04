@@ -21,6 +21,7 @@ const backupTables = [
   "dictation_attempts",
   "frequency_entries",
   "attempts",
+  "attempt_questions",
   "attempt_answers",
   "mistake_labels",
   "attempt_answer_conflicts",

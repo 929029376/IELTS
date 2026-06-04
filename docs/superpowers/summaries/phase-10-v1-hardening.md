@@ -433,6 +433,23 @@
     repeated submit clicks,
   - no duplicate submitted-attempt sync event is appended for an already
     submitted attempt.
+- Added Mac unanswered-review integrity hardening:
+  - started attempts now persist their loaded question ids in `attempt_questions`,
+  - submitted reviews now include unanswered loaded questions instead of only
+    saved answer rows,
+  - unanswered review rows return `isAnswered: false`, `isCorrect: false`, and
+    an empty raw answer for clearer post-test analysis,
+  - full mock score estimates now use the loaded 40-question attempt size so
+    skipped questions count as zero rather than suppressing the mock band
+    estimate,
+  - manual backups include `attempt_questions` so restored local attempts keep
+    full review coverage.
+- Added Mac unanswered-review UI hardening:
+  - submitted mock reviews show `Unanswered` when a loaded question had no saved
+    answer,
+  - reopened history reviews show the same `Unanswered` state,
+  - existing older review payloads without `isAnswered` remain compatible and
+    continue to display `Correct` or `Incorrect`.
 - Added Mac review-attempt integrity hardening:
   - review requests for missing attempt ids now return `404`,
   - invalid history/review links no longer surface as server errors,
@@ -1884,6 +1901,29 @@
       `409`, preventing duplicate submitted-attempt sync events.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 28 practice route tests.
+- Mac unanswered-review integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "unanswered loaded questions"`
+    - Initially failed because submitted attempt reviews returned only the one
+      saved answer row instead of all 40 loaded questions.
+    - Passed after attempts persist loaded question ids and review generation
+      marks missing answers as unanswered, incorrect review rows.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "blank submitted mock review evidence"`
+    - Initially failed because submitted mock review rows with
+      `isAnswered: false` still rendered as `Incorrect`.
+    - Passed after the mock review heading renders `Unanswered` for unanswered
+      loaded questions.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "blank history review answers"`
+    - Initially failed because reopened history review rows with
+      `isAnswered: false` still rendered as `Incorrect`.
+    - Passed after the history review heading uses the same unanswered status
+      fallback.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 29 practice route tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/dbRepositories.test.ts src/test/backupService.test.ts src/test/backupRoutes.test.ts`
+    - Passed with database repository and backup coverage after adding
+      `attempt_questions` to the schema and backup table list.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx src/test/historyReports.test.tsx`
+    - Passed with submitted review and history review UI coverage.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

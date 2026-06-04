@@ -994,7 +994,22 @@ describe("practice routes", () => {
         url: `/api/practice/${started.attemptId}/review`
       });
       expect(review.statusCode).toBe(200);
-      expect(review.json()).toMatchObject({
+      const reviewed = review.json<{
+        answers: Array<{ isCorrect: boolean; questionId: string; rawAnswer: string }>;
+        id: string;
+        reviewItems: Array<{
+          acceptedAnswers: string[];
+          answerSentence: string | null;
+          explanation: string | null;
+          isCorrect: boolean;
+          passageTitle: string | null;
+          prompt: string | null;
+          questionId: string;
+          rawAnswer: string;
+          synonyms: string[];
+        }>;
+      }>();
+      expect(reviewed).toMatchObject({
         id: started.attemptId,
         answers: [
           expect.objectContaining({
@@ -1002,20 +1017,91 @@ describe("practice routes", () => {
             rawAnswer: " Answer 1 ",
             isCorrect: true
           })
-        ],
-        reviewItems: [
-          expect.objectContaining({
-            answerSentence: "The answer is answer 1.",
-            acceptedAnswers: ["answer 1"],
-            explanation: "Question 1 is answered directly in the sample text.",
-            isCorrect: true,
-            passageTitle: "Forty Question Practice Set",
-            prompt: "Question 1",
-            rawAnswer: " Answer 1 ",
-            synonyms: [],
-            questionId: firstQuestion.id
-          })
         ]
+      });
+      expect(reviewed.reviewItems).toHaveLength(40);
+      expect(reviewed.reviewItems[0]).toMatchObject({
+        answerSentence: "The answer is answer 1.",
+        acceptedAnswers: ["answer 1"],
+        explanation: "Question 1 is answered directly in the sample text.",
+        isCorrect: true,
+        passageTitle: "Forty Question Practice Set",
+        prompt: "Question 1",
+        rawAnswer: " Answer 1 ",
+        synonyms: [],
+        questionId: firstQuestion.id
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("includes unanswered loaded questions in submitted attempt reviews", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-review-unanswered-questions-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string; questionNumber: number }>;
+      }>();
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          questionId: started.questions[0].id,
+          rawAnswer: "answer 1",
+          timeSpentSeconds: 11,
+          markedForReview: false
+        }
+      });
+      expect(answer.statusCode).toBe(200);
+
+      const submit = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/submit`
+      });
+      expect(submit.statusCode).toBe(200);
+
+      const review = await server.inject({
+        method: "GET",
+        url: `/api/practice/${started.attemptId}/review`
+      });
+
+      expect(review.statusCode).toBe(200);
+      const reviewed = review.json<{
+        reviewItems: Array<{
+          isAnswered: boolean;
+          isCorrect: boolean;
+          questionId: string;
+          questionNumber: number;
+          rawAnswer: string;
+        }>;
+      }>();
+      expect(reviewed.reviewItems).toHaveLength(40);
+      expect(reviewed.reviewItems[0]).toMatchObject({
+        isAnswered: true,
+        isCorrect: true,
+        questionId: started.questions[0].id,
+        rawAnswer: "answer 1"
+      });
+      expect(reviewed.reviewItems[1]).toMatchObject({
+        isAnswered: false,
+        isCorrect: false,
+        questionId: started.questions[1].id,
+        questionNumber: 2,
+        rawAnswer: ""
       });
     } finally {
       await server.close();

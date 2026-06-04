@@ -23,9 +23,17 @@ export interface AttemptAnswerRecord {
   markedForReview: boolean;
 }
 
+export interface AttemptQuestionRecord {
+  id: string;
+  attemptId: string;
+  questionId: string;
+  questionOrder: number;
+}
+
 export interface AttemptWithAnswers extends AttemptRecord {
   answers: AttemptAnswerRecord[];
   conflicts: AttemptAnswerConflictRecord[];
+  questions: AttemptQuestionRecord[];
 }
 
 export interface AttemptAnswerConflictRecord {
@@ -57,6 +65,27 @@ export function createAttemptRepo(db: DatabaseHandle) {
         VALUES (@id, @mode, @subject, @startedAt, @submittedAt, @rawScore, @estimatedBand)
       `).run(record);
       return record;
+    },
+
+    recordAttemptQuestions(attemptId: string, questionIds: string[]): AttemptQuestionRecord[] {
+      const records = questionIds.map((questionId, index): AttemptQuestionRecord => {
+        return {
+          attemptId,
+          id: randomUUID(),
+          questionId,
+          questionOrder: index + 1
+        };
+      });
+
+      const statement = db.prepare(`
+        INSERT OR IGNORE INTO attempt_questions (id, attempt_id, question_id, question_order)
+        VALUES (@id, @attemptId, @questionId, @questionOrder)
+      `);
+      for (const record of records) {
+        statement.run(record);
+      }
+
+      return records;
     },
 
     saveAnswer(input: Omit<AttemptAnswerRecord, "id">): AttemptAnswerRecord {
@@ -207,6 +236,20 @@ export function createAttemptRepo(db: DatabaseHandle) {
         `
         )
         .all(attemptId) as Array<Omit<AttemptAnswerConflictRecord, "remoteIsCorrect"> & { remoteIsCorrect: number }>;
+      const loadedQuestions = db
+        .prepare(
+          `
+          SELECT
+            id,
+            attempt_id AS attemptId,
+            question_id AS questionId,
+            question_order AS questionOrder
+          FROM attempt_questions
+          WHERE attempt_id = ?
+          ORDER BY question_order ASC
+        `
+        )
+        .all(attemptId) as AttemptQuestionRecord[];
 
       return {
         ...attempt,
@@ -218,7 +261,8 @@ export function createAttemptRepo(db: DatabaseHandle) {
         conflicts: conflicts.map((conflict) => ({
           ...conflict,
           remoteIsCorrect: conflict.remoteIsCorrect === 1
-        }))
+        })),
+        questions: loadedQuestions
       };
     }
   };

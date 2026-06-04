@@ -603,6 +603,7 @@ describe("history and reports preview", () => {
                 acceptedAnswers: ["   ", ""],
                 answerSentence: "   ",
                 explanation: "Question was imported without answer evidence.",
+                isAnswered: false,
                 isCorrect: false,
                 part: "P2",
                 passageTitle: "Transport",
@@ -653,6 +654,7 @@ describe("history and reports preview", () => {
 
     const reviewRegion = await screen.findByRole("region", { name: "History review details" });
     expect(reviewRegion).toBeInTheDocument();
+    expect(screen.getByText("Unanswered")).toBeInTheDocument();
     expect(screen.getByText("12 Review question")).toBeInTheDocument();
     expect(screen.getByText("Your answer: No answer")).toBeInTheDocument();
     expect(screen.getByText("Accepted: Not configured")).toBeInTheDocument();

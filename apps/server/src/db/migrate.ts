@@ -123,6 +123,15 @@ export function migrate(target?: string | DatabaseHandle): void {
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
       );
 
+      CREATE TABLE IF NOT EXISTS attempt_questions (
+        id TEXT PRIMARY KEY,
+        attempt_id TEXT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,
+        question_id TEXT NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+        question_order INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE (attempt_id, question_id)
+      );
+
       CREATE TABLE IF NOT EXISTS attempt_answers (
         id TEXT PRIMARY KEY,
         attempt_id TEXT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,

@@ -40,6 +40,7 @@ interface MockReviewItem {
   acceptedAnswers: string[];
   answerSentence: string | null;
   explanation: string | null;
+  isAnswered?: boolean;
   isCorrect: boolean;
   part: string | null;
   passageTitle: string | null;
@@ -160,6 +161,14 @@ function reviewPromptLabel(value?: string | null) {
 
 function formatReviewUserAnswer(rawAnswer: string) {
   return rawAnswer.trim() || "No answer";
+}
+
+function formatReviewStatus(item: MockReviewItem) {
+  if (item.isAnswered === false) {
+    return "Unanswered";
+  }
+
+  return item.isCorrect ? "Correct" : "Incorrect";
 }
 
 function formatConflictAnswer(rawAnswer: string) {
@@ -636,7 +645,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
             {mockReview.reviewItems.map((item) => (
               <li key={item.questionId}>
                 <div className="mock-review-heading">
-                  <span>{item.isCorrect ? "Correct" : "Incorrect"}</span>
+                  <span>{formatReviewStatus(item)}</span>
                   <strong>
                     {item.questionNumber ?? "Question"} {reviewPromptLabel(item.prompt)}
                   </strong>

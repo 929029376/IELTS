@@ -46,6 +46,7 @@ interface HistoryReviewItem {
   acceptedAnswers: string[];
   answerSentence: string | null;
   explanation: string | null;
+  isAnswered?: boolean;
   isCorrect: boolean;
   part: string | null;
   passageTitle: string | null;
@@ -111,6 +112,14 @@ function formatHistoryDate(submittedAt: string) {
 
 function formatUserAnswer(rawAnswer: string) {
   return rawAnswer.trim() || "No answer";
+}
+
+function formatReviewStatus(item: HistoryReviewItem) {
+  if (item.isAnswered === false) {
+    return "Unanswered";
+  }
+
+  return item.isCorrect ? "Correct" : "Incorrect";
 }
 
 function formatConflictAnswer(rawAnswer: string) {
@@ -354,7 +363,7 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
               {historyReview.reviewItems.map((item) => (
                 <li key={item.questionId}>
                   <div className="mock-review-heading">
-                    <span>{item.isCorrect ? "Correct" : "Incorrect"}</span>
+                    <span>{formatReviewStatus(item)}</span>
                     <strong>
                       {item.questionNumber ?? "Question"} {formatReviewPrompt(item.prompt)}
                     </strong>

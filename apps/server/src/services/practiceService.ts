@@ -209,6 +209,10 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
         subject: input.subject,
         startedAt: new Date().toISOString()
       });
+      attempts.recordAttemptQuestions(
+        attempt.id,
+        practiceQuestions.map((question) => question.id)
+      );
 
       return {
         attemptId: attempt.id,
@@ -286,7 +290,8 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
 
       const rawScore = attempt.answers.filter((answer) => answer.isCorrect).length;
       const table = attempt.subject === "listening" ? listeningBandTable : academicReadingBandTable;
-      const shouldEstimateBand = attempt.answers.length >= fullIeltsTestQuestionCount;
+      const loadedQuestionCount = attempt.questions.length || attempt.answers.length;
+      const shouldEstimateBand = attempt.mode === "mock" && loadedQuestionCount >= fullIeltsTestQuestionCount;
       const estimatedBand = shouldEstimateBand ? estimateBand(rawScore, table) : null;
       const submittedAt = new Date().toISOString();
 
@@ -311,22 +316,29 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
         throw new PracticeAttemptNotFoundError();
       }
 
-      const reviewItems = attempt.answers.map((answer) => {
-        const question = questions.getQuestionWithAnswerKeys(answer.questionId);
+      const answerByQuestionId = new Map(attempt.answers.map((answer) => [answer.questionId, answer]));
+      const reviewQuestionIds =
+        attempt.questions.length > 0
+          ? attempt.questions.map((loadedQuestion) => loadedQuestion.questionId)
+          : attempt.answers.map((answer) => answer.questionId);
+      const reviewItems = reviewQuestionIds.map((questionId) => {
+        const answer = answerByQuestionId.get(questionId);
+        const question = questions.getQuestionWithAnswerKeys(questionId);
         const answerKeys = question?.answerKeys ?? [];
         return {
           answerSentence: answerKeys.find((answerKey) => answerKey.answerSentence)?.answerSentence ?? null,
           acceptedAnswers: answerKeys.flatMap((answerKey) => answerKey.acceptedAnswers),
           explanation: answerKeys.find((answerKey) => answerKey.explanation)?.explanation ?? null,
-          isCorrect: answer.isCorrect,
-          markedForReview: answer.markedForReview,
+          isAnswered: Boolean(answer),
+          isCorrect: answer?.isCorrect ?? false,
+          markedForReview: answer?.markedForReview ?? false,
           part: question?.part ?? null,
           passageTitle: question?.passageTitle ?? null,
           prompt: question?.prompt ?? null,
-          questionId: answer.questionId,
+          questionId,
           questionNumber: question?.questionNumber ?? null,
           questionType: question?.questionType ?? null,
-          rawAnswer: answer.rawAnswer,
+          rawAnswer: answer?.rawAnswer ?? "",
           synonyms: answerKeys.flatMap((answerKey) => answerKey.synonyms)
         };
       });

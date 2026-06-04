@@ -1691,6 +1691,7 @@ describe("exam simulation components", () => {
                 acceptedAnswers: [" ", ""],
                 answerSentence: "   ",
                 explanation: " ",
+                isAnswered: false,
                 isCorrect: false,
                 part: "P1",
                 passageTitle: "Blank Review Passage",
@@ -1718,6 +1719,7 @@ describe("exam simulation components", () => {
     fireEvent.click(screen.getByRole("button", { name: "Submit local mock" }));
 
     expect(await screen.findByRole("region", { name: "Mock review details" })).toBeInTheDocument();
+    expect(screen.getByText("Unanswered")).toBeInTheDocument();
     expect(screen.getByText("1 Review question")).toBeInTheDocument();
     expect(screen.getByText("Your answer: No answer")).toBeInTheDocument();
     expect(screen.getByText("Accepted: Not configured")).toBeInTheDocument();
