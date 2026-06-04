@@ -446,6 +446,41 @@ describe("SyncSettingsPreview", () => {
     expect(screen.queryByText("Sync folder saved")).not.toBeInTheDocument();
   });
 
+  it("clears stale sync-folder saved feedback when the folder path is edited", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath: "/Users/musheng/Desktop/同步空间"
+      })
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Sync folder path"), {
+      target: { value: "/Users/musheng/Desktop/同步空间" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save sync folder" }));
+
+    expect(await screen.findByText("Sync folder saved")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Sync folder path"), {
+      target: { value: "/Users/musheng/Desktop/同步空间/IELTS-Sync-2" }
+    });
+
+    expect(screen.queryByText("Sync folder saved")).not.toBeInTheDocument();
+  });
+
   it("fills the sync folder path from a selected JSONL sync file", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);

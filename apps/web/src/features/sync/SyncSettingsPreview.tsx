@@ -129,6 +129,11 @@ export function SyncSettingsPreview({
     }
   }
 
+  function updateEditableSyncPath(path: string) {
+    setEditableSyncPath(path);
+    setSyncConfigSaved(false);
+  }
+
   async function runManualSync() {
     setIsSyncing(true);
     setSyncError(null);
@@ -223,9 +228,8 @@ export function SyncSettingsPreview({
     const localPath = getLocalFilePath(file);
     const parentDirectory = getParentDirectory(localPath);
     if (parentDirectory.length > 0) {
-      setEditableSyncPath(parentDirectory);
+      updateEditableSyncPath(parentDirectory);
       setSyncError(null);
-      setSyncConfigSaved(false);
       return;
     }
 
@@ -260,7 +264,7 @@ export function SyncSettingsPreview({
             <span>Sync folder path</span>
             <input
               aria-label="Sync folder path"
-              onChange={(event) => setEditableSyncPath(event.target.value)}
+              onChange={(event) => updateEditableSyncPath(event.target.value)}
               value={editableSyncPath}
             />
           </label>

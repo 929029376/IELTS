@@ -409,6 +409,10 @@
     `PUT /api/sync/config`,
   - saved sync folder paths are written to local runtime config JSON and loaded
     again when the real server starts.
+- Added Mac sync-folder edit feedback hardening:
+  - editing the sync folder path clears previous `Sync folder saved` feedback,
+  - selecting another sync JSONL or `devices.json` file also clears stale saved
+    feedback before the next save attempt.
 - Added Mac sync-settings metadata fallback hardening:
   - blank sync folder display values now render as `Sync folder not configured`,
   - blank device names now render as `Unknown device`,
@@ -1003,6 +1007,25 @@
     - Shared: 4 tests passed.
     - Server: 73 tests passed.
     - Web: 129 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed, including Rust runtime diagnostics.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
+- Mac sync-folder edit feedback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "folder path is edited"`
+    - Initially failed because editing the sync folder path after a successful
+      save left stale `Sync folder saved` feedback visible.
+    - Passed after sync folder path changes clear saved-feedback state.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - 15 tests passed.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Web TypeScript and Vite production build passed.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed on macOS while Windows evidence remains intentionally deferred.
+    - Shared: 4 tests passed.
+    - Server: 73 tests passed.
+    - Web: 132 tests passed.
     - Playwright Chromium: 2 tests passed.
     - Production build passed.
     - `desktop:check` passed, including Rust runtime diagnostics.
