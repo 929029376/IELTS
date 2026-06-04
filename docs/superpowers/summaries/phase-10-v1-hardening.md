@@ -406,6 +406,11 @@
   - invalid attempt ids no longer surface as database/server errors,
   - no answer row or Baidu Cloud answer sync event is written for a missing
     attempt.
+- Added Mac answer-question integrity hardening:
+  - answer-save requests for missing question ids now return `404`,
+  - invalid question ids no longer surface as server errors,
+  - no answer row or Baidu Cloud answer sync event is written for a missing
+    question.
 - Added Mac submit-attempt integrity hardening:
   - submit requests for missing attempt ids now return `404`,
   - invalid submit requests no longer surface as server errors,
@@ -1822,6 +1827,14 @@
       and saving the answer, and the route maps missing attempts to `404`.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 22 practice route tests.
+- Mac answer-question integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "missing question"`
+    - Initially failed because saving an answer against a missing question id
+      returned `500`.
+    - Passed after answer saving uses a typed question-not-found error and the
+      practice route maps it to `404` before writing an answer.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 25 practice route tests.
 - Mac submit-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "submitting a missing attempt"`
     - Initially failed because submitting a missing attempt id returned `500`.

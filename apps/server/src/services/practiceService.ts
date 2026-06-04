@@ -43,6 +43,13 @@ export class PracticeAttemptNotFoundError extends Error {
   }
 }
 
+export class PracticeQuestionNotFoundError extends Error {
+  constructor() {
+    super("Question not found.");
+    this.name = "PracticeQuestionNotFoundError";
+  }
+}
+
 const wordLimitNumbers: Record<string, number> = {
   eight: 8,
   five: 5,
@@ -209,7 +216,7 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
 
       const question = questions.getQuestionWithAnswerKeys(input.questionId);
       if (!question) {
-        throw new Error("Question not found.");
+        throw new PracticeQuestionNotFoundError();
       }
 
       const acceptedAnswers = question.answerKeys.flatMap((answerKey) => answerKey.acceptedAnswers);

@@ -6,7 +6,8 @@ import type { DatabaseHandle } from "../db/database";
 import {
   createPracticeService,
   EmptyPracticeStartError,
-  PracticeAttemptNotFoundError
+  PracticeAttemptNotFoundError,
+  PracticeQuestionNotFoundError
 } from "../services/practiceService";
 import { MissingMockCandidateError, type TestBuilderOptions } from "../services/testBuilder";
 import type { SyncService } from "../sync/syncService";
@@ -68,6 +69,9 @@ export function registerPracticeRoutes(
       });
     } catch (error) {
       if (error instanceof PracticeAttemptNotFoundError) {
+        return reply.code(404).send({ error: error.message });
+      }
+      if (error instanceof PracticeQuestionNotFoundError) {
         return reply.code(404).send({ error: error.message });
       }
       throw error;

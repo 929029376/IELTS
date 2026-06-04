@@ -1023,6 +1023,46 @@ describe("practice routes", () => {
     }
   });
 
+  it("returns not found instead of writing answers for a missing question", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-answer-missing-question-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+      }>();
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId: "missing-question-id",
+          rawAnswer: "answer 1",
+          timeSpentSeconds: 9
+        }
+      });
+
+      expect(answer.statusCode).toBe(404);
+      expect(answer.json()).toMatchObject({
+        error: "Question not found."
+      });
+      expect(countAttemptAnswers(databasePath)).toBe(0);
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("returns not found when submitting a missing attempt", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-submit-missing-attempt-"));
     const databasePath = join(tempDir, "ielts.db");
