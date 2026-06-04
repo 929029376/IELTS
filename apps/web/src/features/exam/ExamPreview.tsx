@@ -53,6 +53,10 @@ interface MockReview {
   reviewItems: MockReviewItem[];
 }
 
+interface ExamPreviewProps {
+  onMockSubmitted?: () => void;
+}
+
 async function startMock(subject: "listening" | "reading"): Promise<StartedMock> {
   const response = await fetch("/api/practice/start", {
     body: JSON.stringify({ mode: "mock", subject }),
@@ -82,7 +86,7 @@ function renderReviewEvidence(item: MockReviewItem) {
   return <mark className="ielts-highlight">{item.answerSentence}</mark>;
 }
 
-export function ExamPreview() {
+export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isStarting, setIsStarting] = useState(false);
@@ -148,6 +152,7 @@ export function ExamPreview() {
         throw new Error("Could not submit mock");
       }
       setScoreReport((await response.json()) as MockSubmitResult);
+      onMockSubmitted?.();
       const reviewResponse = await fetch(`/api/practice/${activeMock.attemptId}/review`, {
         method: "GET"
       });

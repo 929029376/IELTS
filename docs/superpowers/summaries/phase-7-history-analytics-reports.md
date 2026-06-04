@@ -53,6 +53,9 @@
 - Added frontend conversion for the server analytics shape so the dashboard can
   render part, frequency, question-type, history, prediction, and hardening data
   from the local database.
+- Added a Mac dashboard refresh follow-up so submitting a local mock immediately
+  refreshes history, latest mock score, prediction cards, and recommended next
+  practice without requiring a browser reload.
 
 ## Verification Evidence
 
@@ -76,6 +79,16 @@
       reports export API or render exported file paths.
     - Passed after wiring the report buttons to the local export API and showing
       generated JSON/CSV paths in the reports panel.
+- Mac post-mock dashboard refresh follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because submitting a local mock did not refetch dashboard
+      history or prediction data.
+    - Passed after the mock exam UI notifies the dashboard to reload reports and
+      study overview data after successful local mock submission.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the post-mock dashboard refresh follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

@@ -1,4 +1,4 @@
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../app/App";
 
@@ -262,5 +262,188 @@ describe("dashboard shell", () => {
     expect(screen.getByText("key answer sentence")).toHaveClass("ielts-highlight");
     expect(screen.getByText("prove = support")).toBeInTheDocument();
     expect(screen.getByText("This sentence directly proves the claim.")).toBeInTheDocument();
+  });
+
+  it("refreshes dashboard history and prediction after submitting a local mock", async () => {
+    let dashboardCalls = 0;
+    let mockSubmitted = false;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/reports/history") {
+        return {
+          ok: true,
+          json: async () =>
+            mockSubmitted
+              ? [
+                  {
+                    durationSeconds: 900,
+                    estimatedBand: 4,
+                    id: "attempt-refresh-1",
+                    mode: "mock",
+                    rawScore: 1,
+                    startedAt: "2026-06-04T08:00:00.000Z",
+                    subject: "reading",
+                    submittedAt: "2026-06-04T08:15:00.000Z"
+                  }
+                ]
+              : []
+        };
+      }
+      if (url === "/api/reports/analytics") {
+        return {
+          ok: true,
+          json: async () => ({ byPart: {}, byQuestionType: {}, mistakeLabels: [] })
+        };
+      }
+      if (url === "/api/reports/dashboard") {
+        dashboardCalls += 1;
+        return {
+          ok: true,
+          json: async () => ({
+            latestMockScore:
+              dashboardCalls > 1
+                ? {
+                    durationSeconds: 900,
+                    estimatedBand: 4,
+                    id: "attempt-refresh-1",
+                    mode: "mock",
+                    rawScore: 1,
+                    startedAt: "2026-06-04T08:00:00.000Z",
+                    subject: "reading",
+                    submittedAt: "2026-06-04T08:15:00.000Z"
+                  }
+                : null,
+            predictedListening: "Need history",
+            predictedReading:
+              dashboardCalls > 1
+                ? {
+                    basisAttempts: 1,
+                    confidence: "low",
+                    predictedBand: 4,
+                    range: { max: 4.5, min: 3.5 },
+                    subject: "reading"
+                  }
+                : "Need history",
+            recommendedNextPractice: dashboardCalls > 1 ? "Review fill blank" : "Import a set to begin",
+            weakestQuestionType: dashboardCalls > 1 ? "fill blank" : null
+          })
+        };
+      }
+      if (url === "/api/hardening/status") {
+        return {
+          ok: true,
+          json: async () => ({
+            backupReminder: { latestBackupAt: null, reason: null, shouldRemind: false, submittedAttemptCount: 0 },
+            importFailures: { byStatus: {}, sources: [], totalUnresolved: 0 },
+            questionBankCompleteness: {
+              issueCounts: {
+                missingAnswerKey: 0,
+                missingAnswerSentence: 0,
+                missingAudio: 0,
+                missingExplanation: 0,
+                missingFrequencyEntry: 0,
+                missingListeningCues: 0,
+                missingTranscript: 0
+              },
+              passages: [],
+              totalPassages: 0
+            }
+          })
+        };
+      }
+      if (url === "/api/study/overview") {
+        return {
+          ok: true,
+          json: async () => ({
+            readiness: { listeningFullMockReady: false, readingFullMockReady: false },
+            recommendedMockSets: { listening: null, reading: null },
+            subjects: {
+              listening: {
+                cueCount: 0,
+                frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: 0,
+                questionCount: 0
+              },
+              reading: {
+                cueCount: 0,
+                frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: 0,
+                questionCount: 0
+              }
+            }
+          })
+        };
+      }
+      if (url === "/api/study/intensive") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (url === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-refresh-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-refresh-1",
+                part: "P1",
+                passageId: "passage-refresh-1",
+                passageTitle: "Refresh Reading",
+                prompt: "Which word completes the sentence?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (url === "/api/practice/attempt-refresh-1/answer") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (url === "/api/practice/attempt-refresh-1/submit") {
+        mockSubmitted = true;
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-refresh-1",
+            estimatedBand: 4,
+            rawScore: 1,
+            submittedAt: "2026-06-04T08:15:00.000Z"
+          })
+        };
+      }
+      if (url === "/api/practice/attempt-refresh-1/review") {
+        return {
+          ok: true,
+          json: async () => ({ id: "attempt-refresh-1", reviewItems: [] })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("No mock submitted")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    const answer = await screen.findByRole("textbox", { name: "Answer for question question-refresh-1" });
+    fireEvent.change(answer, { target: { value: "routes" } });
+    fireEvent.click(screen.getByRole("button", { name: "Submit local mock" }));
+
+    await waitFor(() => {
+      expect(dashboardCalls).toBe(2);
+    });
+    expect(screen.getByText("Reading 1/40, Band 4")).toBeInTheDocument();
+    expect(screen.getByText("Review fill blank")).toBeInTheDocument();
+    expect(screen.getByText("2026-06-04")).toBeInTheDocument();
   });
 });

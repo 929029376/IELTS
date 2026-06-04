@@ -162,6 +162,10 @@
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
+- Added Mac post-mock dashboard refresh hardening:
+  - successful local mock submissions now refresh report history, latest mock
+    score, score prediction cards, and the local study overview without requiring
+    a manual page reload.
 
 ## Verification Evidence
 
@@ -367,6 +371,16 @@
     - Initially failed because report export buttons were static.
     - Passed after wiring them to the reports export API and rendering exported
       local file paths.
+- Mac post-mock dashboard refresh follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because a successful local mock submission left dashboard
+      reports and predictions on the initial API snapshot.
+    - Passed after sending a successful-submit notification from the mock exam UI
+      and refetching report/history and study overview data.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the post-mock dashboard refresh follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac manual sync follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
     - Initially failed because the Manual sync button did not call the sync API or

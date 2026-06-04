@@ -215,7 +215,7 @@ function toDashboardView(report: ServerDashboardReport): DashboardReportView {
   };
 }
 
-function useDashboardData(): DashboardData {
+function useDashboardData(refreshVersion: number): DashboardData {
   const [data, setData] = useState<DashboardData>({
     analytics: emptyAnalytics,
     dashboard: emptyDashboardReport,
@@ -264,12 +264,12 @@ function useDashboardData(): DashboardData {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [refreshVersion]);
 
   return data;
 }
 
-function useStudyOverview(): StudyOverviewView {
+function useStudyOverview(refreshVersion: number): StudyOverviewView {
   const [overview, setOverview] = useState<StudyOverviewView>(emptyStudyOverview);
 
   useEffect(() => {
@@ -294,7 +294,7 @@ function useStudyOverview(): StudyOverviewView {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [refreshVersion]);
 
   return overview;
 }
@@ -330,9 +330,10 @@ function useIntensiveStudyPreview(): IntensiveStudyPreviewView | undefined {
 }
 
 export function App() {
-  const dashboardData = useDashboardData();
+  const [dataRefreshVersion, setDataRefreshVersion] = useState(0);
+  const dashboardData = useDashboardData(dataRefreshVersion);
   const intensiveStudyPreview = useIntensiveStudyPreview();
-  const studyOverview = useStudyOverview();
+  const studyOverview = useStudyOverview(dataRefreshVersion);
   const desktopRuntimeStatus = useDesktopRuntimeStatus();
 
   return (
@@ -389,7 +390,7 @@ export function App() {
         </section>
 
         <StudyOverviewPanel overview={studyOverview} />
-        <ExamPreview />
+        <ExamPreview onMockSubmitted={() => setDataRefreshVersion((version) => version + 1)} />
         <QuestionBankImportPanel />
         <IntensivePracticePreview preview={intensiveStudyPreview} />
         <HistoryReportsPreview
