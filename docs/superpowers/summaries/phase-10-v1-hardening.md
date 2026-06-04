@@ -265,6 +265,11 @@
   - reopened history review headings also trim imported prompts,
   - whitespace-only review prompts now show `Review question` instead of an
     apparently blank heading.
+- Added Mac sync-conflict answer fallback hardening:
+  - submitted mock review sync conflicts trim remote answers before rendering,
+  - reopened history review sync conflicts use the same fallback behavior,
+  - whitespace-only remote answers now show `No answer` instead of an empty
+    conflict row.
 - Added Mac history review reopening hardening:
   - completed attempts in the report history table can reopen the saved detailed
     review through `GET /api/practice/:attemptId/review`,
@@ -1433,6 +1438,17 @@
       rendered as a blank review heading.
     - Passed after trimming reopened history review prompts and falling back to
       `Review question`.
+- Mac sync-conflict answer fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "loads detailed review evidence"`
+    - Initially failed because a whitespace-only remote conflict answer rendered
+      as an empty submitted-mock conflict row.
+    - Passed after trimming submitted mock conflict answers and falling back to
+      `No answer`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "saved sync conflicts"`
+    - Initially failed because a whitespace-only remote conflict answer rendered
+      as an empty history-review conflict row.
+    - Passed after trimming reopened history conflict answers and falling back to
+      `No answer`.
 
 ## Remaining V1 Gaps
 

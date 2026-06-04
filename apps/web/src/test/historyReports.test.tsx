@@ -320,7 +320,7 @@ describe("history and reports preview", () => {
                 remoteCreatedAt: "2026-06-04T11:05:00.000Z",
                 remoteDeviceId: "windows-laptop",
                 remoteIsCorrect: true,
-                remoteRawAnswer: "central station",
+                remoteRawAnswer: "   ",
                 status: "conflict"
               }
             ],
@@ -380,7 +380,7 @@ describe("history and reports preview", () => {
 
     expect(await screen.findByRole("region", { name: "History review details" })).toBeInTheDocument();
     expect(screen.getByText("Sync conflict")).toBeInTheDocument();
-    expect(screen.getByText("Remote answer from windows-laptop: central station")).toBeInTheDocument();
+    expect(screen.getByText("Remote answer from windows-laptop: No answer")).toBeInTheDocument();
   });
 
   it("shows empty states for missing history review explanations and synonym notes", async () => {
