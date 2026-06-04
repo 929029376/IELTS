@@ -18,25 +18,40 @@ interface HighlightToken {
   start: number;
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function buildTargetPattern(target: string): RegExp | null {
+  const parts = target.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length === 0) {
+    return null;
+  }
+
+  return new RegExp(parts.map(escapeRegExp).join("\\s+"), "gi");
+}
+
 function buildHighlightTokens(text: string, highlights: Array<{ className: string; target: string }>) {
   const tokens: HighlightToken[] = [];
-  const lowerText = text.toLowerCase();
 
   for (const highlight of highlights) {
-    if (!highlight.target) {
+    const pattern = buildTargetPattern(highlight.target);
+
+    if (!pattern) {
       continue;
     }
 
-    const lowerTarget = highlight.target.toLowerCase();
-    let start = lowerText.indexOf(lowerTarget);
+    let match = pattern.exec(text);
 
-    while (start !== -1) {
-      const end = start + highlight.target.length;
+    while (match) {
+      const start = match.index;
+      const end = start + match[0].length;
       const overlapsExistingToken = tokens.some((token) => start < token.end && end > token.start);
       if (!overlapsExistingToken) {
         tokens.push({ className: highlight.className, end, start });
       }
-      start = lowerText.indexOf(lowerTarget, end);
+      match = pattern.exec(text);
     }
   }
 

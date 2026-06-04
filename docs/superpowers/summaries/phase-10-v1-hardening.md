@@ -606,6 +606,12 @@
       the Mac study overview or intensive preview without a page reload.
     - Passed after the import panel notifies the dashboard after successful
       imports and the intensive preview refetches with the same refresh signal.
+- Mac close-reading flexible-whitespace highlight hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because PDF/HTML extracted passage text with line breaks
+      or repeated spaces prevented answer-sentence and keyword highlights.
+    - Passed after the close-reading highlighter began treating whitespace in
+      stored evidence and imported passage text as equivalent.
 
 ## Remaining V1 Gaps
 

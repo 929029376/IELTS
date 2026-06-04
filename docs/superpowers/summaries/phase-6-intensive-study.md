@@ -176,6 +176,13 @@
       page reload.
     - Passed after intensive preview refetches whenever dashboard local data is
       refreshed.
+- Mac close-reading flexible-whitespace highlight follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because stored evidence like `answer sentence` did not
+      highlight imported passage text split as `answer\nsentence` or
+      `trade   routes`.
+    - Passed after matching highlight targets with flexible whitespace while
+      preserving the original imported passage text inside the highlight.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

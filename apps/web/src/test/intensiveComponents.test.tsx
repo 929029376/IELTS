@@ -313,4 +313,27 @@ describe("intensive study components", () => {
     expect(screen.getByText("Answer Sentence")).toHaveClass("ielts-highlight");
     expect(screen.getByText("Trade Routes")).toHaveClass("keyword-highlight");
   });
+
+  it("highlights answer evidence and keywords when imported passage whitespace differs", () => {
+    render(
+      <CloseReadingView
+        passageText={"The answer\nsentence identifies trade   routes as the key evidence."}
+        answerSentence="answer sentence"
+        keywords={["trade routes"]}
+        synonyms={[]}
+        explanation="The sentence directly supports the answer."
+        question={<p>Question 1</p>}
+        isWrongAnswer={false}
+        onSelectAnswerSentence={() => undefined}
+        onMistakeLabel={() => undefined}
+      />
+    );
+
+    expect(
+      screen.getByText((_content, element) => element?.tagName === "MARK" && element.textContent === "answer\nsentence")
+    ).toHaveClass("ielts-highlight");
+    expect(
+      screen.getByText((_content, element) => element?.tagName === "MARK" && element.textContent === "trade   routes")
+    ).toHaveClass("keyword-highlight");
+  });
 });
