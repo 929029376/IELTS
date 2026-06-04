@@ -198,7 +198,7 @@ function splitImportedAnswerAlternatives(acceptedAnswer: string): string[] {
 
 function acceptedAnswerVariants(acceptedAnswer: string): string[] {
   const optionalPattern = /\(([^()]+)\)/;
-  const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
+  const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer.replace(/\r?\n+/g, "|"));
   const variants = [
     normalizedAcceptedAnswer,
     stripImportedAnswerNumberingPrefix(normalizedAcceptedAnswer),

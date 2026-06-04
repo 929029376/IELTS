@@ -315,6 +315,8 @@
     `green park、green parks` also expand into separate accepted variants,
   - Chinese `或` answer cells such as `green park 或 green parks` also expand
     into separate accepted variants,
+  - multiline imported answer cells such as `green park\ngreen parks` also
+    expand into separate accepted variants,
   - unrelated answers such as `blue park` still fail instead of being
     over-accepted.
 - Added Mac slash-alias answer-key scoring hardening:
@@ -2109,9 +2111,11 @@
       `green park、green parks` were not split.
     - A later red run failed because Chinese `或` cells such as
       `green park 或 green parks` were not split.
+    - A later red run failed because multiline answer cells such as
+      `green park\ngreen parks` were normalized into one long literal answer.
     - Passed after semicolon-, pipe-, `or`-, Chinese `或`-, full-width
-      semicolon-, and enumeration-delimited accepted-answer cells were split
-      into separate answer variants.
+      semicolon-, enumeration-, and newline-delimited accepted-answer cells were
+      split into separate answer variants.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "multi-answer"`
     - Initially failed because the practice API marked `green parks` incorrect
       against imported accepted answer `green park; green parks`.
@@ -2121,6 +2125,8 @@
       `green park；green parks`.
     - A later red run failed when the practice API saw imported accepted answer
       `green park 或 green parks`.
+    - A later red run failed when the practice API saw imported accepted answer
+      `green park\ngreen parks`.
     - Passed after the shared multi-answer cell expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "multiple-choice"`
