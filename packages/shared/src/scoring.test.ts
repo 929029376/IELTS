@@ -14,6 +14,12 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("blue park", ["Green Park", "Park Green"])).toBe(false);
   });
 
+  it("ignores surrounding punctuation copied from imported answer text", () => {
+    expect(isAnswerCorrect("green park", ["green park."])).toBe(true);
+    expect(isAnswerCorrect("green park.", ["green park"])).toBe(true);
+    expect(isAnswerCorrect("st. john's", ["St. John's."])).toBe(true);
+  });
+
   it("matches imported unicode dash answers with typed hyphen answers", () => {
     expect(isAnswerCorrect("well-known", ["well–known"])).toBe(true);
     expect(isAnswerCorrect("well known", ["well–known"])).toBe(false);

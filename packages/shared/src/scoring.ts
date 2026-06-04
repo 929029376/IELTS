@@ -40,6 +40,7 @@ export function estimateBand(rawScore: number, table: BandRange[]): number {
 export function normalizeAnswer(answer: string): string {
   return answer
     .trim()
+    .replace(/^[.,;:!?]+|[.,;:!?]+$/g, "")
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, "\"")
     .replace(/[‐‑‒–—―]/g, "-")
@@ -143,16 +144,23 @@ function expandSlashAliases(variant: string): string[] {
   }
 
   const tokens = variant.split(/\s+/).filter(Boolean);
-  let variants = [""];
+  let variants: string[][] = [[]];
+  let hasSlashAlias = false;
 
   for (const token of tokens) {
-    const alternatives = slashAliasParts(token) ?? [token];
-    variants = variants.flatMap((prefix) =>
-      alternatives.map((alternative) => normalizeAnswer(`${prefix} ${alternative}`))
-    );
+    const alternatives = slashAliasParts(token);
+    if (alternatives) {
+      hasSlashAlias = true;
+    }
+
+    variants = variants.flatMap((prefix) => (alternatives ?? [token]).map((alternative) => [...prefix, alternative]));
   }
 
-  return variants;
+  if (!hasSlashAlias) {
+    return [variant];
+  }
+
+  return variants.map((parts) => normalizeAnswer(parts.join(" ")));
 }
 
 function acceptedAnswerVariants(acceptedAnswer: string): string[] {

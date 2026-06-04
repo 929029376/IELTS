@@ -260,6 +260,13 @@
   - spaced Unicode dash forms still use the existing hyphen-spacing rule,
   - practice and mock scoring can handle answer keys copied from PDFs or DOCX
     files that use typographic dash characters.
+- Added Mac surrounding-punctuation answer normalization hardening:
+  - imported answers copied as sentence fragments such as `green park.` now
+    match typed answers such as `green park`,
+  - typed answers with accidental trailing punctuation such as `green park.`
+    also match punctuation-free answer keys,
+  - internal punctuation in answers such as `St. John's` stays intact instead
+    of being stripped during answer-variant expansion.
 - Added Mac slash-alias answer-key scoring hardening:
   - accepted answers with slash-separated aliases such as `centre/center` now
     match either spelling,
@@ -1910,6 +1917,26 @@
     - Passed with all 9 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 12 practice route tests.
+- Mac surrounding-punctuation answer normalization hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "surrounding punctuation"`
+    - Initially failed because accepted answer `green park.` was not normalized
+      to match typed answer `green park`.
+    - A follow-up run exposed that slash-alias variant expansion was stripping
+      the internal period from `St. John's` when no slash alias was present.
+    - Passed after trimming only surrounding punctuation during normalization
+      and preserving non-alias answer variants without token-by-token rebuilding.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
+    - Passed after the variant-expansion refactor, confirming slash aliases
+      still expand correctly.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "surrounding punctuation"`
+    - Initially failed because the practice API marked `green park` incorrect
+      against imported accepted answer `green park.`.
+    - Passed after the shared surrounding-punctuation normalization was used by
+      practice answer scoring.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Passed with all 10 shared scoring tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 13 practice route tests.
 - Mac slash-alias answer-key scoring hardening:
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
     - Initially failed because accepted answer `centre/center` was compared as
@@ -1928,9 +1955,9 @@
     - Passed after the shared slash-alias answer expansion was used by practice
       answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
-    - Passed with all 9 shared scoring tests.
+    - Passed with all 10 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
-    - Passed with all 12 practice route tests.
+    - Passed with all 13 practice route tests.
 
 ## Remaining V1 Gaps
 
