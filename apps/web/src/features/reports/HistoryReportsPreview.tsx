@@ -18,6 +18,15 @@ export interface AccuracyRowView {
   total: number;
 }
 
+export interface PredictionCardView {
+  basisAttempts: number | null;
+  confidence: "low" | "medium" | "high" | null;
+  detail: string | null;
+  value: string;
+}
+
+export type PredictionCardData = PredictionCardView | string;
+
 export interface ReportsAnalyticsView {
   frequencyRows: AccuracyRowView[];
   mistakeLabels: Array<{ count: number; label: string }>;
@@ -27,8 +36,8 @@ export interface ReportsAnalyticsView {
 
 export interface DashboardReportView {
   latestMockScore: string;
-  predictedListening: string;
-  predictedReading: string;
+  predictedListening: PredictionCardData;
+  predictedReading: PredictionCardData;
   recommendedNextPractice: string;
   weakestQuestionType: string;
 }
@@ -112,6 +121,31 @@ function renderAccuracyRows(rows: AccuracyRowView[]) {
   ));
 }
 
+function formatConfidence(confidence: PredictionCardView["confidence"]) {
+  return confidence ? `${confidence.charAt(0).toUpperCase()}${confidence.slice(1)} confidence` : null;
+}
+
+function renderPredictionCard(prediction: PredictionCardData) {
+  if (typeof prediction === "string") {
+    return <strong>{prediction}</strong>;
+  }
+
+  const confidence = formatConfidence(prediction.confidence);
+  const basis =
+    prediction.basisAttempts === null
+      ? null
+      : `${prediction.basisAttempts} ${prediction.basisAttempts === 1 ? "attempt" : "attempts"}`;
+  const meta = [confidence, basis].filter(Boolean).join(" - ");
+
+  return (
+    <>
+      <strong>{prediction.value}</strong>
+      {prediction.detail ? <small className="prediction-detail">{prediction.detail}</small> : null}
+      {meta ? <small className="prediction-detail">{meta}</small> : null}
+    </>
+  );
+}
+
 export function HistoryReportsPreview({ analytics, dashboard, history }: HistoryReportsPreviewProps) {
   const [exportedFiles, setExportedFiles] = useState<ExportedReportFiles | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
@@ -187,11 +221,11 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
         </div>
         <div>
           <span>Listening prediction</span>
-          <strong>{dashboard.predictedListening}</strong>
+          {renderPredictionCard(dashboard.predictedListening)}
         </div>
         <div>
           <span>Reading prediction</span>
-          <strong>{dashboard.predictedReading}</strong>
+          {renderPredictionCard(dashboard.predictedReading)}
         </div>
         <div>
           <span>Next practice</span>

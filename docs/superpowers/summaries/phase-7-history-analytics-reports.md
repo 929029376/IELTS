@@ -71,6 +71,11 @@
   - backend `byFrequencyClass` analytics are mapped into dedicated report rows,
   - the Mac reports panel shows a separate Frequency accuracy group instead of
     mixing high/medium/low accuracy into part rows.
+- Added Mac prediction-card detail rendering:
+  - live API prediction objects now keep predicted band, range, confidence, and
+    basis attempt count through the frontend conversion layer,
+  - the reports panel shows the predicted band as the primary value with range,
+    confidence, and attempt count as supporting evidence.
 
 ## Verification Evidence
 
@@ -133,6 +138,15 @@
     - Passed after the post-mock dashboard refresh follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac prediction-card detail follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because live API prediction objects were reduced to a
+      range string, so predicted band, confidence, and basis attempts were not
+      visible in the dashboard.
+    - Passed after preserving prediction objects through the frontend mapper and
+      rendering supporting evidence in the report metric cards.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx src/test/dashboard.test.tsx`
+    - Passed with both component-level and live-dashboard prediction coverage.
 - Mac estimate-label follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the mock score report showed an estimated band

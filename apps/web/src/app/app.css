@@ -611,6 +611,14 @@ h1 {
   font-size: 17px;
 }
 
+.report-metrics .prediction-detail {
+  color: #52647b;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-transform: none;
+}
+
 .score-estimate-note {
   margin: -4px 0 16px;
   color: #66768c;

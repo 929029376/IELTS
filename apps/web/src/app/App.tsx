@@ -8,6 +8,7 @@ import {
   HistoryReportsPreview,
   type DashboardReportView,
   type HistoryAttemptView,
+  type PredictionCardData,
   type ReportsAnalyticsView
 } from "../features/reports/HistoryReportsPreview";
 import { StudyOverviewPanel, type StudyOverviewView } from "../features/study/StudyOverviewPanel";
@@ -213,14 +214,19 @@ function toAnalyticsView(analytics: ServerAnalytics): ReportsAnalyticsView {
   };
 }
 
-function formatPrediction(value: ServerBandPrediction | string): string {
+function formatPrediction(value: ServerBandPrediction | string): PredictionCardData {
   if (typeof value === "string") {
     return value;
   }
   if (!value.range || value.predictedBand === null) {
     return "Need history";
   }
-  return `${value.range.min}-${value.range.max}`;
+  return {
+    basisAttempts: value.basisAttempts,
+    confidence: value.confidence,
+    detail: `Range ${value.range.min}-${value.range.max}`,
+    value: `Band ${value.predictedBand}`
+  };
 }
 
 function formatLatestMock(value: HistoryAttemptView | string | null): string {

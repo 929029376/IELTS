@@ -184,6 +184,11 @@
   - mock score reports explicitly label IELTS band scores as estimates,
   - prediction cards explain that local predicted bands are estimates and
     official raw-score cutoffs can vary.
+- Added Mac prediction-card evidence hardening:
+  - live dashboard prediction objects now preserve predicted band, range,
+    confidence label, and basis attempt count,
+  - reports render the predicted band as the primary card value and show range,
+    confidence, and attempt count as supporting evidence.
 - Added Mac frequency-accuracy report hardening:
   - report analytics now keep frequency-class accuracy in its own group,
   - live dashboard API data maps `byFrequencyClass` into high/medium/low
