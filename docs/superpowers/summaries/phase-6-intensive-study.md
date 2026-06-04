@@ -59,6 +59,11 @@
   - selecting passage text and clicking `Use selected sentence as answer
     evidence` saves the evidence sentence, shows saved status, and immediately
     updates the close-reading highlight.
+- Added Mac close-reading keyword evidence wiring:
+  - `/api/study/intensive` now reads string keywords from
+    `questions.answer_rules_json.keywords`,
+  - the Mac close-reading panel can highlight imported or manually curated
+    keyword evidence instead of relying only on fallback sample data.
 - Added focused unit tests for intensive server persistence and web components.
 
 ## Verification Evidence
@@ -107,6 +112,16 @@
       rendering the saved highlight/status.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the manual answer-sentence persistence follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac close-reading keyword evidence follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because `/api/study/intensive` always returned an empty
+      `keywords` array for reading evidence.
+    - Passed after parsing `answer_rules_json.keywords` into the intensive
+      reading preview.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the close-reading keyword evidence follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`

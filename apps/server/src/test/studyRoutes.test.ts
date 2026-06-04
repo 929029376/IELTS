@@ -169,7 +169,7 @@ describe("study overview routes", () => {
       textContent: "The key answer sentence proves the claim. The distractor sentence is nearby."
     });
     const readingQuestion = questions.createQuestion({
-      answerRules: {},
+      answerRules: { keywords: ["claim", "key answer sentence"] },
       passageId: readingPassage.id,
       prompt: "Find the evidence sentence.",
       questionNumber: 1,
@@ -199,6 +199,7 @@ describe("study overview routes", () => {
     expect(body.reading).toMatchObject({
       answerSentence: "key answer sentence",
       explanation: "This sentence directly proves the claim.",
+      keywords: ["claim", "key answer sentence"],
       passageText: "The key answer sentence proves the claim. The distractor sentence is nearby.",
       synonyms: ["prove = support"]
     });

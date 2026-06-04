@@ -110,6 +110,26 @@ function parseJson<T>(value: string): T {
   return JSON.parse(value) as T;
 }
 
+function parseKeywords(answerRulesJson: string): string[] {
+  try {
+    const rules = JSON.parse(answerRulesJson) as { keywords?: unknown };
+    if (!Array.isArray(rules.keywords)) {
+      return [];
+    }
+
+    return [
+      ...new Set(
+        rules.keywords
+          .filter((keyword): keyword is string => typeof keyword === "string")
+          .map((keyword) => keyword.trim())
+          .filter(Boolean)
+      )
+    ];
+  } catch {
+    return [];
+  }
+}
+
 function getListeningPreview(db: DatabaseHandle): IntensiveStudyPreview["listening"] {
   const passage = db
     .prepare(
@@ -172,6 +192,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
         ak.answer_sentence AS answerSentence,
         ak.explanation,
         ak.synonyms_json AS synonymsJson,
+        q.answer_rules_json AS answerRulesJson,
         COALESCE(sa.text_content, '') AS passageText
       FROM questions q
       JOIN passages p ON p.id = q.passage_id
@@ -206,6 +227,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
         attemptAnswerId: string | null;
         answerKeyId: string;
         answerSentence: string | null;
+        answerRulesJson: string;
         explanation: string | null;
         passageText: string;
         passageTitle: string;
@@ -223,7 +245,7 @@ function getReadingPreview(db: DatabaseHandle): IntensiveStudyPreview["reading"]
     answerKeyId: row.answerKeyId,
     answerSentence: row.answerSentence,
     explanation: row.explanation,
-    keywords: [],
+    keywords: parseKeywords(row.answerRulesJson),
     passageText: row.passageText || row.answerSentence || row.questionPrompt,
     passageTitle: row.passageTitle,
     questionPrompt: row.questionPrompt,

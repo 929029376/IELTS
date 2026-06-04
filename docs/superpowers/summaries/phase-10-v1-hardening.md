@@ -147,6 +147,10 @@
     `missingAnswerSentence`,
   - the V1 hardening center now shows an Answer sentence issue meter and passage
     labels so manual close-reading evidence work is easier to find.
+- Added close-reading keyword evidence hardening:
+  - intensive reading previews now parse `answer_rules_json.keywords`,
+  - imported or manually curated reading keywords can appear in the Mac
+    close-reading highlight flow.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -432,6 +436,15 @@
     - Passed after the reading answer-sentence completeness follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Close-reading keyword evidence follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because `/api/study/intensive` always returned empty
+      reading `keywords`.
+    - Passed after parsing string keywords from `answer_rules_json.keywords`.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the close-reading keyword evidence hardening follow-up,
+      including unit/component tests, Playwright, production build, desktop
+      diagnostics, and Mac DMG packaging.
 - Mac readiness follow-up:
   - `node scripts/mac-readiness-check.mjs`
     - Initially failed because the question-bank import panel regression clicked
