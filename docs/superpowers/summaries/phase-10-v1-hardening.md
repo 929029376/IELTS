@@ -61,6 +61,7 @@
   - changed local listening ZIP and reading PDF imports now advance the source
     version for that same path,
   - unchanged local imports still dedupe by checksum,
+  - the Mac import failure table now displays each unresolved source version,
   - the import failure/readiness view can report meaningful source versions for
     local question-bank updates.
 - Replaced static dashboard hardening sample data with live local API data from
@@ -1205,6 +1206,13 @@
       rendered as empty readiness rows.
     - Passed after trimming hardening-center source paths and passage titles
       before applying fallback labels.
+- Mac hardening-center source-version display:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/hardeningCenter.test.tsx`
+    - Initially failed because the import failure report table received source
+      versions from the API but rendered only source path, status, and asset
+      count.
+    - Passed after adding a Version column that displays source versions as
+      `vN`.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

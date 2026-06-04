@@ -103,6 +103,7 @@ export function HardeningCenter({ status }: HardeningCenterProps) {
                 <tr>
                   <th>Source</th>
                   <th>Status</th>
+                  <th>Version</th>
                   <th>Assets</th>
                 </tr>
               </thead>
@@ -111,6 +112,7 @@ export function HardeningCenter({ status }: HardeningCenterProps) {
                   <tr key={source.id}>
                     <td>{sourcePathLabel(source.originalPath)}</td>
                     <td>{source.importStatus}</td>
+                    <td>v{source.version}</td>
                     <td>{source.assetCount}</td>
                   </tr>
                 ))}

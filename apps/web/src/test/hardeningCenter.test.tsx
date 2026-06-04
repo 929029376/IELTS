@@ -28,7 +28,7 @@ describe("V1 hardening center", () => {
                 importStatus: "failed",
                 originalPath: "reading/broken.pdf",
                 sourceType: "reading_pdf",
-                version: 1
+                version: 3
               }
             ],
             totalUnresolved: 2
@@ -70,6 +70,8 @@ describe("V1 hardening center", () => {
     expect(screen.getByRole("region", { name: "Import failure report" })).toHaveTextContent(
       "reading/broken.pdf"
     );
+    expect(screen.getByRole("region", { name: "Import failure report" })).toHaveTextContent("Version");
+    expect(screen.getByRole("region", { name: "Import failure report" })).toHaveTextContent("v3");
     expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
       "Airport Enquiry"
     );
