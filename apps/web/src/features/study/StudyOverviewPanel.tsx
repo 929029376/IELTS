@@ -45,6 +45,14 @@ function passageTitle(title: string) {
   return title.trim() || "Untitled passage";
 }
 
+function passagePart(part: string) {
+  return part.trim() || "Unknown part";
+}
+
+function passageFrequency(frequencyClass: string) {
+  return frequencyClass.trim() || "Unknown frequency";
+}
+
 function FrequencyStrip({ subject }: { subject: StudySubjectOverviewView }) {
   return (
     <div className="study-frequency-strip" aria-label="Frequency distribution">
@@ -65,9 +73,9 @@ function MockSetList({ passages }: { passages: StudyPassageView[] }) {
     <ol className="study-set-list">
       {passages.map((passage) => (
         <li key={passage.id}>
-          <span>{passage.part}</span>
+          <span>{passagePart(passage.part)}</span>
           <strong>{passageTitle(passage.title)}</strong>
-          <small>{passage.frequencyClass}</small>
+          <small>{passageFrequency(passage.frequencyClass)}</small>
         </li>
       ))}
     </ol>

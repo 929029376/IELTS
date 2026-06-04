@@ -166,6 +166,13 @@
     `Untitled passage`,
   - the local study queue no longer shows blank recommendation rows when source
     metadata is incomplete.
+- Added Mac study queue metadata fallback hardening:
+  - recommended mock passages with whitespace-only imported part labels now
+    render as `Unknown part`,
+  - recommended mock passages with whitespace-only imported frequency labels now
+    render as `Unknown frequency`,
+  - the local study queue stays readable when imported frequency-table metadata
+    is incomplete.
 - Added Mac hardening-center source/title fallback hardening:
   - blank import source paths now render as `Unknown source path`,
   - blank question-bank completeness passage titles now render as
@@ -1262,6 +1269,12 @@
       rendered as blank rows.
     - Passed after trimming study queue passage titles and using
       `Untitled passage` as the fallback.
+- Mac study queue metadata fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/studyOverviewPanel.test.tsx -t "blank recommended mock part"`
+    - Initially failed because whitespace-only recommended mock part and
+      frequency labels rendered as blank study queue metadata.
+    - Passed after trimming recommended mock part and frequency labels and
+      falling back to `Unknown part` and `Unknown frequency`.
 - Mac hardening-center source/title fallback hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/hardeningCenter.test.tsx`
     - Initially failed because blank import source paths and passage titles
