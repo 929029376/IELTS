@@ -251,6 +251,14 @@
   - unrelated alternatives such as `a green park` still fail,
   - practice and mock scoring can handle imported answer-key notation that marks
     articles or short words as optional.
+- Added Mac slash-alias answer-key scoring hardening:
+  - accepted answers with slash-separated aliases such as `centre/center` now
+    match either spelling,
+  - unrelated answers such as `central` still fail,
+  - slash-separated numeric tokens such as dates remain whole answer tokens
+    instead of being over-expanded,
+  - practice and mock scoring can handle imported answer-key notation that lists
+    answer aliases compactly.
 - Added Mac IELTS judgment-question input hardening:
   - `TRUE/FALSE/NOT GIVEN` questions now use fixed answer choices,
   - `YES/NO/NOT GIVEN` questions now use fixed answer choices,
@@ -1869,6 +1877,21 @@
     - Passed with all 6 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 10 practice route tests.
+- Mac slash-alias answer-key scoring hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
+    - Initially failed because accepted answer `centre/center` was compared as
+      one literal normalized string and did not match user answer `center`.
+    - Passed after expanding alphabetic slash-separated accepted-answer tokens
+      into answer aliases.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "slash-separated"`
+    - Initially failed because the practice API marked `center` incorrect
+      against accepted answer `centre/center`.
+    - Passed after the shared slash-alias answer expansion was used by practice
+      answer scoring.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Passed with all 8 shared scoring tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 11 practice route tests.
 
 ## Remaining V1 Gaps
 

@@ -93,6 +93,37 @@ function unorderedChoiceMatch(rawAnswer: string, acceptedAnswer: string): boolea
   return rawTokens.every((token, index) => token === acceptedTokens[index]);
 }
 
+function slashAliasParts(token: string): string[] | null {
+  if (!token.includes("/")) {
+    return null;
+  }
+
+  const parts = token
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length < 2 || !parts.every((part) => /^[a-z][a-z'-]*$/.test(part))) {
+    return null;
+  }
+
+  return parts;
+}
+
+function expandSlashAliases(variant: string): string[] {
+  const tokens = variant.split(/\s+/).filter(Boolean);
+  let variants = [""];
+
+  for (const token of tokens) {
+    const alternatives = slashAliasParts(token) ?? [token];
+    variants = variants.flatMap((prefix) =>
+      alternatives.map((alternative) => normalizeAnswer(`${prefix} ${alternative}`))
+    );
+  }
+
+  return variants;
+}
+
 function acceptedAnswerVariants(acceptedAnswer: string): string[] {
   const optionalPattern = /\(([^()]+)\)/;
   const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
@@ -109,7 +140,7 @@ function acceptedAnswerVariants(acceptedAnswer: string): string[] {
     variants.push(normalizeAnswer(variant.replace(optionalPattern, match[1])));
   }
 
-  return Array.from(new Set(variants.filter((variant) => !optionalPattern.test(variant))));
+  return Array.from(new Set(variants.filter((variant) => !optionalPattern.test(variant)).flatMap(expandSlashAliases)));
 }
 
 export function isAnswerCorrect(

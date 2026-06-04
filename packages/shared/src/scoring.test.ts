@@ -13,6 +13,17 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("blue park", ["Green Park", "Park Green"])).toBe(false);
   });
 
+  it("expands slash-separated aliases in accepted answers", () => {
+    expect(isAnswerCorrect("center", ["centre/center"])).toBe(true);
+    expect(isAnswerCorrect("centre", ["centre/center"])).toBe(true);
+    expect(isAnswerCorrect("central", ["centre/center"])).toBe(false);
+  });
+
+  it("keeps numeric slash tokens as whole accepted answers", () => {
+    expect(isAnswerCorrect("10/12/2024", ["10/12/2024"])).toBe(true);
+    expect(isAnswerCorrect("10", ["10/12/2024"])).toBe(false);
+  });
+
   it("expands optional parenthesized words in accepted answers", () => {
     expect(isAnswerCorrect("green park", ["(the) green park"])).toBe(true);
     expect(isAnswerCorrect("the green park", ["(the) green park"])).toBe(true);
