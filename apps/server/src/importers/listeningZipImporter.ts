@@ -58,7 +58,10 @@ export async function importListeningZip(
     originalPath: options.zipPath,
     checksum,
     importStatus: "needs_review",
-    version: 1
+    version: repo.nextSourceVersion({
+      originalPath: options.zipPath,
+      sourceType: "listening_zip"
+    })
   });
   const passage = repo.createPassage({
     sourceId: source.id,

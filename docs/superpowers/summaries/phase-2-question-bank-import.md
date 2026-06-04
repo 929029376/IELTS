@@ -9,6 +9,7 @@
 - Added `source_assets` storage for imported raw assets and extracted text.
 - Added question repository support for:
   - checksum source lookup,
+  - same-path source version calculation,
   - source asset creation,
   - source asset listing,
   - first passage lookup by source,
@@ -55,6 +56,12 @@
   - Provides frequency CSV/XLSX import and corrected frequency row import.
   - Shows import progress and imported item counts in the dashboard.
 - Integrated the Question Bank import panel into the main app dashboard.
+- Added Mac source-version tracking for question-bank updates:
+  - re-importing the exact same checksum still dedupes to the existing source,
+  - re-importing changed content from the same local path records the next
+    source version,
+  - updated listening ZIP and reading PDF files can be tracked as local source
+    revisions instead of every changed file appearing as another version `1`.
 
 ## Verification Evidence
 
@@ -135,6 +142,13 @@
       manually pasting the full file path.
     - Passed after adding a frequency CSV/XLSX file selector that fills the
       import path from desktop-exposed local file paths.
+- Mac source-version tracking follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/importers.test.ts`
+    - Initially failed because importing changed PDF content from the same local
+      path created a second source with version `1`.
+    - Passed after the importers calculate the next source version per
+      source-type/local-path pair while preserving checksum dedupe for unchanged
+      imports.
 
 ## Notes
 

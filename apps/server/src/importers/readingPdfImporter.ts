@@ -63,7 +63,10 @@ export async function importReadingPdf(
     originalPath: options.pdfPath,
     checksum,
     importStatus: "needs_review",
-    version: 1
+    version: repo.nextSourceVersion({
+      originalPath: options.pdfPath,
+      sourceType: "reading_pdf"
+    })
   });
   const passage = repo.createPassage({
     sourceId: source.id,

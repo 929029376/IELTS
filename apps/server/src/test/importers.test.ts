@@ -153,6 +153,31 @@ describe("question bank importers", () => {
     });
   });
 
+  it("versions updated source files imported again from the same path", async () => {
+    const pdfDir = join(tempDir, "ReadingPractice", "PDF");
+    await mkdir(pdfDir, { recursive: true });
+    const pdfPath = join(pdfDir, "18. P1 - The History of Tea 茶叶的历史.pdf");
+    await writeFile(pdfPath, "first PDF bytes");
+
+    const first = await importReadingPdf(db, {
+      pdfPath,
+      assetRoot: join(tempDir, "assets")
+    });
+    await writeFile(pdfPath, "updated PDF bytes");
+    const second = await importReadingPdf(db, {
+      pdfPath,
+      assetRoot: join(tempDir, "assets")
+    });
+
+    const versions = db
+      .prepare("SELECT version FROM sources WHERE original_path = ? ORDER BY version ASC")
+      .all(pdfPath) as Array<{ version: number }>;
+
+    expect(first.deduped).toBe(false);
+    expect(second.deduped).toBe(false);
+    expect(versions).toEqual([{ version: 1 }, { version: 2 }]);
+  });
+
   it("imports structured frequency CSV rows", async () => {
     const csvPath = join(tempDir, "frequency.csv");
     writeFileSync(

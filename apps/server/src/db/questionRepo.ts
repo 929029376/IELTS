@@ -137,6 +137,21 @@ export function createQuestionRepo(db: DatabaseHandle) {
       return row ?? null;
     },
 
+    nextSourceVersion(input: { originalPath: string; sourceType: string }): number {
+      const row = db
+        .prepare(
+          `
+          SELECT COALESCE(MAX(version), 0) + 1 AS nextVersion
+          FROM sources
+          WHERE original_path = @originalPath
+            AND source_type = @sourceType
+        `
+        )
+        .get(input) as { nextVersion: number };
+
+      return row.nextVersion;
+    },
+
     createSourceAsset(input: Omit<SourceAssetRecord, "id">): SourceAssetRecord {
       const record: SourceAssetRecord = { id: randomUUID(), ...input };
       db.prepare(`

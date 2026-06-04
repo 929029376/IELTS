@@ -57,6 +57,12 @@
   - frequency CSV/XLSX import,
   - corrected manual frequency row import,
   - Playwright anchors for the Question Bank import region and default Mac local paths.
+- Added Mac source-version tracking hardening:
+  - changed local listening ZIP and reading PDF imports now advance the source
+    version for that same path,
+  - unchanged local imports still dedupe by checksum,
+  - the import failure/readiness view can report meaningful source versions for
+    local question-bank updates.
 - Replaced static dashboard hardening sample data with live local API data from
   `/api/hardening/status`.
 - Updated Playwright configuration so the dashboard regression starts the root
@@ -459,6 +465,11 @@
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/importRoutes.test.ts`
     - Initially failed with 404 because the import API routes were missing.
     - Passed after adding import routes and wiring them into `buildServer`.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/importers.test.ts`
+    - Initially failed because changed local source content imported from the
+      same path created another source at version `1`.
+    - Passed after source versions increment by source type and local path while
+      unchanged checksums still dedupe.
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
     - Initially failed because the Question Bank import panel did not exist.
     - Passed after adding the panel and local import API calls.
