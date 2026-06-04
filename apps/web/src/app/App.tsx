@@ -193,6 +193,10 @@ function frequencyBucketRows(buckets: Record<string, AccuracyBucket> | undefined
   }));
 }
 
+function fallbackText(value: string | null | undefined, fallback: string) {
+  return value?.trim() || fallback;
+}
+
 function toAnalyticsView(analytics: ServerAnalytics): ReportsAnalyticsView {
   if (analytics.partRows && analytics.questionTypeRows) {
     return {
@@ -216,7 +220,7 @@ function toAnalyticsView(analytics: ServerAnalytics): ReportsAnalyticsView {
 
 function formatPrediction(value: ServerBandPrediction | string): PredictionCardData {
   if (typeof value === "string") {
-    return value;
+    return fallbackText(value, "Need history");
   }
   if (!value.range || value.predictedBand === null) {
     return "Need history";
@@ -231,7 +235,7 @@ function formatPrediction(value: ServerBandPrediction | string): PredictionCardD
 
 function formatLatestMock(value: HistoryAttemptView | string | null): string {
   if (typeof value === "string") {
-    return value;
+    return fallbackText(value, "No mock submitted");
   }
   if (!value) {
     return "No mock submitted";
@@ -247,8 +251,8 @@ function toDashboardView(report: ServerDashboardReport): DashboardReportView {
     latestMockScore: formatLatestMock(report.latestMockScore),
     predictedListening: formatPrediction(report.predictedListening),
     predictedReading: formatPrediction(report.predictedReading),
-    recommendedNextPractice: report.recommendedNextPractice ?? "Import a set to begin",
-    weakestQuestionType: report.weakestQuestionType ?? "No data"
+    recommendedNextPractice: fallbackText(report.recommendedNextPractice, "Import a set to begin"),
+    weakestQuestionType: fallbackText(report.weakestQuestionType, "No data")
   };
 }
 

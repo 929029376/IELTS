@@ -91,6 +91,12 @@
     basis attempt count through the frontend conversion layer,
   - the reports panel shows the predicted band as the primary value with range,
     confidence, and attempt count as supporting evidence.
+- Added Mac dashboard report fallback hardening:
+  - whitespace-only live API strings for latest mock, predicted scores,
+    recommended next practice, and weakest question type now fall back to clear
+    empty-state copy,
+  - report cards no longer render visually blank values when local report data is
+    partially configured.
 
 ## Verification Evidence
 
@@ -160,6 +166,12 @@
     - Passed after the frequency-accuracy grouping follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac dashboard report fallback follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because whitespace-only live dashboard report strings
+      replaced the default report-card copy with blank values.
+    - Passed after trimming dashboard report strings before the fallback
+      decision.
 - Mac post-mock dashboard refresh follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because submitting a local mock did not refetch dashboard

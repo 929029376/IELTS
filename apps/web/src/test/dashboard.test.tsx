@@ -161,6 +161,76 @@ describe("dashboard shell", () => {
     expect(screen.queryByText("reading/broken.pdf")).not.toBeInTheDocument();
   });
 
+  it("normalizes blank dashboard report strings from the local API", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/reports/history") {
+        return { ok: true, json: async () => [] };
+      }
+      if (url === "/api/reports/analytics") {
+        return { ok: true, json: async () => ({ byPart: {}, byQuestionType: {}, mistakeLabels: [] }) };
+      }
+      if (url === "/api/reports/dashboard") {
+        return {
+          ok: true,
+          json: async () => ({
+            latestMockScore: "   ",
+            predictedListening: "   ",
+            predictedReading: "   ",
+            recommendedNextPractice: "   ",
+            weakestQuestionType: "   "
+          })
+        };
+      }
+      if (url === "/api/hardening/status") {
+        return {
+          ok: true,
+          json: async () => ({
+            backupReminder: { latestBackupAt: null, reason: null, shouldRemind: false, submittedAttemptCount: 0 },
+            importFailures: {
+              byStatus: { needs_review: 1 },
+              sources: [
+                {
+                  assetCount: 1,
+                  createdAt: "2026-06-04T00:00:00.000Z",
+                  id: "blank-dashboard-source",
+                  importStatus: "needs_review",
+                  originalPath: "blank-dashboard-source.zip",
+                  sourceType: "listening_zip",
+                  version: 1
+                }
+              ],
+              totalUnresolved: 1
+            },
+            questionBankCompleteness: {
+              issueCounts: {
+                missingAnswerKey: 0,
+                missingAnswerSentence: 0,
+                missingAudio: 0,
+                missingExplanation: 0,
+                missingFrequencyEntry: 0,
+                missingListeningCues: 0,
+                missingTranscript: 0
+              },
+              passages: [],
+              totalPassages: 0
+            }
+          })
+        };
+      }
+      return { ok: false, json: async () => ({}) };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("blank-dashboard-source.zip")).toBeInTheDocument();
+    expect(screen.getByText("No mock submitted")).toBeInTheDocument();
+    expect(screen.getAllByText("Need history")).toHaveLength(2);
+    expect(screen.getByText("Import a set to begin")).toBeInTheDocument();
+    expect(screen.getByText("No data")).toBeInTheDocument();
+  });
+
   it("loads local study overview and recommended mock sets from the local API", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const url = String(input);

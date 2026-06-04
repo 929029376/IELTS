@@ -149,6 +149,11 @@
     answers, and answer sentences as missing,
   - review panels now show clear answer empty states instead of blank text or
     empty highlighted marks.
+- Added Mac dashboard report fallback hardening:
+  - whitespace-only live API strings for latest mock, predictions, next practice,
+    and weakest question type are treated as missing,
+  - dashboard report cards now keep clear empty-state copy instead of rendering
+    blank values.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1149,6 +1154,12 @@
     - Initially failed because whitespace-only user answers, accepted answers,
       and answer sentences rendered as blank review content.
     - Passed after trimming answer fields and filtering accepted-answer values.
+- Mac dashboard report fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because blank live dashboard report strings rendered empty
+      report cards.
+    - Passed after trimming dashboard report strings before applying fallback
+      copy.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown
