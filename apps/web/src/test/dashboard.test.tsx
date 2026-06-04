@@ -446,4 +446,125 @@ describe("dashboard shell", () => {
     expect(screen.getByText("Review fill blank")).toBeInTheDocument();
     expect(screen.getByText("2026-06-04")).toBeInTheDocument();
   });
+
+  it("refreshes the backup reminder after exporting a manual backup", async () => {
+    let hardeningCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/reports/history") {
+        return {
+          ok: true,
+          json: async () => []
+        };
+      }
+      if (url === "/api/reports/analytics") {
+        return {
+          ok: true,
+          json: async () => ({ byPart: {}, byQuestionType: {}, mistakeLabels: [] })
+        };
+      }
+      if (url === "/api/reports/dashboard") {
+        return {
+          ok: true,
+          json: async () => ({
+            latestMockScore: null,
+            predictedListening: "Need history",
+            predictedReading: "Need history",
+            recommendedNextPractice: "Import a set to begin",
+            weakestQuestionType: null
+          })
+        };
+      }
+      if (url === "/api/hardening/status") {
+        hardeningCalls += 1;
+        return {
+          ok: true,
+          json: async () => ({
+            backupReminder:
+              hardeningCalls > 1
+                ? {
+                    latestBackupAt: "2026-06-04T11:00:00.000Z",
+                    reason: null,
+                    shouldRemind: false,
+                    submittedAttemptCount: 12
+                  }
+                : {
+                    latestBackupAt: null,
+                    reason: "You have 12 submitted attempts and no recent backup.",
+                    shouldRemind: true,
+                    submittedAttemptCount: 12
+                  },
+            importFailures: { byStatus: {}, sources: [], totalUnresolved: 0 },
+            questionBankCompleteness: {
+              issueCounts: {
+                missingAnswerKey: 0,
+                missingAnswerSentence: 0,
+                missingAudio: 0,
+                missingExplanation: 0,
+                missingFrequencyEntry: 0,
+                missingListeningCues: 0,
+                missingTranscript: 0
+              },
+              passages: [],
+              totalPassages: 0
+            }
+          })
+        };
+      }
+      if (url === "/api/study/overview") {
+        return {
+          ok: true,
+          json: async () => ({
+            readiness: { listeningFullMockReady: false, readingFullMockReady: false },
+            recommendedMockSets: { listening: null, reading: null },
+            subjects: {
+              listening: {
+                cueCount: 0,
+                frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: 0,
+                questionCount: 0
+              },
+              reading: {
+                cueCount: 0,
+                frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: 0,
+                questionCount: 0
+              }
+            }
+          })
+        };
+      }
+      if (url === "/api/study/intensive") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (url === "/api/backups/export") {
+        return {
+          ok: true,
+          json: async () => ({
+            filePath: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-2026-06-04.json",
+            rowCounts: { attempt_answers: 12, attempts: 12, dictation_attempts: 0, listening_cues: 0 }
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("You have 12 submitted attempts and no recent backup.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Export backup" }));
+
+    await waitFor(() => {
+      expect(hardeningCalls).toBe(2);
+    });
+    expect(screen.getByText("latest backup: 2026-06-04")).toBeInTheDocument();
+    expect(screen.getByText("Backup status is acceptable for the current history size.")).toBeInTheDocument();
+  });
 });

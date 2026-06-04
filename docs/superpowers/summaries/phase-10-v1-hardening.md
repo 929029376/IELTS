@@ -171,6 +171,10 @@
   - the generated backup path and key row counts are shown in the UI,
   - a pasted backup path can be imported through the local backup API,
   - restore feedback shows imported tables and row counts.
+- Added Mac backup reminder refresh hardening:
+  - successful backup export/import actions refresh the dashboard data snapshot,
+  - the V1 hardening backup reminder updates immediately after a backup is
+    created or restored.
 
 ## Verification Evidence
 
@@ -411,6 +415,15 @@
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the manual backup UI follow-up, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Mac backup reminder refresh follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because exporting a backup left the V1 hardening backup
+      reminder on the stale pre-export status.
+    - Passed after backup export/import success triggers a dashboard data refresh.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the backup reminder refresh follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac intensive listening sync follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
     - Initially failed because the cue and dictation study routes persisted local

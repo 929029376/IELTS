@@ -78,6 +78,10 @@
   - display the generated backup JSON path and key row counts,
   - import a pasted backup JSON path through `POST /api/backups/import`,
   - display imported table and row counts after restore.
+- Added backup status refresh after manual backup changes:
+  - exporting or importing a backup from the Mac dashboard refreshes the
+    hardening/report snapshot,
+  - the backup reminder updates without requiring a page reload.
 
 ## Verification Evidence
 
@@ -182,6 +186,16 @@
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the manual backup UI follow-up, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Mac backup reminder refresh follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because exporting a backup did not refresh the dashboard
+      backup reminder.
+    - Passed after backup export/import success notifies the dashboard to refetch
+      hardening and report data.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the backup reminder refresh follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

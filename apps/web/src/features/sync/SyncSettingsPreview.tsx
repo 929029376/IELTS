@@ -6,6 +6,7 @@ import { DesktopRuntimeDiagnostics, type DesktopRuntimeStatus } from "../desktop
 export interface SyncSettingsPreviewProps {
   deviceName: string;
   lastSyncAt: string | null;
+  onBackupChanged?: () => void;
   runtimeStatus?: DesktopRuntimeStatus | null;
   syncFiles: string[];
   syncPath: string;
@@ -30,6 +31,7 @@ function backupCount(result: BackupResult | null, key: string) {
 export function SyncSettingsPreview({
   deviceName,
   lastSyncAt,
+  onBackupChanged,
   runtimeStatus = null,
   syncFiles,
   syncPath
@@ -70,6 +72,7 @@ export function SyncSettingsPreview({
       const result = (await response.json()) as BackupResult;
       setBackupExportResult(result);
       setBackupFilePath(result.filePath ?? "");
+      onBackupChanged?.();
     } catch {
       setBackupError("Could not export local backup.");
     } finally {
@@ -97,6 +100,7 @@ export function SyncSettingsPreview({
         throw new Error("Could not import backup");
       }
       setBackupImportResult((await response.json()) as BackupResult);
+      onBackupChanged?.();
     } catch {
       setBackupError("Could not import local backup.");
     } finally {

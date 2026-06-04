@@ -402,6 +402,7 @@ export function App() {
         <SyncSettingsPreview
           deviceName="Mac local device"
           lastSyncAt={null}
+          onBackupChanged={() => setDataRefreshVersion((version) => version + 1)}
           runtimeStatus={desktopRuntimeStatus}
           syncFiles={[
             "attempts.jsonl",
