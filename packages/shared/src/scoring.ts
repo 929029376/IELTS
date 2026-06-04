@@ -174,12 +174,12 @@ function stripImportedAnswerLabelPrefix(acceptedAnswer: string): string {
 }
 
 function splitImportedAnswerAlternatives(acceptedAnswer: string): string[] {
-  if (!/[;|]/.test(acceptedAnswer) && !/\s+or\s+/i.test(acceptedAnswer)) {
+  if (!/[;；|、]/.test(acceptedAnswer) && !/\s+or\s+/i.test(acceptedAnswer)) {
     return [acceptedAnswer];
   }
 
   const parts = acceptedAnswer
-    .split(/\s*(?:[;|]|\bor\b)\s*/i)
+    .split(/\s*(?:[;；|、]|\bor\b)\s*/i)
     .map((part) => normalizeAnswer(part))
     .filter(Boolean);
 

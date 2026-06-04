@@ -16,6 +16,8 @@ describe("answer scoring", () => {
 
   it("expands imported multi-answer cells separated by semicolons, pipes, or or", () => {
     expect(isAnswerCorrect("green parks", ["green park; green parks"])).toBe(true);
+    expect(isAnswerCorrect("green parks", ["green park；green parks"])).toBe(true);
+    expect(isAnswerCorrect("green parks", ["green park、green parks"])).toBe(true);
     expect(isAnswerCorrect("green parks", ["green park | green parks"])).toBe(true);
     expect(isAnswerCorrect("green parks", ["green park or green parks"])).toBe(true);
     expect(isAnswerCorrect("blue park", ["green park; green parks"])).toBe(false);

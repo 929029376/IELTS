@@ -481,7 +481,7 @@ function seedDelimitedAnswersQuestion(databasePath: string) {
     });
     questions.createAnswerKey({
       questionId: question.id,
-      acceptedAnswers: ["green park or green parks"],
+      acceptedAnswers: ["green park；green parks"],
       answerSentence: "The imported answer key kept both alternatives in one cell.",
       explanation: "Imported answer cells can contain multiple alternatives.",
       synonyms: []
