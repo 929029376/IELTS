@@ -487,6 +487,11 @@
     the desktop-exposed local file path,
   - manual path entry remains available when a browser environment does not
     expose a local path.
+- Added Mac packaged import-picker fallback hardening:
+  - selected import files without an exposed local path now trim the browser file
+    name before rendering status,
+  - blank selected file names now show `Unknown <import type>` instead of a
+    malformed empty status message.
 - Added Mac post-mock dashboard refresh hardening:
   - successful local mock submissions now refresh report history, latest mock
     score, score prediction cards, and the local study overview without requiring
@@ -607,6 +612,12 @@
       populate the import path in packaged local use.
     - Passed after adding a frequency file selector that reads desktop-exposed
       local `File.path` values into the frequency import field.
+- Mac packaged import-picker fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx -t "no name or local path"`
+    - Initially failed because a selected import file without a local path and
+      without a browser file name rendered a malformed blank status message.
+    - Passed after trimming selected file names and falling back to
+      `Unknown <import type>` in the import picker status.
 - Mac mock-start UI follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the dashboard exam preview had no `Start reading mock`

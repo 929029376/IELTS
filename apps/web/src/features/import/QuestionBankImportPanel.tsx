@@ -50,6 +50,10 @@ function getLocalFilePath(file: File | null) {
   return fileWithLocalPath.path?.trim() || fileWithLocalPath.webkitRelativePath?.trim() || "";
 }
 
+function selectedFileName(file: File, label: string) {
+  return file.name.trim() || `Unknown ${label}`;
+}
+
 export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete?: () => void }) {
   const [listeningDir, setListeningDir] = useState("/Users/musheng/Desktop/IELTS/listening");
   const [listeningZipPath, setListeningZipPath] = useState("");
@@ -83,7 +87,7 @@ export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete
     }
 
     if (file) {
-      setStatus(`${file.name} selected, but the local path was not exposed. Paste the full path before importing.`);
+      setStatus(`${selectedFileName(file, label)} selected, but the local path was not exposed. Paste the full path before importing.`);
     }
   }
 

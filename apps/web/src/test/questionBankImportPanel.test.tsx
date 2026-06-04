@@ -157,4 +157,16 @@ describe("QuestionBankImportPanel", () => {
       "/Users/musheng/Desktop/IELTS/reading/frequency/reading-frequency.csv"
     );
   });
+
+  it("shows a fallback when a selected import file has no name or local path", () => {
+    render(<QuestionBankImportPanel />);
+
+    fireEvent.change(screen.getByLabelText("Choose listening ZIP file"), {
+      target: { files: [new File(["zip"], "", { type: "application/zip" })] }
+    });
+
+    expect(
+      screen.getByText("Unknown listening ZIP selected, but the local path was not exposed. Paste the full path before importing.")
+    ).toBeInTheDocument();
+  });
 });
