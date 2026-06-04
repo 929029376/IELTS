@@ -114,4 +114,36 @@ describe("QuestionBankImportPanel", () => {
       );
     });
   });
+
+  it("fills single-file import paths from packaged file picker selections", () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ importedCount: 1 })
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<QuestionBankImportPanel />);
+
+    const listeningZip = new File(["zip"], "1. P1 Enquiry.zip", { type: "application/zip" });
+    Object.defineProperty(listeningZip, "path", {
+      value: "/Users/musheng/Desktop/IELTS/listening/P1/高频/1. P1 Enquiry.zip"
+    });
+    fireEvent.change(screen.getByLabelText("Choose listening ZIP file"), {
+      target: { files: [listeningZip] }
+    });
+    expect(screen.getByLabelText("Listening ZIP path")).toHaveValue(
+      "/Users/musheng/Desktop/IELTS/listening/P1/高频/1. P1 Enquiry.zip"
+    );
+
+    const readingPdf = new File(["pdf"], "18. P1 - Tea.pdf", { type: "application/pdf" });
+    Object.defineProperty(readingPdf, "path", {
+      value: "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - Tea.pdf"
+    });
+    fireEvent.change(screen.getByLabelText("Choose reading PDF file"), {
+      target: { files: [readingPdf] }
+    });
+    expect(screen.getByLabelText("Reading PDF path")).toHaveValue(
+      "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - Tea.pdf"
+    );
+  });
 });

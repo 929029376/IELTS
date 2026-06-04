@@ -281,6 +281,13 @@
 - Added Mac single-file import controls so a single listening ZIP or reading PDF
   can be imported directly from the Question Bank panel without rescanning the
   whole source directory.
+- Added Mac packaged file-picker hardening for single-file imports:
+  - selecting a listening ZIP can fill the single ZIP path field from the
+    desktop-exposed local file path,
+  - selecting a reading PDF can fill the single PDF path field from the
+    desktop-exposed local file path,
+  - manual path entry remains available when a browser environment does not
+    expose a local path.
 - Added Mac post-mock dashboard refresh hardening:
   - successful local mock submissions now refresh report history, latest mock
     score, score prediction cards, and the local study overview without requiring
@@ -368,6 +375,12 @@
     - Passed after adding single-file path fields, disabled empty-path states,
       and API calls to `POST /api/import/listening-zip` and
       `POST /api/import/reading-pdf`.
+- Mac packaged file-picker import follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
+    - Initially failed because the single-file import cards had no file picker
+      controls to populate import paths in packaged local use.
+    - Passed after adding listening ZIP and reading PDF file selectors that read
+      desktop-exposed local `File.path` values into the matching import fields.
 - Mac mock-start UI follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the dashboard exam preview had no `Start reading mock`

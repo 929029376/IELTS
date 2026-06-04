@@ -49,6 +49,8 @@
 - Added `apps/web/src/features/import/QuestionBankImportPanel.tsx`.
   - Provides Mac local path inputs for the existing `listening` folder and reading PDF folder.
   - Provides single-file Mac imports for an individual listening ZIP or reading PDF.
+  - Provides packaged-file-picker controls that can fill single-file import paths
+    when the desktop WebView exposes local `File.path` values.
   - Provides frequency CSV/XLSX import and corrected frequency row import.
   - Shows import progress and imported item counts in the dashboard.
 - Integrated the Question Bank import panel into the main app dashboard.
@@ -119,6 +121,13 @@
       exposed individual listening ZIP and reading PDF import routes.
     - Passed after adding single-file path controls for
       `POST /api/import/listening-zip` and `POST /api/import/reading-pdf`.
+- Mac packaged file-picker import follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/questionBankImportPanel.test.tsx`
+    - Initially failed because the single-file import panel had no local file
+      picker controls.
+    - Passed after adding listening ZIP and reading PDF file selectors that fill
+      the import path from desktop-exposed local file paths while preserving
+      manual path entry as a fallback.
 
 ## Notes
 

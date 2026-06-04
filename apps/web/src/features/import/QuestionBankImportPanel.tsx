@@ -41,6 +41,15 @@ function toFrequencyPayload(row: FrequencyCorrectionRow) {
   };
 }
 
+function getLocalFilePath(file: File | null) {
+  if (!file) {
+    return "";
+  }
+
+  const fileWithLocalPath = file as File & { path?: string; webkitRelativePath?: string };
+  return fileWithLocalPath.path?.trim() || fileWithLocalPath.webkitRelativePath?.trim() || "";
+}
+
 export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete?: () => void }) {
   const [listeningDir, setListeningDir] = useState("/Users/musheng/Desktop/IELTS/listening");
   const [listeningZipPath, setListeningZipPath] = useState("");
@@ -62,6 +71,19 @@ export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete
       setStatus(error instanceof Error ? error.message : `Importing ${label} failed.`);
     } finally {
       setIsImporting(false);
+    }
+  }
+
+  function fillPathFromSelectedFile(label: string, file: File | null, onPathChange: (path: string) => void) {
+    const localPath = getLocalFilePath(file);
+    if (localPath.length > 0) {
+      onPathChange(localPath);
+      setStatus(`Selected ${label}: ${localPath}`);
+      return;
+    }
+
+    if (file) {
+      setStatus(`${file.name} selected, but the local path was not exposed. Paste the full path before importing.`);
     }
   }
 
@@ -118,6 +140,17 @@ export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete
               onChange={(event) => setListeningZipPath(event.target.value)}
             />
           </label>
+          <label className="import-file-picker">
+            Choose listening ZIP file
+            <input
+              accept=".zip,application/zip"
+              aria-label="Choose listening ZIP file"
+              type="file"
+              onChange={(event) =>
+                fillPathFromSelectedFile("listening ZIP", event.currentTarget.files?.[0] ?? null, setListeningZipPath)
+              }
+            />
+          </label>
           <button type="submit" disabled={isImporting || listeningZipPath.trim().length === 0}>
             Import listening ZIP
           </button>
@@ -160,6 +193,17 @@ export function QuestionBankImportPanel({ onImportComplete }: { onImportComplete
               placeholder="/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/18. P1 - Tea.pdf"
               value={readingPdfPath}
               onChange={(event) => setReadingPdfPath(event.target.value)}
+            />
+          </label>
+          <label className="import-file-picker">
+            Choose reading PDF file
+            <input
+              accept="application/pdf,.pdf"
+              aria-label="Choose reading PDF file"
+              type="file"
+              onChange={(event) =>
+                fillPathFromSelectedFile("reading PDF", event.currentTarget.files?.[0] ?? null, setReadingPdfPath)
+              }
             />
           </label>
           <button type="submit" disabled={isImporting || readingPdfPath.trim().length === 0}>

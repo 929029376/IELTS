@@ -780,6 +780,19 @@ h1 {
   font-size: 13px;
 }
 
+.import-panel .import-file-picker {
+  padding: 10px;
+  border: 1px dashed #cbd6e3;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.import-panel .import-file-picker input {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .import-panel button,
 .frequency-manual-panel button {
   min-height: 34px;
