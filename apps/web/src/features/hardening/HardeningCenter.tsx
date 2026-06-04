@@ -73,6 +73,7 @@ function passageTitleLabel(value: string) {
 }
 
 export function HardeningCenter({ status }: HardeningCenterProps) {
+  const importStatusEntries = Object.entries(status.importFailures.byStatus);
   const issueEntries = Object.entries(status.questionBankCompleteness.issueCounts) as Array<
     [keyof IssueCounts, number]
   >;
@@ -97,6 +98,16 @@ export function HardeningCenter({ status }: HardeningCenterProps) {
           </div>
           <strong className="readiness-number">{status.importFailures.totalUnresolved}</strong>
           <p className="readiness-caption">unresolved imports</p>
+          {importStatusEntries.length > 0 ? (
+            <div className="issue-meter-list" aria-label="Import status counts">
+              {importStatusEntries.map(([importStatus, count]) => (
+                <div className="issue-meter" key={importStatus}>
+                  <span>{importStatus}: </span>
+                  <strong>{count}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
           {status.importFailures.sources.length > 0 ? (
             <table className="compact-table">
               <thead>

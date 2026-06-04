@@ -72,6 +72,8 @@ describe("V1 hardening center", () => {
     );
     expect(screen.getByRole("region", { name: "Import failure report" })).toHaveTextContent("Version");
     expect(screen.getByRole("region", { name: "Import failure report" })).toHaveTextContent("v3");
+    expect(screen.getByRole("region", { name: "Import failure report" })).toHaveTextContent("failed: 1");
+    expect(screen.getByRole("region", { name: "Import failure report" })).toHaveTextContent("needs_review: 1");
     expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
       "Airport Enquiry"
     );

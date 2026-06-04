@@ -12,7 +12,7 @@
   - `GET /api/hardening/question-bank-completeness`,
   - `GET /api/hardening/backup-reminder`,
   - `GET /api/hardening/status`.
-- Added import failure reporting for unresolved `failed` and `needs_review` sources, including source path, status, version, and asset count.
+- Added import failure reporting for unresolved `failed` and `needs_review` sources, including source path, status, version, asset count, and status-count summaries.
 - Added question-bank completeness checks for:
   - missing answer key,
   - missing answer sentence,
@@ -1213,6 +1213,12 @@
       count.
     - Passed after adding a Version column that displays source versions as
       `vN`.
+- Mac hardening-center import-status counts:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/hardeningCenter.test.tsx`
+    - Initially failed because the import failure report received `byStatus`
+      counts from the API but rendered only the unresolved total and table rows.
+    - Passed after rendering `failed` and `needs_review` status-count summaries
+      above the source table.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown
