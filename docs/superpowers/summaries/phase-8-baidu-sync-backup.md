@@ -23,6 +23,14 @@
   - answer saving,
   - attempt submission,
   - close-reading mistake-label selection.
+- Added append-only JSONL sync events for Mac intensive listening writes:
+  - sentence cue creation,
+  - dictation attempt saving.
+- Added defensive import handling for remote intensive listening sync events:
+  - cue events wait until the referenced passage exists locally,
+  - dictation events wait until the referenced cue exists locally,
+  - manual sync skips those events instead of crashing when another device has
+    not imported the same question-bank rows yet.
 - Added remote JSONL import:
   - on server startup when sync is configured,
   - through `POST /api/sync/import`.
@@ -56,6 +64,21 @@
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts src/test/syncRoutes.test.ts`
   - Passed after the Mac close-reading mistake-label route was wired to local
     persistence and optional `mistake.added` JSONL sync events.
+- Mac intensive listening sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because saving listening cues and dictation attempts left
+      `stats.jsonl` empty.
+    - Passed after appending `intensive.listening_cue.created` and
+      `intensive.dictation_attempt.saved` events to Baidu Cloud sync logs.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed with a SQLite foreign-key error when remote intensive
+      events referenced passage/cue ids missing on the current device.
+    - Passed after safely skipping unresolved remote intensive events until the
+      referenced local question-bank rows exist.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the intensive listening sync follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
   - Initially failed because the Manual sync button did not call the sync API or
     render a completion status.

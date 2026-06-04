@@ -46,6 +46,31 @@ function seedQuestion(databasePath: string) {
   }
 }
 
+function seedListeningPassage(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      checksum: "sync-routes-listening-seed",
+      importStatus: "imported",
+      originalPath: "seed/sync-routes-listening.json",
+      sourceType: "seed",
+      version: 1
+    });
+    return questions.createPassage({
+      frequencyClass: "high",
+      part: "P1",
+      sourceId: source.id,
+      subject: "listening",
+      title: "Sync Listening Intensive"
+    }).id;
+  } finally {
+    db.close();
+  }
+}
+
 describe("sync routes", () => {
   it("appends practice writes to sync JSONL files and imports remote events manually", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-routes-"));
@@ -140,6 +165,115 @@ describe("sync routes", () => {
       });
       expect(review.statusCode).toBe(200);
       expect(review.json()).toMatchObject({ id: "remote-startup-attempt", subject: "reading" });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
+  it("appends intensive listening cue and dictation writes to sync JSONL files", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-intensive-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    const passageId = seedListeningPassage(databasePath);
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const cueResponse = await server.inject({
+        method: "POST",
+        payload: {
+          endSeconds: 4.2,
+          label: "Sentence 1",
+          passageId,
+          startSeconds: 1.2,
+          transcript: "Green Park"
+        },
+        url: "/api/study/listening-cues"
+      });
+      const cue = cueResponse.json<{ id: string }>();
+
+      await server.inject({
+        method: "POST",
+        payload: {
+          cueId: cue.id,
+          userText: "green park"
+        },
+        url: "/api/study/dictation-attempts"
+      });
+
+      const statsJsonl = readFileSync(join(syncFolderPath, "stats.jsonl"), "utf8");
+      expect(statsJsonl).toContain("intensive.listening_cue.created");
+      expect(statsJsonl).toContain("intensive.dictation_attempt.saved");
+      expect(statsJsonl).toContain("Green Park");
+      expect(statsJsonl).toContain("green park");
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
+  it("does not crash when remote intensive events reference question-bank rows missing on this device", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-intensive-missing-bank-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    mkdirSync(syncFolderPath, { recursive: true });
+    writeFileSync(
+      join(syncFolderPath, "stats.jsonl"),
+      [
+        JSON.stringify({
+          createdAt: "2026-06-04T08:00:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "remote-cue-with-missing-passage",
+          payload: {
+            endSeconds: 4.2,
+            id: "remote-cue-1",
+            label: "Sentence 1",
+            passageId: "missing-passage-id",
+            startSeconds: 1.2,
+            transcript: "Green Park"
+          },
+          type: "intensive.listening_cue.created"
+        }),
+        JSON.stringify({
+          createdAt: "2026-06-04T08:01:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "remote-dictation-with-missing-cue",
+          payload: {
+            cueId: "missing-cue-id",
+            id: "remote-dictation-1",
+            isCorrect: true,
+            normalizedText: "green park",
+            userText: "green park"
+          },
+          type: "intensive.dictation_attempt.saved"
+        }),
+        ""
+      ].join("\n")
+    );
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const sync = await server.inject({ method: "POST", url: "/api/sync/import" });
+      expect(sync.statusCode).toBe(200);
+      expect(sync.json()).toMatchObject({ imported: 0, skipped: 2 });
     } finally {
       await server.close();
       rmSync(tempDir, { force: true, recursive: true });

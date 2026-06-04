@@ -104,6 +104,14 @@
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
+- Added Mac intensive listening sync hardening:
+  - sentence cue creation now appends `intensive.listening_cue.created` events,
+  - dictation attempt saving now appends `intensive.dictation_attempt.saved`
+    events,
+  - both event types are written to Baidu Cloud `stats.jsonl` for cross-device
+    practice-record continuity,
+  - unresolved remote intensive events are skipped instead of crashing manual
+    sync when the current device has not imported matching question-bank rows.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -300,6 +308,20 @@
       show a completion status.
     - Passed after wiring it to `POST /api/sync/import` and rendering imported,
       skipped, and conflict counts.
+- Mac intensive listening sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because the cue and dictation study routes persisted local
+      SQLite rows but did not append Baidu Cloud sync events.
+    - Passed after appending intensive cue and dictation events to `stats.jsonl`.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed with a foreign-key crash when a remote intensive event
+      referenced a passage or cue missing from the current Mac database.
+    - Passed after treating unresolved remote intensive events as skipped during
+      sync import.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the intensive listening sync hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac readiness follow-up:
   - `node scripts/mac-readiness-check.mjs`
     - Initially failed because the question-bank import panel regression clicked

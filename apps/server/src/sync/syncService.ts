@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { join } from "node:path";
 import type { AttemptAnswerRecord, AttemptRecord } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
+import type { DictationAttemptRecord, ListeningCueRecord } from "../db/intensiveRepo";
 import { createSyncRepo } from "../db/syncRepo";
 
 const syncJsonlFiles = [
@@ -57,6 +58,9 @@ function groupForEventType(type: string): SyncGroup {
   }
   if (type.startsWith("frequency.")) {
     return "frequency";
+  }
+  if (type.startsWith("intensive.")) {
+    return "stats";
   }
   return "imports";
 }
@@ -151,6 +155,14 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
 
   function appendMistakeEvent(label: MistakeLabelPayload, createdAt: string) {
     return appendEvent("mistake.added", label, createdAt);
+  }
+
+  function appendListeningCueEvent(cue: ListeningCueRecord, createdAt: string) {
+    return appendEvent("intensive.listening_cue.created", cue, createdAt);
+  }
+
+  function appendDictationAttemptEvent(attempt: DictationAttemptRecord, createdAt: string) {
+    return appendEvent("intensive.dictation_attempt.saved", attempt, createdAt);
   }
 
   function appendExternalEvent(group: SyncGroup, event: SyncEnvelope) {
@@ -287,6 +299,70 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     ).run(payload);
   }
 
+  function addListeningCue(payload: ListeningCueRecord, createdAt: string) {
+    const passage = db.prepare("SELECT id FROM passages WHERE id = ?").get(payload.passageId);
+    if (!passage) {
+      return false;
+    }
+
+    db.prepare(
+      `
+      INSERT OR IGNORE INTO listening_cues (
+        id,
+        passage_id,
+        start_seconds,
+        end_seconds,
+        label,
+        transcript,
+        created_at
+      )
+      VALUES (
+        @id,
+        @passageId,
+        @startSeconds,
+        @endSeconds,
+        @label,
+        @transcript,
+        @createdAt
+      )
+    `
+    ).run({ ...payload, createdAt });
+    return true;
+  }
+
+  function addDictationAttempt(payload: DictationAttemptRecord, createdAt: string) {
+    const cue = db.prepare("SELECT id FROM listening_cues WHERE id = ?").get(payload.cueId);
+    if (!cue) {
+      return false;
+    }
+
+    db.prepare(
+      `
+      INSERT OR IGNORE INTO dictation_attempts (
+        id,
+        cue_id,
+        user_text,
+        normalized_text,
+        is_correct,
+        created_at
+      )
+      VALUES (
+        @id,
+        @cueId,
+        @userText,
+        @normalizedText,
+        @isCorrect,
+        @createdAt
+      )
+    `
+    ).run({
+      ...payload,
+      createdAt,
+      isCorrect: payload.isCorrect === null ? null : payload.isCorrect ? 1 : 0
+    });
+    return true;
+  }
+
   function applyEvent(event: SyncEnvelope) {
     if (syncRepo.hasSyncEvent(event.eventId)) {
       return { conflict: false, inserted: false };
@@ -299,6 +375,14 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       conflict = upsertAnswer(event.payload as AttemptAnswerRecord, event).conflict;
     } else if (event.type === "mistake.added") {
       addMistake(event.payload as MistakeLabelPayload);
+    } else if (event.type === "intensive.listening_cue.created") {
+      if (!addListeningCue(event.payload as ListeningCueRecord, event.createdAt)) {
+        return { conflict: false, inserted: false };
+      }
+    } else if (event.type === "intensive.dictation_attempt.saved") {
+      if (!addDictationAttempt(event.payload as DictationAttemptRecord, event.createdAt)) {
+        return { conflict: false, inserted: false };
+      }
     }
 
     syncRepo.recordSyncEvent({
@@ -339,7 +423,9 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
   return {
     appendAnswerEvent,
     appendAttemptEvent,
+    appendDictationAttemptEvent,
     appendExternalEvent,
+    appendListeningCueEvent,
     appendMistakeEvent,
     ensureSyncFolder,
     importRemoteEvents

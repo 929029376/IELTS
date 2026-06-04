@@ -47,12 +47,14 @@ export function registerStudyRoutes(server: FastifyInstance, db: DatabaseHandle,
       startSeconds: body.startSeconds,
       transcript: body.transcript ?? null
     });
+    sync?.appendListeningCueEvent(cue, new Date().toISOString());
 
     return reply.code(201).send(cue);
   });
   server.post("/api/study/dictation-attempts", async (request, reply) => {
     const body = createDictationBody.parse(request.body);
     const attempt = intensive.saveDictationAttempt(body);
+    sync?.appendDictationAttemptEvent(attempt, new Date().toISOString());
 
     return reply.code(201).send(attempt);
   });
