@@ -40,9 +40,10 @@ export function estimateBand(rawScore: number, table: BandRange[]): number {
 export function normalizeAnswer(answer: string): string {
   return answer
     .trim()
-    .replace(/^[.,;:!?]+|[.,;:!?]+$/g, "")
     .replace(/[‘’]/g, "'")
     .replace(/[“”]/g, "\"")
+    .replace(/^['"]+|['"]+$/g, "")
+    .replace(/^[.,;:!?]+|[.,;:!?]+$/g, "")
     .replace(/[‐‑‒–—―]/g, "-")
     .replace(/\s*-\s*/g, "-")
     .replace(/\s+/g, " ")

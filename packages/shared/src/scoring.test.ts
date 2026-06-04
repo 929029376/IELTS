@@ -20,6 +20,12 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("st. john's", ["St. John's."])).toBe(true);
   });
 
+  it("ignores surrounding quotes copied from imported answer text", () => {
+    expect(isAnswerCorrect("green park", ['"green park"'])).toBe(true);
+    expect(isAnswerCorrect("green park", ["“green park”"])).toBe(true);
+    expect(isAnswerCorrect("john's car", ["‘John’s car’"])).toBe(true);
+  });
+
   it("matches imported unicode dash answers with typed hyphen answers", () => {
     expect(isAnswerCorrect("well-known", ["well–known"])).toBe(true);
     expect(isAnswerCorrect("well known", ["well–known"])).toBe(false);
