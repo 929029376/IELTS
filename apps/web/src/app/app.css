@@ -1308,6 +1308,43 @@ h1 {
   min-height: 360px;
 }
 
+.exam-shell-large-text {
+  font-size: 17px;
+}
+
+.exam-popover {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #d9e1ec;
+  background: #eef4fb;
+}
+
+.exam-popover h3,
+.exam-popover p {
+  margin: 0;
+}
+
+.exam-popover h3 {
+  font-size: 15px;
+}
+
+.exam-popover p {
+  margin-top: 4px;
+  color: #405169;
+}
+
+.exam-popover button {
+  min-height: 34px;
+  border: 1px solid #bcc9d9;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #20314a;
+  cursor: pointer;
+}
+
 .submit-warning {
   display: flex;
   align-items: center;

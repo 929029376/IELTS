@@ -31,6 +31,8 @@ export function ExamShell({
   const [remainingSeconds, setRemainingSeconds] = useState(durationSeconds);
   const [showWarning, setShowWarning] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [activePanel, setActivePanel] = useState<"help" | "settings" | null>(null);
+  const [largeText, setLargeText] = useState(false);
   const unansweredCount = questions.filter((question) => !question.answered).length;
   const markedCount = questions.filter((question) => question.markedForReview).length;
   const navItems = useMemo(() => createQuestionNavItems(questions), [questions]);
@@ -71,7 +73,7 @@ export function ExamShell({
   }
 
   return (
-    <section className="exam-shell" aria-label={title}>
+    <section className={largeText ? "exam-shell exam-shell-large-text" : "exam-shell"} aria-label={title}>
       <header className="exam-topbar">
         <div className="exam-title-group">
           <BookOpen size={18} aria-hidden="true" />
@@ -82,11 +84,11 @@ export function ExamShell({
             <Timer size={16} aria-hidden="true" />
             {formatTimer(remainingSeconds)}
           </span>
-          <button type="button">
+          <button type="button" onClick={() => setActivePanel("help")}>
             <CircleHelp size={16} aria-hidden="true" />
             Help
           </button>
-          <button type="button">
+          <button type="button" onClick={() => setActivePanel("settings")}>
             <Settings size={16} aria-hidden="true" />
             Settings
           </button>
@@ -96,6 +98,34 @@ export function ExamShell({
           </button>
         </div>
       </header>
+
+      {activePanel === "help" ? (
+        <section className="exam-popover" role="dialog" aria-label="Exam help">
+          <div>
+            <h3>Exam help</h3>
+            <p>Use the question numbers to move through the test, mark questions for review, and submit when ready.</p>
+          </div>
+          <button type="button" onClick={() => setActivePanel(null)}>
+            Close exam help
+          </button>
+        </section>
+      ) : null}
+
+      {activePanel === "settings" ? (
+        <section className="exam-popover" role="dialog" aria-label="Exam settings">
+          <div>
+            <h3>Exam settings</h3>
+            <p>Adjust the exam interface for comfortable reading.</p>
+          </div>
+          <button
+            aria-pressed={largeText}
+            type="button"
+            onClick={() => setLargeText((current) => !current)}
+          >
+            Large interface text
+          </button>
+        </section>
+      ) : null}
 
       <div className="exam-content">{children}</div>
 

@@ -14,6 +14,8 @@
   - Mark for review button.
   - Bottom question navigation.
   - Submit test button.
+  - Functional help panel.
+  - Functional settings panel with large interface text.
   - Submit warnings for unanswered and marked questions.
   - Time-expired auto-submit.
 - Implemented `ReadingExamView`.
@@ -157,6 +159,16 @@
       wiring it to the active local mock question state in `ExamPreview`.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the exam topbar review-marker follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac exam topbar help/settings follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because clicking `Help` did not open an `Exam help`
+      dialog and `Settings` did not expose any adjustable exam setting.
+    - Passed after adding topbar help and settings panels to `ExamShell`, plus a
+      large-interface-text setting that applies to the active exam shell.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the exam topbar help/settings follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - Mac full-set passage/section grouping follow-up:

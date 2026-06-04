@@ -108,6 +108,8 @@
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
+  - open functional exam topbar Help and Settings panels,
+  - toggle large interface text from the Settings panel,
   - mark questions for review and keep those marks visible in the local mock
     question navigation,
   - use the exam topbar `Mark for review` control to toggle the current local
@@ -342,6 +344,16 @@
       question mark and handling it in `ExamPreview`.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the exam topbar review-marker follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac exam topbar help/settings follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because `Help` and `Settings` were visible topbar controls
+      without usable panels.
+    - Passed after adding accessible help/settings dialogs and a large-interface
+      text toggle for the active exam shell.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the exam topbar help/settings follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - Mac full-set passage/section grouping follow-up:

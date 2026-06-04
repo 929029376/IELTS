@@ -21,7 +21,7 @@ describe("exam simulation components", () => {
   it("renders timer, help, settings, review marker, bottom nav, and submit warning", () => {
     const onSubmit = vi.fn();
 
-    render(
+    const { container } = render(
       <ExamShell
         title="Reading Mock Test"
         durationSeconds={3600}
@@ -40,6 +40,15 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("button", { name: "Settings" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mark for review" })).toBeInTheDocument();
     expect(screen.getByLabelText("Question 2, marked")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Help" }));
+    expect(screen.getByRole("dialog", { name: "Exam help" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close exam help" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+    expect(screen.getByRole("dialog", { name: "Exam settings" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Large interface text" }));
+    expect(container.querySelector(".exam-shell")).toHaveClass("exam-shell-large-text");
 
     fireEvent.click(screen.getByRole("button", { name: "Submit test" }));
 
