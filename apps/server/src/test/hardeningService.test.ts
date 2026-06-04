@@ -79,7 +79,44 @@ describe("V1 hardening service", () => {
       synonyms: []
     });
 
-    return { noAnswerKey, passage, weakAnswerKey };
+    const readingSource = questions.createSource({
+      checksum: "hardening-reading-missing-answer-sentence",
+      importStatus: "imported",
+      originalPath: "reading/missing-answer-sentence.pdf",
+      sourceType: "reading_pdf",
+      version: 1
+    });
+    const readingPassage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P2",
+      sourceId: readingSource.id,
+      subject: "reading",
+      title: "Answer Sentence Gap"
+    });
+    const readingQuestion = questions.createQuestion({
+      answerRules: {},
+      passageId: readingPassage.id,
+      prompt: "Which sentence proves the answer?",
+      questionNumber: 1,
+      questionType: "fill_blank"
+    });
+    questions.createAnswerKey({
+      acceptedAnswers: ["proof"],
+      answerSentence: null,
+      explanation: "The explanation exists, but the exact answer sentence still needs manual selection.",
+      questionId: readingQuestion.id,
+      synonyms: []
+    });
+    db.prepare(
+      `
+      INSERT INTO frequency_entries (
+        id, source_month, subject, part, english_title, chinese_title, frequency_class, difficulty
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `
+    ).run("hardening-reading-gap-frequency", "2026-06", "reading", "P2", "Answer Sentence Gap", null, "high", 2);
+
+    return { noAnswerKey, passage, readingPassage, weakAnswerKey };
   }
 
   function seedSubmittedAttempts(count: number) {
@@ -168,6 +205,7 @@ describe("V1 hardening service", () => {
     expect(service.getQuestionBankCompleteness()).toMatchObject({
       issueCounts: {
         missingAnswerKey: 1,
+        missingAnswerSentence: 1,
         missingAudio: 1,
         missingExplanation: 1,
         missingFrequencyEntry: 1,
@@ -185,9 +223,13 @@ describe("V1 hardening service", () => {
             "missing listening cues",
             "missing frequency entry"
           ])
+        }),
+        expect.objectContaining({
+          id: seeded.readingPassage.id,
+          issueLabels: expect.arrayContaining(["missing answer sentence"])
         })
       ]),
-      totalPassages: 2
+      totalPassages: 3
     });
 
     expect(service.getBackupReminder()).toMatchObject({

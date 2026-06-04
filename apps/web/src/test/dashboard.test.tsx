@@ -110,6 +110,7 @@ describe("dashboard shell", () => {
             questionBankCompleteness: {
               issueCounts: {
                 missingAnswerKey: 1,
+                missingAnswerSentence: 0,
                 missingAudio: 0,
                 missingExplanation: 1,
                 missingFrequencyEntry: 0,

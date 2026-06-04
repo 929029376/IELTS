@@ -2,6 +2,7 @@ import { AlertTriangle, DatabaseZap, ShieldCheck } from "lucide-react";
 
 type IssueCounts = {
   missingAnswerKey: number;
+  missingAnswerSentence: number;
   missingAudio: number;
   missingExplanation: number;
   missingFrequencyEntry: number;
@@ -51,6 +52,7 @@ export interface HardeningCenterProps {
 
 const issueLabels: Record<keyof IssueCounts, string> = {
   missingAnswerKey: "Answer key",
+  missingAnswerSentence: "Answer sentence",
   missingAudio: "Audio",
   missingExplanation: "Explanation",
   missingFrequencyEntry: "Frequency",

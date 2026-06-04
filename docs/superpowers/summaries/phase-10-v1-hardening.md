@@ -15,6 +15,7 @@
 - Added import failure reporting for unresolved `failed` and `needs_review` sources, including source path, status, version, and asset count.
 - Added question-bank completeness checks for:
   - missing answer key,
+  - missing answer sentence,
   - missing explanation,
   - missing audio,
   - missing transcript,
@@ -141,6 +142,11 @@
 - Added malformed devices metadata sync hardening:
   - malformed `devices.json` is repaired instead of crashing startup,
   - valid current-device metadata is rewritten.
+- Added reading answer-sentence completeness hardening:
+  - reading answer keys with empty `answer_sentence` are counted as
+    `missingAnswerSentence`,
+  - the V1 hardening center now shows an Answer sentence issue meter and passage
+    labels so manual close-reading evidence work is easier to find.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -408,6 +414,24 @@
     - Passed after the malformed devices metadata sync hardening follow-up,
       including unit/component tests, Playwright, production build, desktop
       diagnostics, and Mac DMG packaging.
+- Reading answer-sentence completeness follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/hardeningService.test.ts`
+    - Initially failed because reading answer keys with empty `answer_sentence`
+      were not counted in question-bank completeness.
+    - Passed after adding `missingAnswerSentence` issue counts and passage
+      labels.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/hardeningCenter.test.tsx`
+    - Initially failed because the V1 hardening center had no Answer sentence
+      issue meter.
+    - Passed after adding the frontend issue count type and label.
+  - `npx pnpm@9.15.4 build`
+    - Initially failed because the dashboard fallback hardening status still used
+      the old issue-count shape.
+    - Passed after updating the fallback and dashboard test fixture.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the reading answer-sentence completeness follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac readiness follow-up:
   - `node scripts/mac-readiness-check.mjs`
     - Initially failed because the question-bank import panel regression clicked

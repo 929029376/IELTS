@@ -69,6 +69,7 @@ const emptyHardeningStatus: HardeningStatusView = {
   questionBankCompleteness: {
     issueCounts: {
       missingAnswerKey: 0,
+      missingAnswerSentence: 0,
       missingAudio: 0,
       missingExplanation: 0,
       missingFrequencyEntry: 0,

@@ -32,6 +32,7 @@ describe("V1 hardening center", () => {
           questionBankCompleteness: {
             issueCounts: {
               missingAnswerKey: 1,
+              missingAnswerSentence: 1,
               missingAudio: 1,
               missingExplanation: 1,
               missingFrequencyEntry: 1,
@@ -42,7 +43,12 @@ describe("V1 hardening center", () => {
               {
                 frequencyClass: "unknown",
                 id: "passage-1",
-                issueLabels: ["missing answer key", "missing audio", "missing frequency entry"],
+                issueLabels: [
+                  "missing answer key",
+                  "missing answer sentence",
+                  "missing audio",
+                  "missing frequency entry"
+                ],
                 part: "P1",
                 questionCount: 2,
                 sourceStatus: "needs_review",
@@ -62,6 +68,12 @@ describe("V1 hardening center", () => {
     );
     expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
       "Airport Enquiry"
+    );
+    expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
+      "Answer sentence"
+    );
+    expect(screen.getByRole("region", { name: "Question-bank completeness" })).toHaveTextContent(
+      "missing answer sentence"
     );
     expect(screen.getByRole("region", { name: "Backup reminder" })).toHaveTextContent("12 submitted attempts");
   });
@@ -84,6 +96,7 @@ describe("V1 hardening center", () => {
           questionBankCompleteness: {
             issueCounts: {
               missingAnswerKey: 0,
+              missingAnswerSentence: 0,
               missingAudio: 0,
               missingExplanation: 0,
               missingFrequencyEntry: 0,

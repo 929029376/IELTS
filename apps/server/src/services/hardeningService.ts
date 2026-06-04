@@ -49,6 +49,7 @@ export interface BackupReminder {
 
 type CompletenessIssue =
   | "missingAnswerKey"
+  | "missingAnswerSentence"
   | "missingAudio"
   | "missingExplanation"
   | "missingFrequencyEntry"
@@ -56,6 +57,7 @@ type CompletenessIssue =
   | "missingTranscript";
 
 interface PassageCompletenessRow {
+  answerKeysMissingAnswerSentence: number;
   answerKeysMissingExplanation: number;
   frequencyClass: FrequencyClass;
   frequencyEntryCount: number;
@@ -73,6 +75,7 @@ interface PassageCompletenessRow {
 
 const issueLabels: Record<CompletenessIssue, string> = {
   missingAnswerKey: "missing answer key",
+  missingAnswerSentence: "missing answer sentence",
   missingAudio: "missing audio",
   missingExplanation: "missing explanation",
   missingFrequencyEntry: "missing frequency entry",
@@ -83,6 +86,7 @@ const issueLabels: Record<CompletenessIssue, string> = {
 function emptyIssueCounts(): Record<CompletenessIssue, number> {
   return {
     missingAnswerKey: 0,
+    missingAnswerSentence: 0,
     missingAudio: 0,
     missingExplanation: 0,
     missingFrequencyEntry: 0,
@@ -187,6 +191,12 @@ export function createHardeningService(db: DatabaseHandle, options: HardeningSer
             WHEN ak.id IS NOT NULL AND (ak.explanation IS NULL OR TRIM(ak.explanation) = '')
             THEN q.id
           END) AS answerKeysMissingExplanation,
+          COUNT(DISTINCT CASE
+            WHEN p.subject = 'reading'
+              AND ak.id IS NOT NULL
+              AND (ak.answer_sentence IS NULL OR TRIM(ak.answer_sentence) = '')
+            THEN q.id
+          END) AS answerKeysMissingAnswerSentence,
           COUNT(DISTINCT la.id) AS listeningAudioCount,
           COUNT(DISTINCT lc.id) AS listeningCueCount,
           COUNT(DISTINCT CASE
@@ -217,6 +227,9 @@ export function createHardeningService(db: DatabaseHandle, options: HardeningSer
       }
       if (row.answerKeysMissingExplanation > 0) {
         issues.push("missingExplanation");
+      }
+      if (row.answerKeysMissingAnswerSentence > 0) {
+        issues.push("missingAnswerSentence");
       }
       if (row.subject === "listening" && row.listeningAudioCount === 0) {
         issues.push("missingAudio");
