@@ -7,6 +7,10 @@ interface SelectedAsset {
   url: string | null;
 }
 
+function assetName(value: string | null, fallback: string) {
+  return value?.trim() || fallback;
+}
+
 function useObjectUrl(file: File | null) {
   const [asset, setAsset] = useState<SelectedAsset | null>(null);
 
@@ -30,12 +34,14 @@ function AssetFileInput({
   icon,
   label,
   onSelect,
+  selectedFallback,
   selectedName
 }: {
   accept: string;
   icon: ReactNode;
   label: string;
   onSelect: (file: File | null) => void;
+  selectedFallback: string;
   selectedName: string | null;
 }) {
   return (
@@ -50,7 +56,7 @@ function AssetFileInput({
         type="file"
         onChange={(event) => onSelect(event.currentTarget.files?.[0] ?? null)}
       />
-      <strong>{selectedName ?? "No file selected"}</strong>
+      <strong>{assetName(selectedName, selectedFallback)}</strong>
     </label>
   );
 }
@@ -74,6 +80,7 @@ export function DesktopAssetVerifier() {
           accept=".zip,application/zip"
           icon={<FileArchive size={18} aria-hidden="true" />}
           label="Select listening ZIP"
+          selectedFallback={zipFile ? "Unknown ZIP file" : "No file selected"}
           selectedName={zipFile?.name ?? null}
           onSelect={setZipFile}
         />
@@ -81,6 +88,7 @@ export function DesktopAssetVerifier() {
           accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg"
           icon={<FileAudio size={18} aria-hidden="true" />}
           label="Select audio asset"
+          selectedFallback={audioFile ? "Unknown audio file" : "No file selected"}
           selectedName={audioAsset?.name ?? null}
           onSelect={setAudioFile}
         />
@@ -88,6 +96,7 @@ export function DesktopAssetVerifier() {
           accept="application/pdf,.pdf"
           icon={<FileText size={18} aria-hidden="true" />}
           label="Select reading PDF"
+          selectedFallback={pdfFile ? "Unknown PDF file" : "No file selected"}
           selectedName={pdfAsset?.name ?? null}
           onSelect={setPdfFile}
         />

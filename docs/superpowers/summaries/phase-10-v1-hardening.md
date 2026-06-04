@@ -333,6 +333,11 @@
     local asset API,
   - unsupported local file extensions are rejected so the route only serves
     expected media, PDF, and image assets.
+- Added Mac desktop asset-verifier fallback hardening:
+  - blank selected listening ZIP names now render as `Unknown ZIP file`,
+  - blank selected audio names now render as `Unknown audio file`,
+  - blank selected reading PDF names now render as `Unknown PDF file` while
+    preserving the local blob previews.
 - Added Mac listening practice explicit-control hardening:
   - practice-mode Pause toggles local audio playback by calling play when paused
     and pause while playing,
@@ -1152,6 +1157,12 @@
       then because it used the raw filesystem path as `src`.
     - Passed after the Mac listening mock player rendered an audio element whose
       source uses the local asset API.
+- Mac desktop asset-verifier fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/desktopAssetVerifier.test.tsx -t "blank"`
+    - Initially failed because selected ZIP, audio, and PDF files with blank
+      names rendered as empty self-check cards.
+    - Passed after trimming selected asset names and falling back to explicit
+      unknown-file labels while preserving blob preview URLs.
 - Mac listening practice playback-controls follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because `Start listening practice` loaded local audio but
