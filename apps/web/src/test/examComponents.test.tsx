@@ -430,6 +430,82 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("persists marked-for-review state for local mock questions before submission", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const path = String(input);
+      if (path === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-marked-1",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-marked-1",
+                part: "P1",
+                passageId: "passage-marked-1",
+                passageTitle: "Marked Review Set",
+                prompt: "Which answer should be checked later?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      if (path === "/api/practice/attempt-reading-marked-1/answer") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (path === "/api/practice/attempt-reading-marked-1/submit") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-reading-marked-1",
+            estimatedBand: 4,
+            rawScore: 0,
+            submittedAt: "2026-06-04T09:00:00.000Z"
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    const answer = await screen.findByRole("textbox", { name: "Answer for question question-marked-1" });
+    fireEvent.change(answer, { target: { value: "check later" } });
+    fireEvent.click(screen.getByRole("button", { name: "Mark question 1 for review" }));
+
+    expect(screen.getByLabelText("Question 1, marked")).toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Submit test" })[0]);
+    expect(screen.getByText("0 unanswered questions and 1 marked question remain.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Submit anyway" }));
+
+    expect(await screen.findByRole("region", { name: "Score report" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/practice/attempt-reading-marked-1/answer",
+      expect.objectContaining({
+        body: JSON.stringify({
+          markedForReview: true,
+          questionId: "question-marked-1",
+          rawAnswer: "check later",
+          timeSpentSeconds: 0
+        }),
+        method: "POST"
+      })
+    );
+  });
+
   it("does not submit a local mock when saving current answers fails", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {

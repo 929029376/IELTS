@@ -101,6 +101,9 @@
 - Added frontend local mock completion controls so the active mock attempt can:
   - render answer inputs for returned question-bank questions,
   - save answers through the practice answer API,
+  - mark questions for review and keep those marks visible in the local mock
+    question navigation,
+  - persist the marked-for-review flag with answer-save requests,
   - save current answer field state immediately before submit,
   - stop submission when the pre-submit answer save fails,
   - submit through the practice submit API,
@@ -303,6 +306,13 @@
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the free-practice UI follow-up, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Mac local mock review-marker follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because local mock question cards did not expose a real
+      per-question mark-for-review control.
+    - Passed after adding the mark toggle, bottom-navigation marked state,
+      marked-question submit warning, and `markedForReview` persistence in the
+      local answer-save request.
 - Mac practice-filter follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because supplied practice filters were ignored by the

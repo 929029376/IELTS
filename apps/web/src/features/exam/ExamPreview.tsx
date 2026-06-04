@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Flag } from "lucide-react";
 import type { QuestionType } from "@ielts/shared/questionTypes";
 import { AnswerInput } from "../questions/AnswerInput";
 import { ExamShell } from "./ExamShell";
@@ -154,6 +155,7 @@ function conflictsForQuestion(review: MockReview, questionId: string): MockRevie
 export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const [activeMock, setActiveMock] = useState<StartedMock | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [markedQuestions, setMarkedQuestions] = useState<Record<string, boolean>>({});
   const [practiceFilters, setPracticeFilters] = useState<PracticeFilters>(defaultPracticeFilters);
   const [isStarting, setIsStarting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -170,6 +172,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setMockReview(null);
     setScoreReport(null);
     setAnswers({});
+    setMarkedQuestions({});
     try {
       setActiveMock(await startAttempt(mode, subject, practiceFilters));
     } catch {
@@ -187,7 +190,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     const rawAnswer = answers[questionId] ?? "";
     const response = await fetch(`/api/practice/${activeMock.attemptId}/answer`, {
       body: JSON.stringify({
-        markedForReview: false,
+        markedForReview: Boolean(markedQuestions[questionId]),
         questionId,
         rawAnswer,
         timeSpentSeconds: 0
@@ -236,13 +239,13 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
   const mockQuestionStates = activeQuestions.map((question, index) => ({
     questionNumber: question.questionNumber,
     answered: Boolean((answers[question.id] ?? "").trim()),
-    markedForReview: false,
-    current: index === 0
+    markedForReview: Boolean(markedQuestions[question.id]),
+    current: index === 0 && !markedQuestions[question.id]
   }));
   const mockQuestionList = (
     <div className="local-mock-questions">
       {activeQuestions.map((question) => (
-        <label className="local-mock-question-card" key={question.id}>
+        <div className="local-mock-question-card" key={question.id}>
           <span>{question.part}</span>
           <strong>
             {question.questionNumber}. {question.prompt}
@@ -258,7 +261,23 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
             }}
             onChange={(value) => setAnswers((current) => ({ ...current, [question.id]: value }))}
           />
-        </label>
+          <button
+            aria-pressed={Boolean(markedQuestions[question.id])}
+            className="question-mark-button"
+            onClick={() =>
+              setMarkedQuestions((current) => ({
+                ...current,
+                [question.id]: !current[question.id]
+              }))
+            }
+            type="button"
+          >
+            <Flag size={15} aria-hidden="true" />
+            {markedQuestions[question.id]
+              ? `Unmark question ${question.questionNumber}`
+              : `Mark question ${question.questionNumber} for review`}
+          </button>
+        </div>
       ))}
     </div>
   );

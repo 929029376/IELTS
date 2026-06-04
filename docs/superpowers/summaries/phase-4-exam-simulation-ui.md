@@ -44,6 +44,9 @@
 - Connected the loaded local mock attempt to the exam UI:
   - renders returned local questions as answer inputs,
   - saves answers through `POST /api/practice/:attemptId/answer`,
+  - supports marking local mock questions for review,
+  - reflects marked questions in the bottom question navigation and submit warning,
+  - persists the marked-for-review flag with the saved answer payload,
   - saves current answer input state again before local mock submission,
   - stops submission and shows an error when pre-submit answer saving fails,
   - submits through `POST /api/practice/:attemptId/submit`,
@@ -126,6 +129,13 @@
     - Passed after the local mock submit-save follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac local mock review-marker follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the loaded local mock UI had no per-question
+      control for marking a question for review.
+    - Passed after adding local question mark toggles, marked navigation state,
+      submit warnings for marked local questions, and `markedForReview`
+      persistence in answer-save payloads.
 - Mac local mock save-failure follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because a failed pre-submit answer save still allowed the

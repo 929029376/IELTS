@@ -379,6 +379,26 @@ h1 {
   line-height: 1.4;
 }
 
+.question-mark-button {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid #c9d4e3;
+  border-radius: 6px;
+  background: #f7f9fc;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.question-mark-button[aria-pressed="true"] {
+  border-color: #e0b84a;
+  background: #fff7d6;
+  color: #6c4b00;
+}
+
 .mock-review-panel {
   display: grid;
   gap: 14px;
