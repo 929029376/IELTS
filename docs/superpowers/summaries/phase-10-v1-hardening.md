@@ -180,7 +180,9 @@
     local mock or practice attempts,
   - user highlights use a distinct style from answer-sentence evidence
     highlights,
-  - reading highlights can be cleared from the toolbar.
+  - reading highlights are scoped to the active passage and restored when
+    returning to that passage,
+  - reading highlights can be cleared from the toolbar for the active passage.
 - Added Mac reading pane drag hardening:
   - the reading exam divider can be dragged to resize passage and question panes,
   - the divider keeps a click shortcut and accessible separator metadata,
@@ -1099,6 +1101,11 @@
       after switching to a different passage.
     - Passed after making notes local to each active passage in the reading exam
       view.
+- Mac selected-highlight persistence hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because selected reading highlights were lost when
+      switching away from a passage and returning.
+    - Passed after storing selected highlights per active reading passage.
 
 ## Remaining V1 Gaps
 

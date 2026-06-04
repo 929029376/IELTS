@@ -1,5 +1,5 @@
 import type { KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 export interface ReadingExamViewProps {
   passageTitle: string;
@@ -103,16 +103,13 @@ export function ReadingExamView({
   const [fontScale, setFontScale] = useState<"small" | "regular" | "large">("regular");
   const [leftPanePercent, setLeftPanePercent] = useState(52);
   const [notesByPassage, setNotesByPassage] = useState<Record<string, string>>({});
-  const [userHighlights, setUserHighlights] = useState<string[]>([]);
+  const [userHighlightsByPassage, setUserHighlightsByPassage] = useState<Record<string, string[]>>({});
   const passageNoteKey = `${passageTitle}\n${passageText}`;
+  const userHighlights = userHighlightsByPassage[passageNoteKey] ?? [];
   const renderedText = useMemo(
     () => renderHighlightedText(passageText, highlightedText, userHighlights),
     [passageText, highlightedText, userHighlights]
   );
-
-  useEffect(() => {
-    setUserHighlights([]);
-  }, [passageText, passageTitle]);
 
   function highlightSelection() {
     const selectedText = window.getSelection()?.toString().trim();
@@ -120,7 +117,13 @@ export function ReadingExamView({
       return;
     }
 
-    setUserHighlights((current) => (current.includes(selectedText) ? current : [...current, selectedText]));
+    setUserHighlightsByPassage((current) => {
+      const activeHighlights = current[passageNoteKey] ?? [];
+      if (activeHighlights.includes(selectedText)) {
+        return current;
+      }
+      return { ...current, [passageNoteKey]: [...activeHighlights, selectedText] };
+    });
   }
 
   function updatePanePercentFromClientX(clientX: number) {
@@ -202,7 +205,10 @@ export function ReadingExamView({
         <button type="button" onClick={highlightSelection}>
           Highlight selected text
         </button>
-        <button type="button" onClick={() => setUserHighlights([])}>
+        <button
+          type="button"
+          onClick={() => setUserHighlightsByPassage((current) => ({ ...current, [passageNoteKey]: [] }))}
+        >
           Clear highlights
         </button>
       </div>

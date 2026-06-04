@@ -213,6 +213,43 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("textbox", { name: "Notes" })).toHaveValue("Review paragraph two.");
   });
 
+  it("keeps selected reading highlights separated by active passage", () => {
+    vi.spyOn(window, "getSelection").mockReturnValue({
+      toString: () => "popular because"
+    } as Selection);
+
+    const { rerender } = render(
+      <ReadingExamView
+        passageTitle="Reading Passage One"
+        passageText="Tea became popular because the answer sentence explains the trade."
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Highlight selected text" }));
+    expect(screen.getByText("popular because")).toHaveClass("user-highlight");
+
+    rerender(
+      <ReadingExamView
+        passageTitle="Reading Passage Two"
+        passageText="Passage two text."
+        questions={<p>Questions 14-26</p>}
+      />
+    );
+
+    expect(screen.queryByText("popular because")).not.toBeInTheDocument();
+
+    rerender(
+      <ReadingExamView
+        passageTitle="Reading Passage One"
+        passageText="Tea became popular because the answer sentence explains the trade."
+        questions={<p>Questions 1-13</p>}
+      />
+    );
+
+    expect(screen.getByText("popular because")).toHaveClass("user-highlight");
+  });
+
   it("highlights reading answer evidence when imported passage casing or whitespace differs", () => {
     const { container } = render(
       <ReadingExamView

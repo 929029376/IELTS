@@ -96,7 +96,8 @@
   - selected passage text can be highlighted during a local reading exam or
     practice attempt,
   - user highlights render separately from answer-sentence evidence highlights,
-  - highlights can be cleared from the reading toolbar.
+  - highlights are kept separately for each active passage,
+  - highlights can be cleared from the reading toolbar for the active passage.
 - Added Mac reading pane drag hardening:
   - the reading exam divider can be dragged to resize passage and question panes,
   - the divider can also be adjusted with ArrowLeft, ArrowRight, Home, and End,
@@ -107,6 +108,10 @@
   - switching passages no longer carries a previous passage note into the next
     passage,
   - returning to a passage restores its local note.
+- Added Mac reading selected-highlight persistence:
+  - user-selected highlights are kept separately for each active reading passage,
+  - switching away from a passage no longer discards its selected text highlights,
+  - clearing highlights affects the active passage only.
 - Added Mac reading answer-evidence highlight hardening:
   - answer-sentence evidence in the reading exam view matches imported passage
     text without requiring identical casing,
@@ -297,6 +302,11 @@
       visible after switching to another passage.
     - Passed after notes were keyed by active passage and restored when returning
       to that passage.
+- Mac selected-highlight persistence follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because selected reading highlights disappeared after
+      switching to another passage and returning.
+    - Passed after selected highlights were keyed by active passage.
 - Mac listening practice playback-controls follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because listening practice still rendered the local audio
