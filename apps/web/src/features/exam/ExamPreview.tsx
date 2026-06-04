@@ -206,6 +206,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
     setSubmitError(null);
     setMockReview(null);
     setScoreReport(null);
+    setActiveMock(null);
     setAnswers({});
     setMarkedQuestions({});
     setActiveGroupId(null);

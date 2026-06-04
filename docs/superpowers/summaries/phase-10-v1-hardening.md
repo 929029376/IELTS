@@ -223,6 +223,11 @@
   - stop submission when the pre-submit answer save fails,
   - submit through the practice submit API,
   - show the returned raw score and estimated band report.
+- Added Mac exam start-failure stale-attempt hardening:
+  - starting another mock or practice attempt clears the previous loaded local
+    attempt before loading the new one,
+  - a failed start no longer leaves the prior test visible with reset answer
+    state.
 - Added Mac exam submit-warning navigation hardening:
   - submit confirmation now lists unanswered question numbers,
   - submit confirmation now lists marked-for-review question numbers,
@@ -1372,6 +1377,12 @@
       returning to the exam after opening the confirmation.
     - Passed after adding `Return to test`, which closes the warning without
       calling the submit handler.
+- Mac exam start-failure stale-attempt hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "clears the previous local attempt"`
+    - Initially failed because a failed second attempt start left the previous
+      loaded local mock visible.
+    - Passed after clearing the active local attempt before requesting another
+      mock or practice set.
 
 ## Remaining V1 Gaps
 

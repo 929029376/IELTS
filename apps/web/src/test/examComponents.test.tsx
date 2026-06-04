@@ -459,6 +459,60 @@ describe("exam simulation components", () => {
     );
   });
 
+  it("clears the previous local attempt when starting another attempt fails", async () => {
+    vi.useRealTimers();
+    let startCalls = 0;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        startCalls += 1;
+        if (startCalls === 1) {
+          return {
+            ok: true,
+            json: async () => ({
+              attemptId: "attempt-reading-stale-start",
+              questions: [
+                {
+                  answerRules: {},
+                  id: "question-stale-start-1",
+                  part: "P1",
+                  passageId: "passage-stale-start-1",
+                  passageText: "First attempt passage text.",
+                  passageTitle: "First Attempt Passage",
+                  prompt: "What belongs to the first attempt?",
+                  questionNumber: 1,
+                  questionType: "fill_blank"
+                }
+              ]
+            })
+          };
+        }
+
+        return {
+          ok: false,
+          json: async () => ({})
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+    expect(await screen.findByText("Loaded local reading mock")).toBeInTheDocument();
+    expect(screen.getByText("First attempt passage text.")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Start listening mock" }));
+
+    expect(await screen.findByText("Could not start listening mock from the local question bank.")).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Loaded local mock set" })).not.toBeInTheDocument();
+    expect(screen.queryByText("First attempt passage text.")).not.toBeInTheDocument();
+  });
+
   it("renders a local reading PDF asset when structured passage text is unavailable", async () => {
     vi.useRealTimers();
     const pdfPath = "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/P1-history-of-tea.pdf";
