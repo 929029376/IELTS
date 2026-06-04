@@ -110,6 +110,10 @@
   - the synonym notes panel now shows `No synonym notes recorded yet.` when no
     synonym evidence is available,
   - imported reading previews no longer render a visually empty synonym list.
+- Added Mac close-reading blank-synonym filtering:
+  - whitespace-only synonym entries are ignored before rendering,
+  - imported reading previews with only blank synonym strings now use the same
+    empty-state message.
 - Added Mac close-reading multiple-keyword highlight support:
   - `CloseReadingView` now renders every supplied keyword highlight,
   - answer-sentence highlights remain first priority when highlight spans overlap.
@@ -309,6 +313,11 @@
       list when no synonym evidence existed.
     - Passed after `CloseReadingView` shows a clear empty-state message for
       missing synonym notes.
+- Mac close-reading blank-synonym filtering follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because whitespace-only synonym notes rendered blank list
+      items instead of the empty state.
+    - Passed after trimming and filtering synonym notes before rendering.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

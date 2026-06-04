@@ -131,6 +131,10 @@
   - close-reading synonym notes now show a clear empty-state message when no
     synonym evidence is recorded,
   - the panel no longer renders an empty list that looks like missing UI.
+- Added Mac close-reading blank-synonym hardening:
+  - whitespace-only synonym notes are filtered before rendering,
+  - synonym sections with only blank imported values now show the empty-state
+    message.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1109,6 +1113,12 @@
     - Initially failed because missing synonym notes produced an empty `ul`.
     - Passed after the close-reading view renders `No synonym notes recorded yet.`
       when the synonym list is empty.
+- Mac close-reading blank-synonym hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because blank synonym strings still rendered empty list
+      items.
+    - Passed after trimming and filtering synonym values before the empty-state
+      decision.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

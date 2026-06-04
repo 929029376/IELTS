@@ -97,6 +97,7 @@ export function CloseReadingView({
   onMistakeLabel
 }: CloseReadingViewProps) {
   const keywordHighlights = keywords.map((target) => ({ className: "keyword-highlight", target }));
+  const visibleSynonyms = synonyms.map((synonym) => synonym.trim()).filter(Boolean);
 
   return (
     <section className="close-reading-view" aria-label="Close reading view">
@@ -116,9 +117,9 @@ export function CloseReadingView({
         </button>
         <section aria-label="Synonym notes">
           <h4>Synonym notes</h4>
-          {synonyms.length > 0 ? (
+          {visibleSynonyms.length > 0 ? (
             <ul>
-              {synonyms.map((synonym) => (
+              {visibleSynonyms.map((synonym) => (
                 <li key={synonym}>{synonym}</li>
               ))}
             </ul>

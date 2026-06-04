@@ -600,6 +600,25 @@ describe("intensive study components", () => {
     expect(screen.getByText("No synonym notes recorded yet.")).toBeInTheDocument();
   });
 
+  it("treats blank close-reading synonym notes as unavailable", () => {
+    render(
+      <CloseReadingView
+        passageText="The answer sentence identifies the key evidence."
+        answerSentence="answer sentence"
+        keywords={[]}
+        synonyms={["   ", ""]}
+        explanation="The sentence directly supports the answer."
+        question={<p>Question 1</p>}
+        isWrongAnswer={false}
+        onSelectAnswerSentence={() => undefined}
+        onMistakeLabel={() => undefined}
+      />
+    );
+
+    expect(screen.getByText("No synonym notes recorded yet.")).toBeInTheDocument();
+    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+  });
+
   it("highlights answer evidence and keywords when imported passage casing differs", () => {
     render(
       <CloseReadingView
