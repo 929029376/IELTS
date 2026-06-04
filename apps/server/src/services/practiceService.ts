@@ -29,6 +29,13 @@ export interface PracticeQuestionResponse {
   part: string;
 }
 
+export class EmptyPracticeStartError extends Error {
+  constructor() {
+    super("No questions found for this local practice request.");
+    this.name = "EmptyPracticeStartError";
+  }
+}
+
 const wordLimitNumbers: Record<string, number> = {
   eight: 8,
   five: 5,
@@ -164,6 +171,11 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
                 answerRules: question.answerRules,
                 part: question.part
               }));
+
+      if (practiceQuestions.length === 0) {
+        throw new EmptyPracticeStartError();
+      }
+
       const attempt = attempts.createAttempt({
         mode: input.mode,
         subject: input.subject,

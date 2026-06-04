@@ -59,6 +59,15 @@ function seedPracticeFilterCandidates(databasePath: string) {
   }
 }
 
+function countAttempts(databasePath: string): number {
+  const db = openDatabase(databasePath);
+  try {
+    return (db.prepare("SELECT COUNT(*) AS count FROM attempts").get() as { count: number }).count;
+  } finally {
+    db.close();
+  }
+}
+
 function seedFortyQuestions(databasePath: string) {
   const db = openDatabase(databasePath);
   migrate(db);
@@ -767,6 +776,30 @@ function seedMockCandidatesWithAssets(databasePath: string) {
 }
 
 describe("practice routes", () => {
+  it("does not create an attempt when practice filters return no questions", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-empty-practice-start-"));
+    const databasePath = join(tempDir, "ielts.db");
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+
+      expect(start.statusCode).toBe(409);
+      expect(start.json()).toMatchObject({
+        error: "No questions found for this local practice request."
+      });
+      expect(countAttempts(databasePath)).toBe(0);
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("filters practice starts by part, frequency class, and question type", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-filter-routes-"));
     const databasePath = join(tempDir, "ielts.db");

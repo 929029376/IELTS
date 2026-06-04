@@ -3,7 +3,7 @@ import { z } from "zod";
 import { frequencyClassSchema, partSchema, questionTypeSchema } from "@ielts/shared";
 import { createAttemptRepo } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
-import { createPracticeService } from "../services/practiceService";
+import { createPracticeService, EmptyPracticeStartError } from "../services/practiceService";
 import type { TestBuilderOptions } from "../services/testBuilder";
 import type { SyncService } from "../sync/syncService";
 
@@ -34,7 +34,15 @@ export function registerPracticeRoutes(
 
   server.post("/api/practice/start", async (request, reply) => {
     const input = startPracticeSchema.parse(request.body);
-    const result = practice.startPractice(input);
+    let result: ReturnType<typeof practice.startPractice>;
+    try {
+      result = practice.startPractice(input);
+    } catch (error) {
+      if (error instanceof EmptyPracticeStartError) {
+        return reply.code(409).send({ error: error.message });
+      }
+      throw error;
+    }
     const attempt = attempts.getAttemptWithAnswers(result.attemptId);
     if (attempt) {
       sync?.appendAttemptEvent("attempt.created", attempt, attempt.startedAt);

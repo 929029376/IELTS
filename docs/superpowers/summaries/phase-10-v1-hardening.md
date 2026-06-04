@@ -388,6 +388,13 @@
     treated as start failures,
   - the Mac mock/practice UI no longer shows a submit-ready empty attempt when
     the local question bank or selected filters produce no matching questions.
+- Added Mac empty-attempt persistence hardening:
+  - practice start requests that find no local questions now return a client
+    conflict response,
+  - empty local question-bank or empty filtered practice starts no longer create
+    attempt rows,
+  - this keeps history, prediction, backup, and Baidu Cloud sync logs from being
+    polluted by abandoned zero-question attempts.
 - Added Mac local exam metadata fallback hardening:
   - blank imported passage titles now render as `Untitled passage` in loaded
     mock/practice lists, reading passage headers, and listening section labels,
@@ -1768,6 +1775,16 @@
       `rawScore` but return `estimatedBand: null`.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 19 practice route tests.
+- Mac empty-attempt persistence hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "no questions"`
+    - Initially failed because starting a reading practice request against an
+      empty local question bank returned `200` with no questions, allowing the
+      API to create an empty attempt row.
+    - Passed after empty practice starts return `409` with
+      `No questions found for this local practice request.` before any attempt is
+      inserted.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 20 practice route tests.
 - Mac practice local-resource hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because free practice attempts did not receive imported
