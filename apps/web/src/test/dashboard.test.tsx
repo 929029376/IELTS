@@ -217,6 +217,34 @@ describe("dashboard shell", () => {
     expect(screen.getByText("Live Reading P1 High")).toBeInTheDocument();
   });
 
+  it("loads sync device and folder configuration from the local API", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/sync/config") {
+        return {
+          ok: true,
+          json: async () => ({
+            deviceId: "device-live-sync-1",
+            deviceName: "MacBook IELTS Live",
+            platform: "darwin",
+            syncFolderPath: "/Users/musheng/Desktop/同步空间/IELTS-Live-Sync"
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("/Users/musheng/Desktop/同步空间/IELTS-Live-Sync")).toBeInTheDocument();
+    expect(screen.getByText("MacBook IELTS Live")).toBeInTheDocument();
+    expect(screen.queryByText("Mac local device")).not.toBeInTheDocument();
+  });
+
   it("loads live intensive listening and reading data from the local API", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const url = String(input);

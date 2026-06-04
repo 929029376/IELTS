@@ -907,6 +907,12 @@
       that the local mock attempt could not be submitted.
     - Passed after Mac exam preview error handling reports local practice
       failures as practice failures and preserves mock wording for mock exams.
+- Mac sync-config display hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because the dashboard could show a stale hardcoded Mac
+      sync path instead of the server's active Baidu Cloud JSONL sync folder.
+    - Passed after App loads `/api/sync/config` and passes the live device name
+      and sync folder path into the Sync settings panel.
 
 ## Remaining V1 Gaps
 

@@ -107,12 +107,26 @@ const emptyStudyOverview: StudyOverviewView = {
   }
 };
 
+const defaultSyncConfig: SyncConfigView = {
+  deviceId: "local-mac-device",
+  deviceName: "Mac local device",
+  platform: "darwin",
+  syncFolderPath: "/Users/musheng/Desktop/同步空间/IELTS-Sync"
+};
+
 interface DashboardData {
   analytics: ReportsAnalyticsView;
   dashboard: DashboardReportView;
   hardening: HardeningStatusView;
   history: HistoryAttemptView[];
   status: "loading" | "live" | "fallback";
+}
+
+interface SyncConfigView {
+  deviceId: string;
+  deviceName: string;
+  platform: string;
+  syncFolderPath: string;
 }
 
 interface AccuracyBucket {
@@ -316,6 +330,36 @@ function useStudyOverview(refreshVersion: number): StudyOverviewView {
   return overview;
 }
 
+function useSyncConfig(refreshVersion: number): SyncConfigView {
+  const [syncConfig, setSyncConfig] = useState<SyncConfigView>(defaultSyncConfig);
+
+  useEffect(() => {
+    let mounted = true;
+
+    if (typeof fetch === "undefined") {
+      return;
+    }
+
+    void fetchJson<SyncConfigView>("/api/sync/config")
+      .then((config) => {
+        if (mounted) {
+          setSyncConfig(config);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setSyncConfig(defaultSyncConfig);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [refreshVersion]);
+
+  return syncConfig;
+}
+
 function useIntensiveStudyPreview(refreshVersion: number): IntensiveStudyPreviewView | undefined {
   const [preview, setPreview] = useState<IntensiveStudyPreviewView | undefined>(undefined);
 
@@ -351,6 +395,7 @@ export function App() {
   const dashboardData = useDashboardData(dataRefreshVersion);
   const intensiveStudyPreview = useIntensiveStudyPreview(dataRefreshVersion);
   const studyOverview = useStudyOverview(dataRefreshVersion);
+  const syncConfig = useSyncConfig(dataRefreshVersion);
   const desktopRuntimeStatus = useDesktopRuntimeStatus();
 
   return (
@@ -417,7 +462,7 @@ export function App() {
         />
         <HardeningCenter status={dashboardData.hardening} />
         <SyncSettingsPreview
-          deviceName="Mac local device"
+          deviceName={syncConfig.deviceName}
           lastSyncAt={null}
           onBackupChanged={() => setDataRefreshVersion((version) => version + 1)}
           onSyncComplete={() => setDataRefreshVersion((version) => version + 1)}
@@ -431,7 +476,7 @@ export function App() {
             "imports.jsonl",
             "devices.json"
           ]}
-          syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+          syncPath={syncConfig.syncFolderPath}
         />
       </section>
     </main>

@@ -232,6 +232,14 @@
     - Passed after the history review conflict visibility follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac sync-config display follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because the Mac dashboard hardcoded the sync device name
+      and folder path even though `/api/sync/config` exposed the live local
+      configuration.
+    - Passed after the dashboard fetches the sync configuration and renders the
+      returned device name and Baidu Cloud JSONL folder path, falling back to the
+      Mac default when the API is unavailable.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.
