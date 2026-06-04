@@ -64,6 +64,14 @@ function formatBackupDate(value: string | null) {
   return value ? value.slice(0, 10) : "No backup yet";
 }
 
+function sourcePathLabel(value: string) {
+  return value.trim() || "Unknown source path";
+}
+
+function passageTitleLabel(value: string) {
+  return value.trim() || "Untitled passage";
+}
+
 export function HardeningCenter({ status }: HardeningCenterProps) {
   const issueEntries = Object.entries(status.questionBankCompleteness.issueCounts) as Array<
     [keyof IssueCounts, number]
@@ -101,7 +109,7 @@ export function HardeningCenter({ status }: HardeningCenterProps) {
               <tbody>
                 {status.importFailures.sources.map((source) => (
                   <tr key={source.id}>
-                    <td>{source.originalPath}</td>
+                    <td>{sourcePathLabel(source.originalPath)}</td>
                     <td>{source.importStatus}</td>
                     <td>{source.assetCount}</td>
                   </tr>
@@ -133,7 +141,7 @@ export function HardeningCenter({ status }: HardeningCenterProps) {
               {incompletePassages.map((passage) => (
                 <article className="passage-gap-row" key={passage.id}>
                   <div>
-                    <strong>{passage.title}</strong>
+                    <strong>{passageTitleLabel(passage.title)}</strong>
                     <span>
                       {passage.subject} {passage.part} · {passage.sourceStatus}
                     </span>

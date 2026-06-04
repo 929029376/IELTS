@@ -1,6 +1,6 @@
 # Phase 10 V1 Hardening
 
-**Date:** 2026-06-01 to 2026-06-02
+**Date:** 2026-06-01 to 2026-06-04
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -159,6 +159,12 @@
     `Untitled passage`,
   - the local study queue no longer shows blank recommendation rows when source
     metadata is incomplete.
+- Added Mac hardening-center source/title fallback hardening:
+  - blank import source paths now render as `Unknown source path`,
+  - blank question-bank completeness passage titles now render as
+    `Untitled passage`,
+  - readiness checks no longer show blank rows when importer metadata is
+    incomplete.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1171,6 +1177,12 @@
       rendered as blank rows.
     - Passed after trimming study queue passage titles and using
       `Untitled passage` as the fallback.
+- Mac hardening-center source/title fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/hardeningCenter.test.tsx`
+    - Initially failed because blank import source paths and passage titles
+      rendered as empty readiness rows.
+    - Passed after trimming hardening-center source paths and passage titles
+      before applying fallback labels.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown
