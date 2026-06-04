@@ -56,6 +56,10 @@
 - Added a Mac dashboard refresh follow-up so submitting a local mock immediately
   refreshes history, latest mock score, prediction cards, and recommended next
   practice without requiring a browser reload.
+- Added Mac estimate-label hardening:
+  - mock score reports state that IELTS band scores are estimates,
+  - history/prediction cards state that predicted bands are estimates and
+    official raw-score cutoffs can vary.
 
 ## Verification Evidence
 
@@ -89,6 +93,14 @@
     - Passed after the post-mock dashboard refresh follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac estimate-label follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the mock score report showed an estimated band
+      without explaining that cutoffs can vary by test.
+    - Passed after adding the estimate note to score reports.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because prediction cards did not show an estimate note.
+    - Passed after adding the predicted-band estimate note to the reports panel.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

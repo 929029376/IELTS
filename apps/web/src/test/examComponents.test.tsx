@@ -127,6 +127,7 @@ describe("exam simulation components", () => {
     expect(screen.getByRole("region", { name: "Score report" })).toBeInTheDocument();
     expect(screen.getByText("32/40")).toBeInTheDocument();
     expect(screen.getByText("7.0")).toBeInTheDocument();
+    expect(screen.getByText(/IELTS band scores are estimates/i)).toBeInTheDocument();
   });
 
   it("starts a local reading mock set through the practice API", async () => {

@@ -44,6 +44,7 @@ describe("history and reports preview", () => {
     expect(screen.getByRole("region", { name: "History and reports preview" })).toBeInTheDocument();
     expect(screen.getByText("Listening 31/40, Band 7")).toBeInTheDocument();
     expect(screen.getByText("6.5-7.5")).toBeInTheDocument();
+    expect(screen.getByText(/predicted bands are estimates/i)).toBeInTheDocument();
     expect(screen.getAllByText("matching")).toHaveLength(2);
     expect(screen.getByText("定位失败")).toBeInTheDocument();
     expect(screen.getByText("Export mock report")).toBeInTheDocument();

@@ -591,6 +591,13 @@ h1 {
   font-size: 17px;
 }
 
+.score-estimate-note {
+  margin: -4px 0 16px;
+  color: #66768c;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .reports-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
@@ -1512,6 +1519,10 @@ h1 {
   margin: 4px 0 0;
   color: #172033;
   font-weight: 700;
+}
+
+.score-report .score-estimate-note {
+  margin: 12px 0 0;
 }
 
 .intensive-listening-player,

@@ -130,6 +130,10 @@
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
+- Added score-estimate UI hardening:
+  - mock score reports explicitly label IELTS band scores as estimates,
+  - prediction cards explain that local predicted bands are estimates and
+    official raw-score cutoffs can vary.
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
@@ -680,6 +684,15 @@
       show any sync conflict in the Mac mock review panel.
     - Passed after rendering remote conflicting answers with their source device
       beside the affected question.
+- Mac score-estimate UI hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the score report did not explain that IELTS band
+      scores are estimates.
+    - Passed after adding the score report estimate note.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because prediction cards did not explain that predicted
+      bands are estimates.
+    - Passed after adding the prediction estimate note.
 
 ## Remaining V1 Gaps
 

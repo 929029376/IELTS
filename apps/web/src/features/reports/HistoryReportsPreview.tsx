@@ -124,6 +124,9 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
           <strong>{dashboard.recommendedNextPractice}</strong>
         </div>
       </div>
+      <p className="score-estimate-note">
+        Predicted bands are estimates from local history; official IELTS raw-score cutoffs can vary by test.
+      </p>
 
       <div className="reports-grid">
         <section className="history-table-wrap" aria-label="Attempt history">

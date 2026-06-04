@@ -22,6 +22,9 @@ export function ScoreReport({ subject, rawScore, estimatedBand }: ScoreReportPro
           <dd>{estimatedBand.toFixed(1)}</dd>
         </div>
       </dl>
+      <p className="score-estimate-note">
+        IELTS band scores are estimates because official raw-score cutoffs can vary by test.
+      </p>
     </section>
   );
 }
