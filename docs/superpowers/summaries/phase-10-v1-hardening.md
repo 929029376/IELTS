@@ -88,6 +88,10 @@
     `GET /api/assets/local`,
   - sentence repeat buttons seek to cue start times and loop back at cue end
     times for focused dictation practice.
+- Added Mac intensive speed-status hardening:
+  - the intensive listening Speed control now displays the active playback rate,
+  - toggling slow playback updates the local audio element and the visible speed
+    label for clearer focused-listening feedback.
 - Added Mac close-reading mistake-label hardening:
   - intensive reading preview now exposes the latest wrong reading answer id,
   - mistake-label buttons persist through `POST /api/study/mistake-labels`,
@@ -1031,6 +1035,12 @@
       A-B loop without surfacing the active A point or loop range.
     - Passed after showing the custom A-B loop status in the intensive listening
       player and preserving the existing loop-back playback behavior.
+- Mac intensive speed-status hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the intensive listening Speed control still
+      rendered only `Speed` instead of the current playback rate.
+    - Passed after showing `Speed: 1x` initially and `Speed: 0.85x` after slow
+      playback is toggled.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

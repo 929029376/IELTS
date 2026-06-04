@@ -19,6 +19,10 @@ function formatSeconds(seconds: number): string {
   return `${seconds.toFixed(1)}s`;
 }
 
+function formatPlaybackRate(rate: number): string {
+  return rate.toFixed(2).replace(/\.00$/, "").replace(/0$/, "");
+}
+
 export function IntensiveListeningPlayer({
   audioPath,
   audioTitle,
@@ -29,6 +33,7 @@ export function IntensiveListeningPlayer({
   const [activeCueId, setActiveCueId] = useState(cues[0]?.id ?? "");
   const [loopRange, setLoopRange] = useState<{ endSeconds: number; startSeconds: number } | null>(null);
   const [aPoint, setAPoint] = useState<number | null>(null);
+  const [playbackRate, setPlaybackRate] = useState(1);
   const [dictationText, setDictationText] = useState("");
   const activeCue = cues.find((cue) => cue.id === activeCueId) ?? cues[0];
 
@@ -93,6 +98,17 @@ export function IntensiveListeningPlayer({
     setLoopRange(null);
   }
 
+  function toggleSpeed() {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    const nextRate = audio.playbackRate === 1 ? 0.85 : 1;
+    audio.playbackRate = nextRate;
+    setPlaybackRate(nextRate);
+  }
+
   const loopStatus = loopRange
     ? `A-B loop: ${formatSeconds(loopRange.startSeconds)} to ${formatSeconds(loopRange.endSeconds)}`
     : aPoint !== null
@@ -122,16 +138,8 @@ export function IntensiveListeningPlayer({
         <button type="button" onClick={() => playFrom(activeCue?.startSeconds ?? 0)}>
           Seek
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            const audio = audioRef.current;
-            if (audio) {
-              audio.playbackRate = audio.playbackRate === 1 ? 0.85 : 1;
-            }
-          }}
-        >
-          Speed
+        <button type="button" onClick={toggleSpeed}>
+          Speed: {formatPlaybackRate(playbackRate)}x
         </button>
         <button type="button" onClick={setAPointAtCurrentTime}>
           Set A point

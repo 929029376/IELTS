@@ -67,6 +67,25 @@ describe("intensive study components", () => {
     expect(audio.currentTime).toBe(1.5);
   });
 
+  it("shows the active intensive listening speed after toggling slow playback", () => {
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath="/Users/musheng/Desktop/IELTS/listening/intensive-p1.mp3"
+        cues={[]}
+        onDictationSubmit={() => undefined}
+      />
+    );
+
+    const audio = screen.getByLabelText("Intensive listening audio") as HTMLAudioElement;
+    audio.playbackRate = 1;
+
+    fireEvent.click(screen.getByRole("button", { name: "Speed: 1x" }));
+
+    expect(audio.playbackRate).toBe(0.85);
+    expect(screen.getByRole("button", { name: "Speed: 0.85x" })).toBeInTheDocument();
+  });
+
   it("uses stable sentence labels when live cue labels are missing", () => {
     render(
       <IntensivePracticePreview

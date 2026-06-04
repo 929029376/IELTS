@@ -58,6 +58,10 @@
     `GET /api/assets/local`,
   - clicking a sentence repeat cue seeks to the cue start time and loops back
     when the player reaches the cue end time.
+- Added Mac intensive speed-status wiring:
+  - the intensive listening Speed control now shows the active playback rate,
+  - toggling slow playback updates both the local audio element and the visible
+    speed label so the learner can confirm whether focused replay is slowed.
 - Added Mac close-reading mistake-label persistence:
   - `/api/study/intensive` now returns the latest wrong reading
     `attemptAnswerId` when available,
@@ -230,6 +234,12 @@
       not show the active A point or A-B range to the learner.
     - Passed after the Mac intensive listening player displayed the selected A
       point and active A-B loop range while keeping the loop behavior intact.
+- Mac intensive speed-status follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the intensive listening Speed button did not show
+      the active playback rate.
+    - Passed after the Speed button rendered the current rate and updated it
+      when slow playback was toggled.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.
