@@ -416,6 +416,10 @@
     value immediately,
   - the panel no longer stays on `Not synced yet` after showing completion
     counts.
+- Added Mac last-sync timestamp fallback hardening:
+  - saved sync timestamps are trimmed before formatting,
+  - whitespace-only saved sync timestamps now render `Not synced yet` instead of
+    a blank or malformed last-sync value.
 - Added manual backup hardening for intensive listening:
   - backup export/import now includes `dictation_attempts`,
   - restore order keeps `dictation_attempts` after `listening_cues` so cue
@@ -643,6 +647,26 @@
     - Shared: 4 tests passed.
     - Server: 73 tests passed.
     - Web: 124 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed, including Rust runtime diagnostics.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
+- Mac last-sync timestamp fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "last sync timestamps"`
+    - Initially failed because saved timestamps with surrounding whitespace were
+      sliced before trimming and rendered a malformed value.
+    - Passed after trimming saved timestamps and falling back to
+      `Not synced yet` for whitespace-only values.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - 9 tests passed.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Web TypeScript and Vite production build passed.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed on macOS while Windows evidence remains intentionally deferred.
+    - Shared: 4 tests passed.
+    - Server: 73 tests passed.
+    - Web: 125 tests passed.
     - Playwright Chromium: 2 tests passed.
     - Production build passed.
     - `desktop:check` passed, including Rust runtime diagnostics.

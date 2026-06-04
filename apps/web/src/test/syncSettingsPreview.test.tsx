@@ -42,6 +42,30 @@ describe("SyncSettingsPreview", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/sync/import", expect.objectContaining({ method: "POST" }));
   });
 
+  it("trims last sync timestamps and falls back when the saved timestamp is blank", () => {
+    const { rerender } = render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt="  2026-06-04T10:15:00.000Z  "
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    expect(screen.getByText("2026-06-04 10:15")).toBeInTheDocument();
+
+    rerender(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt="   "
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    expect(screen.getByText("Not synced yet")).toBeInTheDocument();
+  });
+
   it("exports and imports manual backups from the sync settings panel", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const path = String(input);

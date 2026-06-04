@@ -40,6 +40,11 @@ function displayText(value: string, fallback: string) {
   return value.trim() || fallback;
 }
 
+function displayLastSync(value: string | null) {
+  const trimmedValue = value?.trim() ?? "";
+  return trimmedValue ? trimmedValue.slice(0, 16).replace("T", " ") : "Not synced yet";
+}
+
 function selectedFileName(file: File, fallback: string) {
   return file.name.trim() || fallback;
 }
@@ -277,7 +282,7 @@ export function SyncSettingsPreview({
             </div>
             <div>
               <dt>Last sync</dt>
-              <dd>{displayedLastSyncAt ? displayedLastSyncAt.slice(0, 16).replace("T", " ") : "Not synced yet"}</dd>
+              <dd>{displayLastSync(displayedLastSyncAt)}</dd>
             </div>
           </dl>
         </div>
