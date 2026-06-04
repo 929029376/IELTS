@@ -179,6 +179,45 @@ function seedNumberAllowedWordLimitQuestion(databasePath: string) {
   }
 }
 
+function seedOptionalAnswerWordQuestion(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      sourceType: "seed",
+      originalPath: "seed/optional-answer-word.json",
+      checksum: "optional-answer-word-seed",
+      importStatus: "imported",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      sourceId: source.id,
+      subject: "listening",
+      part: "P1",
+      title: "Optional Answer Word Practice",
+      frequencyClass: "high"
+    });
+    const question = questions.createQuestion({
+      passageId: passage.id,
+      questionNumber: 1,
+      questionType: "fill_blank",
+      prompt: "Which place is mentioned?",
+      answerRules: {}
+    });
+    questions.createAnswerKey({
+      questionId: question.id,
+      acceptedAnswers: ["(the) green park"],
+      answerSentence: "The speaker says the green park.",
+      explanation: "The article is optional in the answer key.",
+      synonyms: []
+    });
+  } finally {
+    db.close();
+  }
+}
+
 function seedMultipleChoiceQuestion(databasePath: string) {
   const db = openDatabase(databasePath);
   migrate(db);
@@ -640,6 +679,47 @@ describe("practice routes", () => {
       expect(answer.json()).toMatchObject({
         isCorrect: true,
         normalizedAnswer: "green park 24"
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("scores accepted answers with optional parenthesized words", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-optional-answer-word-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedOptionalAnswerWordQuestion(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "listening" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string }>;
+      }>();
+
+      const answer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId: started.questions[0].id,
+          rawAnswer: "green park",
+          timeSpentSeconds: 10
+        }
+      });
+
+      expect(answer.statusCode).toBe(200);
+      expect(answer.json()).toMatchObject({
+        isCorrect: true,
+        normalizedAnswer: "green park"
       });
     } finally {
       await server.close();

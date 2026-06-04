@@ -13,6 +13,12 @@ describe("answer scoring", () => {
     expect(isAnswerCorrect("blue park", ["Green Park", "Park Green"])).toBe(false);
   });
 
+  it("expands optional parenthesized words in accepted answers", () => {
+    expect(isAnswerCorrect("green park", ["(the) green park"])).toBe(true);
+    expect(isAnswerCorrect("the green park", ["(the) green park"])).toBe(true);
+    expect(isAnswerCorrect("a green park", ["(the) green park"])).toBe(false);
+  });
+
   it("checks word limits before correctness", () => {
     expect(wordCountWithinLimit("green park", 2)).toBe(true);
     expect(wordCountWithinLimit("the green park", 2)).toBe(false);

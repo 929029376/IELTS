@@ -243,6 +243,12 @@
   - compact accepted answers such as `AC` also match spaced user answers such as
     `C A`,
   - incorrect option sets still fail instead of being over-accepted.
+- Added Mac optional-answer-word scoring hardening:
+  - accepted answers with optional parenthesized words such as
+    `(the) green park` now match both `green park` and `the green park`,
+  - unrelated alternatives such as `a green park` still fail,
+  - practice and mock scoring can handle imported answer-key notation that marks
+    articles or short words as optional.
 - Added Mac IELTS judgment-question input hardening:
   - `TRUE/FALSE/NOT GIVEN` questions now use fixed answer choices,
   - `YES/NO/NOT GIVEN` questions now use fixed answer choices,
@@ -1841,6 +1847,21 @@
     - Passed with all 5 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 9 practice route tests.
+- Mac optional-answer-word scoring hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "optional parenthesized"`
+    - Initially failed because accepted answer `(the) green park` did not match
+      user answer `green park`.
+    - Passed after expanding accepted answers with one parenthesized optional
+      segment into with-optional and without-optional variants.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "optional parenthesized"`
+    - Initially failed because the practice API marked `green park` incorrect
+      against accepted answer `(the) green park`.
+    - Passed after the shared optional-answer expansion was used by practice
+      answer scoring.
+  - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
+    - Passed with all 6 shared scoring tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 10 practice route tests.
 
 ## Remaining V1 Gaps
 

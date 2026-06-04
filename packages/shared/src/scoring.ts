@@ -93,6 +93,19 @@ function unorderedChoiceMatch(rawAnswer: string, acceptedAnswer: string): boolea
   return rawTokens.every((token, index) => token === acceptedTokens[index]);
 }
 
+function acceptedAnswerVariants(acceptedAnswer: string): string[] {
+  const normalizedAcceptedAnswer = normalizeAnswer(acceptedAnswer);
+  const optionalPattern = /\(([^()]+)\)/;
+  const match = normalizedAcceptedAnswer.match(optionalPattern);
+  if (!match) {
+    return [normalizedAcceptedAnswer];
+  }
+
+  const withoutOptional = normalizeAnswer(normalizedAcceptedAnswer.replace(optionalPattern, " "));
+  const withOptional = normalizeAnswer(normalizedAcceptedAnswer.replace(optionalPattern, match[1]));
+  return Array.from(new Set([withoutOptional, withOptional]));
+}
+
 export function isAnswerCorrect(
   rawAnswer: string,
   acceptedAnswers: string[],
@@ -107,5 +120,7 @@ export function isAnswerCorrect(
     return acceptedAnswers.some((acceptedAnswer) => unorderedChoiceMatch(rawAnswer, acceptedAnswer));
   }
 
-  return acceptedAnswers.some((acceptedAnswer) => normalizeAnswer(acceptedAnswer) === normalizedAnswer);
+  return acceptedAnswers.some((acceptedAnswer) =>
+    acceptedAnswerVariants(acceptedAnswer).some((variant) => variant === normalizedAnswer)
+  );
 }
