@@ -46,7 +46,18 @@ interface HistoryReviewItem {
   synonyms: string[];
 }
 
+interface HistoryReviewConflict {
+  id: string;
+  questionId: string;
+  remoteCreatedAt: string;
+  remoteDeviceId: string;
+  remoteIsCorrect: boolean;
+  remoteRawAnswer: string;
+  status: "conflict" | "resolved";
+}
+
 interface HistoryReview {
+  conflicts?: HistoryReviewConflict[];
   id: string;
   reviewItems: HistoryReviewItem[];
 }
@@ -82,6 +93,10 @@ function renderAnswerSentence(item: HistoryReviewItem) {
   }
 
   return <mark className="ielts-highlight">{item.answerSentence}</mark>;
+}
+
+function conflictsForQuestion(review: HistoryReview, questionId: string): HistoryReviewConflict[] {
+  return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
 }
 
 export function HistoryReportsPreview({ analytics, dashboard, history }: HistoryReportsPreviewProps) {
@@ -200,6 +215,18 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
                         <li key={synonym}>{synonym}</li>
                       ))}
                     </ul>
+                  ) : null}
+                  {conflictsForQuestion(historyReview, item.questionId).length > 0 ? (
+                    <div className="sync-conflict-review" aria-label={`Sync conflicts for question ${item.questionId}`}>
+                      <strong>Sync conflict</strong>
+                      <ul>
+                        {conflictsForQuestion(historyReview, item.questionId).map((conflict) => (
+                          <li key={conflict.id}>
+                            Remote answer from {conflict.remoteDeviceId}: {conflict.remoteRawAnswer}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ) : null}
                 </li>
               ))}

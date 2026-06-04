@@ -67,6 +67,8 @@
 - Added Mac review visibility for sync conflicts:
   - detailed mock review renders remote conflicting answers beside the affected
     question,
+  - reopened history reviews render the same saved sync conflicts for completed
+    attempts,
   - the conflict message includes the remote device id and remote raw answer.
 - Added sync API:
   - `GET /api/sync/config`,
@@ -219,6 +221,17 @@
     - Initially failed because review responses with `conflicts` did not render
       any sync-conflict warning in the mock review panel.
     - Passed after rendering remote conflicting answers per affected question.
+- Mac history review conflict visibility follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because reopening a completed attempt from history loaded
+      answer evidence but did not render saved sync conflicts from the review
+      response.
+    - Passed after the history review panel rendered remote conflicting answers
+      with their source device beside the affected question.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the history review conflict visibility follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

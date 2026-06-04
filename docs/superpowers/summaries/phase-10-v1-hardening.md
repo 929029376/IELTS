@@ -135,7 +135,8 @@
   - completed attempts in the report history table can reopen the saved detailed
     review through `GET /api/practice/:attemptId/review`,
   - the Mac reports panel renders answer sentence highlights, explanations,
-    accepted answers, and synonym notes for the selected historical attempt.
+    accepted answers, synonym notes, and saved sync conflicts for the selected
+    historical attempt.
 - Added local mock resource hardening:
   - `POST /api/practice/start` now returns imported passage text, source asset
     paths, and listening audio metadata with started mock questions,
@@ -805,6 +806,16 @@
       show any sync conflict in the Mac mock review panel.
     - Passed after rendering remote conflicting answers with their source device
       beside the affected question.
+- Mac history review conflict hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because reopened history reviews did not show saved sync
+      conflicts returned by `GET /api/practice/:attemptId/review`.
+    - Passed after the history review panel rendered remote conflicting answers
+      with their source device beside the affected question.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the history review conflict hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac score-estimate UI hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the score report did not explain that IELTS band

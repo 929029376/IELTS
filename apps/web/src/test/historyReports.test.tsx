@@ -154,4 +154,80 @@ describe("history and reports preview", () => {
     expect(screen.getByText("routes = roads in context only when configured")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/practice/attempt-1/review", expect.objectContaining({ method: "GET" }));
   });
+
+  it("shows saved sync conflicts when reopening a history review", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/attempt-conflict/review") {
+        return {
+          ok: true,
+          json: async () => ({
+            conflicts: [
+              {
+                id: "conflict-1",
+                questionId: "q-conflict",
+                remoteCreatedAt: "2026-06-04T11:05:00.000Z",
+                remoteDeviceId: "windows-laptop",
+                remoteIsCorrect: true,
+                remoteRawAnswer: "central station",
+                status: "conflict"
+              }
+            ],
+            id: "attempt-conflict",
+            reviewItems: [
+              {
+                acceptedAnswers: ["central station"],
+                answerSentence: "The route ended at central station.",
+                explanation: "The answer sentence gives the station name.",
+                isCorrect: false,
+                part: "P2",
+                passageTitle: "Transport",
+                prompt: "Where did the route end?",
+                questionId: "q-conflict",
+                questionNumber: 12,
+                rawAnswer: "city station",
+                synonyms: []
+              }
+            ]
+          })
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[
+          {
+            durationSeconds: 2400,
+            estimatedBand: 6.5,
+            id: "attempt-conflict",
+            mode: "mock",
+            rawScore: 28,
+            startedAt: "2026-06-04T10:00:00.000Z",
+            subject: "listening",
+            submittedAt: "2026-06-04T10:40:00.000Z"
+          }
+        ]}
+        analytics={{ mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "Listening 28/40, Band 6.5",
+          predictedListening: "6.0-7.0",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Review listening P2",
+          weakestQuestionType: "short_answer"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Review attempt attempt-conflict" }));
+
+    expect(await screen.findByRole("region", { name: "History review details" })).toBeInTheDocument();
+    expect(screen.getByText("Sync conflict")).toBeInTheDocument();
+    expect(screen.getByText("Remote answer from windows-laptop: central station")).toBeInTheDocument();
+  });
 });

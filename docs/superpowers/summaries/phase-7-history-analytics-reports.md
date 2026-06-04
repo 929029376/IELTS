@@ -65,7 +65,7 @@
   - completed attempts in the history table expose a Review action,
   - selecting an attempt calls `GET /api/practice/:attemptId/review`,
   - the reports panel renders saved answer evidence, answer-sentence highlight,
-    explanation, accepted answers, and synonym notes.
+    explanation, accepted answers, synonym notes, and saved sync conflicts.
 
 ## Verification Evidence
 
@@ -99,6 +99,12 @@
     - Passed after the history review-reopen follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
+- Mac history review conflict follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because reopened history reviews did not show saved sync
+      conflicts returned by the practice review API.
+    - Passed after rendering remote conflicting answers with the source device
+      inside the history review panel.
 - Mac post-mock dashboard refresh follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because submitting a local mock did not refetch dashboard
