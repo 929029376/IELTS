@@ -126,7 +126,7 @@ function seedWordLimitAliasQuestion(databasePath: string) {
       questionNumber: 1,
       questionType: "fill_blank",
       prompt: "Which place is mentioned?",
-      answerRules: { wordLimit: 2 }
+      answerRules: { wordLimit: "NO MORE THAN TWO WORDS" }
     });
     questions.createAnswerKey({
       questionId: question.id,

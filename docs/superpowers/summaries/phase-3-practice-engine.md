@@ -103,6 +103,12 @@
       could bypass the IELTS word-limit rule.
     - Passed after practice scoring accepted `maxWords`, `wordLimit`, and
       `max_words` rule keys before correctness is calculated.
+- Mac textual word-limit scoring follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because a rule like `NO MORE THAN TWO WORDS` did not
+      produce a numeric max-word limit.
+    - Passed after practice scoring parsed common IELTS English number words in
+      word-limit rule strings.
 
 ## Notes
 

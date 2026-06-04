@@ -29,6 +29,35 @@ export interface PracticeQuestionResponse {
   part: string;
 }
 
+const wordLimitNumbers: Record<string, number> = {
+  eight: 8,
+  five: 5,
+  four: 4,
+  nine: 9,
+  one: 1,
+  seven: 7,
+  six: 6,
+  ten: 10,
+  three: 3,
+  two: 2
+};
+
+function parseWordLimit(value: string): number | undefined {
+  const numericMatch = value.match(/\d+/);
+  if (numericMatch) {
+    return Number.parseInt(numericMatch[0], 10);
+  }
+
+  const normalized = value.toLowerCase();
+  for (const [word, limit] of Object.entries(wordLimitNumbers)) {
+    if (new RegExp(`\\b${word}\\b`).test(normalized)) {
+      return limit;
+    }
+  }
+
+  return undefined;
+}
+
 function getMaxWords(answerRules: Record<string, unknown>): number | undefined {
   for (const key of ["maxWords", "wordLimit", "max_words"]) {
     const value = answerRules[key];
@@ -36,8 +65,8 @@ function getMaxWords(answerRules: Record<string, unknown>): number | undefined {
       return value;
     }
     if (typeof value === "string") {
-      const parsed = Number.parseInt(value, 10);
-      if (Number.isFinite(parsed)) {
+      const parsed = parseWordLimit(value);
+      if (parsed !== undefined) {
         return parsed;
       }
     }

@@ -618,6 +618,12 @@
       did not enforce IELTS answer word limits.
     - Passed after practice scoring recognized common word-limit aliases before
       deciding whether a matched answer is correct.
+- Mac textual word-limit scoring hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because imported rule text such as
+      `NO MORE THAN TWO WORDS` bypassed the word-limit gate.
+    - Passed after practice scoring extracts numeric limits from common IELTS
+      word-limit phrases before checking correctness.
 
 ## Remaining V1 Gaps
 
