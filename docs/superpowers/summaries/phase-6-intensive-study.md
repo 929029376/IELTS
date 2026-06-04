@@ -16,6 +16,7 @@
 - Implemented dictation attempt storage with normalized answer comparison against cue transcript.
 - Added mistake-label listing support to `attemptRepo`.
 - Added intensive listening UI:
+  - local audio playback through the local asset API,
   - play/pause,
   - seek,
   - speed,
@@ -34,7 +35,8 @@
 - Mounted the intensive practice preview on the main dashboard so the local app exposes the Phase 6 experience.
 - Added live local intensive study data loading:
   - `GET /api/study/intensive` returns the highest-priority listening passage
-    with sentence cues and the highest-priority reading item with answer evidence,
+    with audio path, sentence cues, and the highest-priority reading item with
+    answer evidence,
   - the Mac dashboard intensive panel now renders local cue, transcript, answer
     sentence, explanation, synonym, keyword, and passage text data when available,
   - the existing sample preview remains only as a fallback when no local data has
@@ -46,6 +48,12 @@
     correctness against the cue transcript,
   - saving a cue in the Mac dashboard immediately enables sentence repeat, and
     submitting dictation shows the saved/correctness result.
+- Added Mac real-audio sentence repeat wiring:
+  - the intensive listening preview now returns the local listening audio path,
+  - `IntensiveListeningPlayer` renders a real `<audio>` element served through
+    `GET /api/assets/local`,
+  - clicking a sentence repeat cue seeks to the cue start time and loops back
+    when the player reaches the cue end time.
 - Added Mac close-reading mistake-label persistence:
   - `/api/study/intensive` now returns the latest wrong reading
     `attemptAnswerId` when available,
@@ -183,6 +191,21 @@
       `trade   routes`.
     - Passed after matching highlight targets with flexible whitespace while
       preserving the original imported passage text inside the highlight.
+- Mac intensive real-audio repeat follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because `/api/study/intensive` returned listening cues but
+      no local audio path for the Mac intensive player.
+    - Passed after returning the first imported listening audio path for the
+      selected listening passage.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because `IntensiveListeningPlayer` had only static control
+      buttons and no labeled audio element to play or seek.
+    - Passed after rendering a local-asset audio element and making sentence
+      repeat seek to the cue start and loop at the cue end.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the intensive real-audio repeat follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

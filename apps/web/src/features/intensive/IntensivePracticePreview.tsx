@@ -5,6 +5,7 @@ import { IntensiveListeningPlayer } from "./IntensiveListeningPlayer";
 
 export interface IntensiveStudyPreviewView {
   listening: {
+    audioPath?: string | null;
     audioTitle: string;
     cues: Array<{
       endSeconds: number;
@@ -65,6 +66,7 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
 
   const listening = preview?.listening
     ? {
+        audioPath: preview.listening.audioPath ?? null,
         audioTitle: preview.listening.audioTitle,
         cues: normalizeCues([...preview.listening.cues, ...savedCues]),
         passageId: preview.listening.passageId
@@ -157,6 +159,7 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
           {listening ? (
             <>
               <IntensiveListeningPlayer
+                audioPath={listening.audioPath}
                 audioTitle={listening.audioTitle}
                 cues={listening.cues}
                 onDictationSubmit={(input) => {

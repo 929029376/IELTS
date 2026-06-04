@@ -15,6 +15,7 @@ describe("intensive study components", () => {
     render(
       <IntensiveListeningPlayer
         audioTitle="Booking call"
+        audioPath={null}
         cues={[
           {
             id: "cue-1",
@@ -30,6 +31,40 @@ describe("intensive study components", () => {
 
     expect(screen.getByRole("button", { name: "Repeat Sentence 1" })).toBeInTheDocument();
     expect(screen.queryByText("No sentence cues yet. Use A-B repeat or create a cue.")).not.toBeInTheDocument();
+  });
+
+  it("plays real local intensive audio and loops the selected sentence cue", () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    const audioPath = "/Users/musheng/Desktop/IELTS/listening/intensive-p1.mp3";
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath={audioPath}
+        cues={[
+          {
+            id: "cue-1",
+            startSeconds: 1.5,
+            endSeconds: 3.5,
+            label: "Sentence 1",
+            transcript: "Green Park"
+          }
+        ]}
+        onDictationSubmit={() => undefined}
+      />
+    );
+
+    const audio = screen.getByLabelText("Intensive listening audio") as HTMLAudioElement;
+    expect(audio).toHaveAttribute("src", `/api/assets/local?path=${encodeURIComponent(audioPath)}`);
+
+    fireEvent.click(screen.getByRole("button", { name: "Repeat Sentence 1" }));
+
+    expect(audio.currentTime).toBe(1.5);
+    expect(play).toHaveBeenCalledTimes(1);
+
+    audio.currentTime = 3.6;
+    fireEvent.timeUpdate(audio);
+
+    expect(audio.currentTime).toBe(1.5);
   });
 
   it("uses stable sentence labels when live cue labels are missing", () => {
@@ -59,7 +94,14 @@ describe("intensive study components", () => {
   });
 
   it("falls back to A-B repeat and cue prompt when no cues exist", () => {
-    render(<IntensiveListeningPlayer audioTitle="Booking call" cues={[]} onDictationSubmit={() => undefined} />);
+    render(
+      <IntensiveListeningPlayer
+        audioTitle="Booking call"
+        audioPath={null}
+        cues={[]}
+        onDictationSubmit={() => undefined}
+      />
+    );
 
     expect(screen.getByRole("button", { name: "Set A point" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Set B point" })).toBeInTheDocument();
@@ -71,6 +113,7 @@ describe("intensive study components", () => {
     render(
       <IntensiveListeningPlayer
         audioTitle="Booking call"
+        audioPath={null}
         cues={[{ id: "cue-1", startSeconds: 1, endSeconds: 4, label: "Sentence 1", transcript: "Green Park" }]}
         onDictationSubmit={onDictationSubmit}
       />

@@ -146,6 +146,12 @@ describe("study overview routes", () => {
       subject: "listening",
       title: "Live Listening Intensive"
     });
+    questions.createListeningAudio({
+      checksum: "live-intensive-audio",
+      durationSeconds: 320,
+      filePath: "/Users/musheng/Desktop/IELTS/listening/live-intensive.mp3",
+      passageId: listeningPassage.id
+    });
     intensive.createListeningCue({
       endSeconds: 9.4,
       label: "Sentence 2",
@@ -188,6 +194,7 @@ describe("study overview routes", () => {
 
     expect(response.statusCode).toBe(200);
     expect(body.listening).toMatchObject({
+      audioPath: "/Users/musheng/Desktop/IELTS/listening/live-intensive.mp3",
       audioTitle: "Live Listening Intensive",
       cues: [
         expect.objectContaining({

@@ -23,6 +23,7 @@ export interface StudyOverview {
 
 export interface IntensiveStudyPreview {
   listening: {
+    audioPath: string | null;
     audioTitle: string;
     cues: Array<{
       endSeconds: number;
@@ -136,8 +137,10 @@ function getListeningPreview(db: DatabaseHandle): IntensiveStudyPreview["listeni
       `
       SELECT
         p.id,
-        p.title
+        p.title,
+        la.file_path AS audioPath
       FROM passages p
+      LEFT JOIN listening_audio la ON la.passage_id = p.id
       WHERE p.subject = 'listening'
       ORDER BY
         CASE p.frequency_class
@@ -151,7 +154,7 @@ function getListeningPreview(db: DatabaseHandle): IntensiveStudyPreview["listeni
       LIMIT 1
     `
     )
-    .get() as { id: string; title: string } | undefined;
+    .get() as { audioPath: string | null; id: string; title: string } | undefined;
 
   if (!passage) {
     return null;
@@ -174,6 +177,7 @@ function getListeningPreview(db: DatabaseHandle): IntensiveStudyPreview["listeni
     .all(passage.id) as NonNullable<IntensiveStudyPreview["listening"]>["cues"];
 
   return {
+    audioPath: passage.audioPath,
     audioTitle: passage.title,
     cues,
     passageId: passage.id

@@ -70,6 +70,13 @@
   - cue creation now posts to `POST /api/study/listening-cues`,
   - dictation submit now posts to `POST /api/study/dictation-attempts`,
   - newly saved cues immediately appear in sentence repeat controls.
+- Added Mac intensive real-audio repeat hardening:
+  - `/api/study/intensive` now returns the selected listening passage's local
+    audio path,
+  - the intensive listening player renders that local audio through
+    `GET /api/assets/local`,
+  - sentence repeat buttons seek to cue start times and loop back at cue end
+    times for focused dictation practice.
 - Added Mac close-reading mistake-label hardening:
   - intensive reading preview now exposes the latest wrong reading answer id,
   - mistake-label buttons persist through `POST /api/study/mistake-labels`,
@@ -408,6 +415,21 @@
       no-ops.
     - Passed after wiring them to local APIs and rendering saved/correctness
       status.
+- Mac intensive real-audio repeat follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts`
+    - Initially failed because `/api/study/intensive` did not include the local
+      audio path needed by the Mac intensive listening player.
+    - Passed after joining the selected listening passage with imported audio
+      metadata.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the intensive listening player exposed static
+      buttons without a real audio element or cue-driven seek/loop behavior.
+    - Passed after rendering local audio and wiring sentence repeat to cue start
+      and end times.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the intensive real-audio repeat follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac close-reading mistake-label follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/studyRoutes.test.ts src/test/syncRoutes.test.ts`
     - Initially failed because the intensive reading preview did not return the
