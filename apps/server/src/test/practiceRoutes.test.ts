@@ -685,4 +685,49 @@ describe("practice routes", () => {
       rmSync(tempDir, { recursive: true, force: true });
     }
   });
+
+  it("returns imported passage text and listening audio metadata with practice questions", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-practice-assets-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedMockCandidatesWithAssets(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const readingStart = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(readingStart.statusCode).toBe(200);
+      expect(readingStart.json()).toMatchObject({
+        questions: expect.arrayContaining([
+          expect.objectContaining({
+            assetPaths: ["assets/Reading Asset P1.pdf"],
+            passageText: "Imported reading passage text appears in the exam pane.",
+            passageTitle: "Reading Asset P1"
+          })
+        ])
+      });
+
+      const listeningStart = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "listening" }
+      });
+      expect(listeningStart.statusCode).toBe(200);
+      expect(listeningStart.json()).toMatchObject({
+        questions: expect.arrayContaining([
+          expect.objectContaining({
+            audioPath: "/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3",
+            audioDurationSeconds: 320,
+            passageTitle: "Listening Asset P1"
+          })
+        ])
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
 });

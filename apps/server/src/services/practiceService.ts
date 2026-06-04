@@ -96,6 +96,18 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
   const attempts = createAttemptRepo(db);
   const questions = createQuestionRepo(db);
 
+  function getPassageResources(passageId: string) {
+    const loaded = questions.getPassageWithQuestions(passageId);
+    const assets = loaded ? questions.listSourceAssets(loaded.sourceId) : [];
+    const audio = loaded ? questions.getFirstListeningAudio(loaded.id) : null;
+    return {
+      assetPaths: assets.flatMap((asset) => (asset.filePath ? [asset.filePath] : [])),
+      audioDurationSeconds: audio?.durationSeconds ?? null,
+      audioPath: audio?.filePath ?? null,
+      passageText: assets.find((asset) => asset.textContent)?.textContent ?? null
+    };
+  }
+
   return {
     startPractice(input: {
       frequencyClass?: FrequencyClass;
@@ -110,19 +122,16 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
           ? (input.subject === "listening" ? buildFullListeningSet(db, options) : buildFullReadingSet(db, options))
               .passages.flatMap((passage) => {
                 const loaded = questions.getPassageWithQuestions(passage.id);
-                const assets = loaded ? questions.listSourceAssets(loaded.sourceId) : [];
-                const audio = loaded ? questions.getFirstListeningAudio(loaded.id) : null;
-                const passageText = assets.find((asset) => asset.textContent)?.textContent ?? null;
-                const assetPaths = assets.flatMap((asset) => (asset.filePath ? [asset.filePath] : []));
+                const resources = getPassageResources(passage.id);
                 return (
                   loaded?.questions.map((question): PracticeQuestionResponse => ({
-                    assetPaths,
-                    audioDurationSeconds: audio?.durationSeconds ?? null,
-                    audioPath: audio?.filePath ?? null,
+                    assetPaths: resources.assetPaths,
+                    audioDurationSeconds: resources.audioDurationSeconds,
+                    audioPath: resources.audioPath,
                     frequencyClass: loaded.frequencyClass,
                     id: question.id,
                     passageId: question.passageId,
-                    passageText,
+                    passageText: resources.passageText,
                     passageTitle: loaded.title,
                     questionNumber: question.questionNumber,
                     questionType: question.questionType,
@@ -142,13 +151,10 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
                 limit: 40
               })
               .map((question): PracticeQuestionResponse => ({
-                assetPaths: [],
-                audioDurationSeconds: null,
-                audioPath: null,
+                ...getPassageResources(question.passageId),
                 frequencyClass: question.frequencyClass,
                 id: question.id,
                 passageId: question.passageId,
-                passageText: null,
                 passageTitle: question.passageTitle,
                 questionNumber: question.questionNumber,
                 questionType: question.questionType,

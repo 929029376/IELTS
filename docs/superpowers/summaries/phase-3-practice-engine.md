@@ -165,6 +165,14 @@
       not detect `AND/OR A NUMBER`.
     - Passed after practice scoring detected number-permitted IELTS rule text
       and passed the shared option into answer correctness.
+- Mac practice local-resource follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because `mode: "practice"` starts omitted imported
+      passage text, PDF asset paths, and listening audio metadata even though
+      mock starts returned those local resources.
+    - Passed after practice starts reused the same passage resource lookup, so
+      free reading and listening practice can show imported passage/PDF/audio
+      assets on Mac.
 
 ## Notes
 

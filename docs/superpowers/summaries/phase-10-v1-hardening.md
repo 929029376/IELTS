@@ -893,6 +893,14 @@
       `estimatedBand`, which could enter history-based prediction.
     - Passed after partial practice submissions return `estimatedBand: null`
       while preserving full mock band estimates.
+- Mac practice local-resource hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Initially failed because free practice attempts did not receive imported
+      reading passage text, PDF paths, or listening audio metadata from the
+      practice API.
+    - Passed after practice starts return the same local passage resource
+      metadata used by mock starts, keeping Mac free practice usable for
+      reading pages and listening audio.
 
 ## Remaining V1 Gaps
 
