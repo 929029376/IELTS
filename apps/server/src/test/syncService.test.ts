@@ -356,6 +356,57 @@ describe("sync service", () => {
     ).toBeUndefined();
   });
 
+  it("imports remote stats snapshot events for cross-device analytics continuity", () => {
+    const service = createSyncService(db, {
+      deviceId: "macbook",
+      deviceName: "MacBook",
+      platform: "darwin",
+      syncFolderPath: syncDir
+    });
+    service.ensureSyncFolder();
+    service.appendExternalEvent("stats", {
+      createdAt: "2026-06-01T09:04:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-stats-snapshot",
+      payload: {
+        createdAt: "2026-06-01T09:04:00.000Z",
+        id: "remote-stats-snapshot-row",
+        payloadJson: JSON.stringify({
+          predictedReading: { band: 7 },
+          weakestQuestionType: "matching"
+        }),
+        snapshotType: "dashboard_prediction"
+      },
+      type: "stats.snapshot.created"
+    });
+
+    expect(service.importRemoteEvents()).toMatchObject({ imported: 1, skipped: 0 });
+    expect(
+      db
+        .prepare(
+          `
+          SELECT
+            id,
+            snapshot_type AS snapshotType,
+            payload_json AS payloadJson,
+            created_at AS createdAt
+          FROM stats_snapshots
+          WHERE id = ?
+        `
+        )
+        .get("remote-stats-snapshot-row")
+    ).toMatchObject({
+      createdAt: "2026-06-01T09:04:00.000Z",
+      id: "remote-stats-snapshot-row",
+      payloadJson: JSON.stringify({
+        predictedReading: { band: 7 },
+        weakestQuestionType: "matching"
+      }),
+      snapshotType: "dashboard_prediction"
+    });
+    expect(createSyncRepo(db).hasSyncEvent("remote-stats-snapshot")).toBe(true);
+  });
+
   it("keeps remote answer conflicts for submitted local attempts instead of overwriting", () => {
     const question = seedQuestion();
     const attempts = createAttemptRepo(db);

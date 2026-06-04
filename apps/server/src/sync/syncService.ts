@@ -52,6 +52,13 @@ interface AnswerSentencePayload {
   answerSentence: string;
 }
 
+interface StatsSnapshotPayload {
+  createdAt: string;
+  id: string;
+  payloadJson: string;
+  snapshotType: string;
+}
+
 type AttemptSyncPayload = AttemptRecord & {
   questions?: AttemptQuestionRecord[];
 };
@@ -586,6 +593,19 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     applyFrequencyEntryToMatchingPassages(db, payload);
   }
 
+  function upsertStatsSnapshot(payload: StatsSnapshotPayload) {
+    db.prepare(
+      `
+      INSERT INTO stats_snapshots (id, snapshot_type, payload_json, created_at)
+      VALUES (@id, @snapshotType, @payloadJson, @createdAt)
+      ON CONFLICT(id) DO UPDATE SET
+        snapshot_type = excluded.snapshot_type,
+        payload_json = excluded.payload_json,
+        created_at = excluded.created_at
+    `
+    ).run(payload);
+  }
+
   function applyEvent(event: SyncEnvelope) {
     if (syncRepo.hasSyncEvent(event.eventId)) {
       return { conflict: false, inserted: false };
@@ -622,6 +642,8 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       }
     } else if (event.type === "frequency.entry.upserted") {
       upsertFrequencyEntry(event.payload as FrequencyEntryRecord);
+    } else if (event.type === "stats.snapshot.created" || event.type === "stats.snapshot.upserted") {
+      upsertStatsSnapshot(event.payload as StatsSnapshotPayload);
     } else {
       return { conflict: false, inserted: false };
     }
