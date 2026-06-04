@@ -78,6 +78,7 @@ function choiceTokens(answer: string): string[] {
   return normalizeAnswer(answer)
     .replace(/[;,/|]+/g, " ")
     .split(/\s+/)
+    .flatMap((token) => (/^[a-z]+$/.test(token) && token.length > 1 ? token.split("") : [token]))
     .filter(Boolean)
     .sort();
 }

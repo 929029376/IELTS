@@ -26,6 +26,7 @@ describe("answer scoring", () => {
 
   it("can score multiple-choice letter answers without requiring order", () => {
     expect(isAnswerCorrect("C A", ["A C"], { unorderedChoices: true })).toBe(true);
+    expect(isAnswerCorrect("C A", ["AC"], { unorderedChoices: true })).toBe(true);
     expect(isAnswerCorrect("A, D", ["A C"], { unorderedChoices: true })).toBe(false);
     expect(isAnswerCorrect("C A", ["A C"])).toBe(false);
   });

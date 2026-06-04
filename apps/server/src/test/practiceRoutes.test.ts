@@ -208,7 +208,7 @@ function seedMultipleChoiceQuestion(databasePath: string) {
     });
     questions.createAnswerKey({
       questionId: question.id,
-      acceptedAnswers: ["A C"],
+      acceptedAnswers: ["AC"],
       answerSentence: "The passage supports options A and C.",
       explanation: "Both options must be selected, but their order does not matter.",
       synonyms: []
