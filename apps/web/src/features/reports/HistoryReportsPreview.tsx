@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Save } from "lucide-react";
 
 export interface HistoryAttemptView {
   durationSeconds: number | null;
@@ -83,6 +84,13 @@ interface ExportedReportFiles {
   mistakesCsv: string;
   mockCsv: string;
   mockJson: string;
+}
+
+interface SavedAnalyticsSnapshot {
+  createdAt: string;
+  id: string;
+  payloadJson: string;
+  snapshotType: string;
 }
 
 function formatAccuracy(value: number) {
@@ -238,6 +246,9 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
   const [exportedFiles, setExportedFiles] = useState<ExportedReportFiles | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [isSavingSnapshot, setIsSavingSnapshot] = useState(false);
+  const [savedSnapshot, setSavedSnapshot] = useState<SavedAnalyticsSnapshot | null>(null);
+  const [snapshotError, setSnapshotError] = useState<string | null>(null);
   const [historyReview, setHistoryReview] = useState<HistoryReview | null>(null);
   const [historyReviewError, setHistoryReviewError] = useState<string | null>(null);
   const [loadingReviewAttemptId, setLoadingReviewAttemptId] = useState<string | null>(null);
@@ -279,6 +290,23 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
     }
   }
 
+  async function saveAnalyticsSnapshot() {
+    setIsSavingSnapshot(true);
+    setSnapshotError(null);
+    setSavedSnapshot(null);
+    try {
+      const response = await fetch("/api/reports/snapshot", { method: "POST" });
+      if (!response.ok) {
+        throw new Error("Could not save analytics snapshot");
+      }
+      setSavedSnapshot((await response.json()) as SavedAnalyticsSnapshot);
+    } catch {
+      setSnapshotError("Could not save analytics snapshot.");
+    } finally {
+      setIsSavingSnapshot(false);
+    }
+  }
+
   async function openHistoryReview(attemptId: string) {
     setLoadingReviewAttemptId(attemptId);
     setHistoryReview(null);
@@ -310,8 +338,20 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
           <button disabled={isExporting} onClick={() => void exportReports()} type="button">
             Export mistakes
           </button>
+          <button disabled={isSavingSnapshot} onClick={() => void saveAnalyticsSnapshot()} type="button">
+            <Save size={16} aria-hidden="true" />
+            Save analytics snapshot
+          </button>
         </div>
       </div>
+      {savedSnapshot ? (
+        <section className="report-export-status" role="status">
+          <h3>Analytics snapshot saved.</h3>
+          <p>{savedSnapshot.id}</p>
+          <p>{savedSnapshot.createdAt.slice(0, 10)}</p>
+        </section>
+      ) : null}
+      {snapshotError ? <p className="mock-start-error">{snapshotError}</p> : null}
       {exportedFiles ? (
         <section className="report-export-status" role="status">
           <h3>Reports exported</h3>

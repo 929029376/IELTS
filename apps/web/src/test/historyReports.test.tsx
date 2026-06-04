@@ -173,6 +173,39 @@ describe("history and reports preview", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/reports/export", expect.objectContaining({ method: "POST" }));
   });
 
+  it("saves a local analytics snapshot through the reports API", async () => {
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        createdAt: "2026-06-05T10:00:00.000Z",
+        id: "snapshot-1",
+        payloadJson: "{}",
+        snapshotType: "dashboard_report"
+      })
+    }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Save analytics snapshot" }));
+
+    expect(await screen.findByText("Analytics snapshot saved.")).toBeInTheDocument();
+    expect(screen.getByText("snapshot-1")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/reports/snapshot", expect.objectContaining({ method: "POST" }));
+  });
+
   it("copies exported report paths to the clipboard for local file lookup", async () => {
     const exportedFiles = {
       mistakesCsv: "/Users/musheng/Desktop/IELTS/data/exports/mistakes-2026-06-04.csv",

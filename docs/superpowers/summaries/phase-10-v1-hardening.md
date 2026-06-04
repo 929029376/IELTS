@@ -502,6 +502,12 @@
   - saved snapshots append `stats.snapshot.created` to Baidu Cloud `stats.jsonl`
     when sync is configured,
   - the stats snapshot path now has both local write and remote import coverage.
+- Added Mac report snapshot UI hardening:
+  - the History and reports panel now exposes `Save analytics snapshot`,
+  - saved snapshots call `POST /api/reports/snapshot` and show the local
+    snapshot id and date,
+  - failed snapshot saves show a dedicated error without disturbing report export
+    state.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -2089,6 +2095,22 @@
     - Passed TypeScript server build.
   - `npx pnpm@9.15.4 --filter @ielts/web test`
     - Passed with all 137 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
+- Mac report snapshot UI hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "analytics snapshot"`
+    - Initially failed because the History and reports panel had no
+      `Save analytics snapshot` action.
+    - Passed after the panel calls `POST /api/reports/snapshot` and renders the
+      saved snapshot id.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Passed with all 14 history/report component tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 103 server tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server build`
+    - Passed TypeScript server build.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 138 web tests.
   - `npx pnpm@9.15.4 --filter @ielts/web build`
     - Passed TypeScript and Vite production build.
 - Mac review-attempt integrity hardening:
