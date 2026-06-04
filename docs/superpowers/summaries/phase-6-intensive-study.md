@@ -157,6 +157,12 @@
       `/api/study/intensive`.
     - Passed after allowing those questions into the close-reading preview so
       the Mac UI can manually save the selected answer sentence.
+- Mac intensive empty-state follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the intensive preview still rendered sample
+      listening and reading content when local passages were unavailable.
+    - Passed after replacing sample material with local empty states for missing
+      listening and reading data.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

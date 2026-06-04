@@ -48,6 +48,16 @@ describe("intensive study components", () => {
     expect(screen.getByRole("button", { name: "Repeat Sentence 1" })).toBeInTheDocument();
   });
 
+  it("shows local empty states instead of sample intensive material when no passages are available", () => {
+    render(<IntensivePracticePreview preview={{ listening: null, reading: null }} />);
+
+    expect(screen.getByText("No local listening passage")).toBeInTheDocument();
+    expect(screen.getByText("No local reading passage")).toBeInTheDocument();
+    expect(screen.queryByText("Listening Part 1 Review")).not.toBeInTheDocument();
+    expect(screen.queryByText("The booking is under Green Park.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Tea travelled along trade routes.")).not.toBeInTheDocument();
+  });
+
   it("falls back to A-B repeat and cue prompt when no cues exist", () => {
     render(<IntensiveListeningPlayer audioTitle="Booking call" cues={[]} onDictationSubmit={() => undefined} />);
 

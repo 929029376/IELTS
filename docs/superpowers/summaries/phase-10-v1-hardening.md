@@ -587,6 +587,13 @@
     - Passed after the intensive preview started surfacing those incomplete
       reading questions, keeping manual answer-sentence selection usable for
       imported PDF material that still needs review.
+- Mac intensive empty-state hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the dashboard intensive panel still displayed
+      sample listening and reading material when the local question bank had no
+      intensive passage data.
+    - Passed after removing sample fallback rendering and showing local empty
+      states for missing listening and reading passages.
 
 ## Remaining V1 Gaps
 

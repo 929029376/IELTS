@@ -28,28 +28,6 @@ export interface IntensiveStudyPreviewView {
   } | null;
 }
 
-const sampleCues = [
-  {
-    id: "sample-cue-1",
-    startSeconds: 12.5,
-    endSeconds: 16.2,
-    label: "Sentence 1",
-    transcript: "The booking is under Green Park."
-  }
-];
-
-const sampleReading = {
-  attemptAnswerId: null,
-  answerKeyId: null,
-  answerSentence: "answer sentence",
-  explanation: "The sentence directly supports the answer.",
-  keywords: ["trade routes"],
-  passageText: "Tea travelled along trade routes. The answer sentence identifies the key evidence.",
-  passageTitle: "Reading intensive review",
-  questionPrompt: "Question 1: Choose the best evidence.",
-  synonyms: ["evidence", "proof"]
-};
-
 function normalizeCues(cues: NonNullable<IntensiveStudyPreviewView["listening"]>["cues"]) {
   return cues.map((cue, index) => ({
     ...cue,
@@ -91,16 +69,12 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
         cues: normalizeCues([...preview.listening.cues, ...savedCues]),
         passageId: preview.listening.passageId
       }
-    : {
-        audioTitle: "Listening Part 1 Review",
-        cues: normalizeCues([...sampleCues, ...savedCues]),
-        passageId: undefined
-  };
-  const reading = preview?.reading ?? sampleReading;
-  const answerSentence = savedAnswerSentence ?? reading.answerSentence ?? "";
+    : null;
+  const reading = preview?.reading ?? null;
+  const answerSentence = savedAnswerSentence ?? reading?.answerSentence ?? "";
 
   async function saveCue(cue: CueDraft) {
-    if (!listening.passageId) {
+    if (!listening?.passageId) {
       setCueStatus("Load a local listening passage before saving cues.");
       return;
     }
@@ -137,7 +111,7 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
   }
 
   async function saveMistakeLabel(label: string) {
-    if (!reading.attemptAnswerId) {
+    if (!reading?.attemptAnswerId) {
       setMistakeStatus("Load a wrong local answer before saving mistake labels.");
       return;
     }
@@ -159,7 +133,7 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
       setAnswerSentenceStatus("Select passage text before saving answer evidence.");
       return;
     }
-    if (!reading.answerKeyId) {
+    if (!reading?.answerKeyId) {
       setAnswerSentenceStatus("Load a local answer key before saving answer evidence.");
       return;
     }
@@ -180,36 +154,50 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
     <section className="intensive-preview-band" aria-label="Intensive practice preview">
       <div className="intensive-preview-grid">
         <div className="intensive-preview-column">
-          <IntensiveListeningPlayer
-            audioTitle={listening.audioTitle}
-            cues={listening.cues}
-            onDictationSubmit={(input) => {
-              void submitDictation(input);
-            }}
-          />
-          {dictationStatus ? <p className="import-status">{dictationStatus}</p> : null}
-          <CueEditor
-            onSave={(cue) => {
-              void saveCue(cue);
-            }}
-          />
+          {listening ? (
+            <>
+              <IntensiveListeningPlayer
+                audioTitle={listening.audioTitle}
+                cues={listening.cues}
+                onDictationSubmit={(input) => {
+                  void submitDictation(input);
+                }}
+              />
+              {dictationStatus ? <p className="import-status">{dictationStatus}</p> : null}
+              <CueEditor
+                onSave={(cue) => {
+                  void saveCue(cue);
+                }}
+              />
+            </>
+          ) : (
+            <section className="empty-state" aria-label="No local listening passage">
+              No local listening passage
+            </section>
+          )}
           {cueStatus ? <p className="import-status">{cueStatus}</p> : null}
         </div>
-        <CloseReadingView
-          passageText={reading.passageText}
-          answerSentence={answerSentence}
-          keywords={reading.keywords}
-          synonyms={reading.synonyms}
-          explanation={reading.explanation ?? "No explanation recorded yet."}
-          question={<p>{reading.questionPrompt}</p>}
-          isWrongAnswer
-          onSelectAnswerSentence={() => {
-            void saveSelectedAnswerSentence();
-          }}
-          onMistakeLabel={(label) => {
-            void saveMistakeLabel(label);
-          }}
-        />
+        {reading ? (
+          <CloseReadingView
+            passageText={reading.passageText}
+            answerSentence={answerSentence}
+            keywords={reading.keywords}
+            synonyms={reading.synonyms}
+            explanation={reading.explanation ?? "No explanation recorded yet."}
+            question={<p>{reading.questionPrompt}</p>}
+            isWrongAnswer
+            onSelectAnswerSentence={() => {
+              void saveSelectedAnswerSentence();
+            }}
+            onMistakeLabel={(label) => {
+              void saveMistakeLabel(label);
+            }}
+          />
+        ) : (
+          <section className="empty-state" aria-label="No local reading passage">
+            No local reading passage
+          </section>
+        )}
         {answerSentenceStatus ? <p className="import-status">{answerSentenceStatus}</p> : null}
         {mistakeStatus ? <p className="import-status">{mistakeStatus}</p> : null}
       </div>
