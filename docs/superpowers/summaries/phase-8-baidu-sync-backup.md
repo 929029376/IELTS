@@ -48,7 +48,7 @@
 - Added manual backup service and API:
   - `POST /api/backups/export`,
   - `POST /api/backups/import`.
-- Backup export writes restore-ready JSON into `data/backups` by default and includes question-bank skeleton, attempts, answers, mistake labels, conflicts, sync events, stats, frequency, and devices.
+- Backup export writes restore-ready JSON into `data/backups` by default and includes question-bank skeleton, attempts, answers, mistake labels, conflicts, sync events, stats, frequency, devices, listening cues, and dictation attempts.
 
 ## Verification Evidence
 
@@ -84,7 +84,14 @@
     render a completion status.
   - Passed after wiring the button to `POST /api/sync/import`.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupService.test.ts`
-  - Manual backup export/import service test passed.
+  - Initially failed because `dictation_attempts` were missing from the backup
+    payload.
+  - Passed after adding `dictation_attempts` to manual backup export/import
+    after `listening_cues` so restore order preserves foreign keys.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual backup dictation-attempt follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupRoutes.test.ts`
   - Manual backup API test passed.
 - Final verification:

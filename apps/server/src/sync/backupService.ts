@@ -18,6 +18,7 @@ const backupTables = [
   "answer_keys",
   "listening_audio",
   "listening_cues",
+  "dictation_attempts",
   "frequency_entries",
   "attempts",
   "attempt_answers",

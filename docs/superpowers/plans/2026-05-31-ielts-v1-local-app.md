@@ -434,6 +434,8 @@ Answer normalization:
 - [x] Merge attempts and answers by `attemptId`, `questionId`, `deviceId`, and `createdAt`.
 - [x] Never overwrite a local answer with a remote answer for the same submitted attempt; store both and mark conflict in review.
 - [x] Add manual backup export and import from `data/backups`.
+- [x] Include intensive listening cues and dictation attempts in manual backup
+  export/import.
 
 **Acceptance:** A record created on one device can appear on another after Baidu Cloud sync completes, without copying `ielts.db`.
 

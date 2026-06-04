@@ -104,6 +104,10 @@
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
+- Added manual backup hardening for intensive listening:
+  - backup export/import now includes `dictation_attempts`,
+  - restore order keeps `dictation_attempts` after `listening_cues` so cue
+    foreign keys remain valid.
 - Added Mac intensive listening sync hardening:
   - sentence cue creation now appends `intensive.listening_cue.created` events,
   - dictation attempt saving now appends `intensive.dictation_attempt.saved`
@@ -308,6 +312,16 @@
       show a completion status.
     - Passed after wiring it to `POST /api/sync/import` and rendering imported,
       skipped, and conflict counts.
+- Mac manual backup intensive-listening follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupService.test.ts`
+    - Initially failed because manual backup JSON did not include
+      `dictation_attempts`.
+    - Passed after including dictation attempts in export/import and verifying
+      restored intensive attempts can be listed by cue.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual backup intensive-listening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac intensive listening sync follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
     - Initially failed because the cue and dictation study routes persisted local
