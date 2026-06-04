@@ -4,6 +4,7 @@ import type { FastifyInstance } from "fastify";
 import { openDatabase } from "./db/database";
 import { migrate } from "./db/migrate";
 import { dataDir } from "./config/paths";
+import { registerAssetRoutes } from "./routes/assetRoutes";
 import { registerBackupRoutes } from "./routes/backupRoutes";
 import { registerHardeningRoutes } from "./routes/hardeningRoutes";
 import { registerImportRoutes } from "./routes/importRoutes";
@@ -48,6 +49,7 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
   }
 
   server.get("/health", async () => ({ ok: true }));
+  registerAssetRoutes(server);
   registerImportRoutes(server, db, {
     assetRoot: options.assetRoot ?? `${dataDir}/assets`,
     sync

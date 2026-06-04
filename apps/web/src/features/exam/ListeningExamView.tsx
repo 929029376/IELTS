@@ -17,6 +17,10 @@ export interface ListeningExamViewProps {
   finalReviewSeconds: number;
 }
 
+function localAssetUrl(path: string): string {
+  return `/api/assets/local?path=${encodeURIComponent(path)}`;
+}
+
 export function ListeningExamView({
   audioDurationSeconds,
   audioPath,
@@ -38,6 +42,15 @@ export function ListeningExamView({
           {audioPath ? <p className="audio-resource-path">{audioPath}</p> : null}
           {audioDurationSeconds ? <p>Duration: {formatTimer(audioDurationSeconds)}</p> : null}
           <p>Final review time: {formatTimer(finalReviewSeconds)}</p>
+          {audioPath ? (
+            <audio
+              aria-label="Local listening audio"
+              autoPlay={isMock}
+              controls={!isMock}
+              preload="metadata"
+              src={localAssetUrl(audioPath)}
+            />
+          ) : null}
         </div>
         <div className="strict-controls">
           <button type="button" disabled={isMock} aria-label={isMock ? "Pause disabled in mock mode" : "Pause"}>

@@ -279,6 +279,29 @@ describe("exam simulation components", () => {
     expect(screen.getByText("Duration: 05:20")).toBeInTheDocument();
   });
 
+  it("renders a real local audio element while keeping mock controls strict", () => {
+    const audioPath = "/Users/musheng/Desktop/IELTS/listening/asset-p1.mp3";
+    const { container } = render(
+      <ListeningExamView
+        mode="mock"
+        audioTitle="Section 1 audio"
+        audioPath={audioPath}
+        audioDurationSeconds={320}
+        sections={[{ id: "s1", title: "Section 1", questions: <p>Questions 1-10</p> }]}
+        finalReviewSeconds={120}
+      />
+    );
+
+    const audio = container.querySelector("audio");
+    expect(audio).toBeInTheDocument();
+    expect(audio).toHaveAttribute("src", `/api/assets/local?path=${encodeURIComponent(audioPath)}`);
+    expect(audio).toHaveAttribute("preload", "metadata");
+    expect(audio).not.toHaveAttribute("controls");
+    expect(screen.getByRole("button", { name: "Pause disabled in mock mode" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Seek disabled in mock mode" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Speed disabled in mock mode" })).toBeDisabled();
+  });
+
   it("saves current local mock answers before submitting for an estimated band report", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {

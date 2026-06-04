@@ -59,6 +59,13 @@
     placeholder when available,
   - the Mac listening player shows the selected local audio resource path and
     duration metadata.
+- Added Mac local listening audio playback:
+  - the listening mock view renders a real `<audio>` element when imported audio
+    is available,
+  - mock mode keeps the native control bar hidden while the visible pause, seek,
+    and speed controls remain disabled,
+  - audio source URLs are served through a local asset API instead of exposing
+    raw filesystem paths as browser URLs.
 - Added unit coverage for:
   - shell controls,
   - timer auto-submit,
@@ -139,6 +146,18 @@
     - Initially failed because the Mac exam UI still rendered placeholder reading
       text and hid local listening audio metadata.
     - Passed after rendering returned passage text, audio path, and audio duration.
+- Mac local listening audio playback follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because `ListeningExamView` did not render a real audio
+      element for returned local audio paths.
+    - Passed after adding a metadata-preloaded audio element with strict mock
+      controls.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/assetRoutes.test.ts`
+    - Initially failed because `/api/assets/local` did not exist.
+    - Passed after adding a local asset stream route for imported media and PDF
+      files.
+    - A second red test confirmed unsupported local file types were rejected
+      before adding a media/PDF whitelist.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.

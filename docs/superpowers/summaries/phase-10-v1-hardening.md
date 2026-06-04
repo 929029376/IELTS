@@ -115,6 +115,12 @@
   - the Mac reading mock pane renders imported passage text when available,
   - the Mac listening mock player displays the selected local audio path and
     duration metadata.
+- Added Mac local asset playback hardening:
+  - imported local audio can be streamed through `GET /api/assets/local`,
+  - the Mac listening mock player now renders a real audio element that uses the
+    local asset API,
+  - unsupported local file extensions are rejected so the route only serves
+    expected media, PDF, and image assets.
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
@@ -640,6 +646,19 @@
       parsed as only a two-word limit.
     - Passed after the practice service detects number-permitted IELTS rule text
       and forwards that scoring option.
+- Mac local asset playback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/assetRoutes.test.ts`
+    - Initially failed with 404 because no local asset stream route existed.
+    - Passed after adding `GET /api/assets/local` for local audio/PDF/image
+      assets.
+    - Initially failed for unsupported `.txt` files because the route could
+      return arbitrary local files.
+    - Passed after adding an extension whitelist.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because the listening mock view had no audio element and
+      then because it used the raw filesystem path as `src`.
+    - Passed after the Mac listening mock player rendered an audio element whose
+      source uses the local asset API.
 
 ## Remaining V1 Gaps
 
