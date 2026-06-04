@@ -325,7 +325,7 @@ function seedPunctuatedAnswerQuestion(databasePath: string) {
     });
     questions.createAnswerKey({
       questionId: question.id,
-      acceptedAnswers: ["green park."],
+      acceptedAnswers: ["green park。"],
       answerSentence: "The answer text was copied with punctuation.",
       explanation: "Imported answer keys can include sentence punctuation.",
       synonyms: []

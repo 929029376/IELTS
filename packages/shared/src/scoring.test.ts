@@ -26,6 +26,8 @@ describe("answer scoring", () => {
   it("ignores surrounding punctuation copied from imported answer text", () => {
     expect(isAnswerCorrect("green park", ["green park."])).toBe(true);
     expect(isAnswerCorrect("green park.", ["green park"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["green park。"])).toBe(true);
+    expect(isAnswerCorrect("green park", ["，green park，"])).toBe(true);
     expect(isAnswerCorrect("st. john's", ["St. John's."])).toBe(true);
   });
 

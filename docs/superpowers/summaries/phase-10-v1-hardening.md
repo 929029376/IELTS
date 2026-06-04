@@ -263,6 +263,8 @@
 - Added Mac surrounding-punctuation answer normalization hardening:
   - imported answers copied as sentence fragments such as `green park.` now
     match typed answers such as `green park`,
+  - imported answers copied with localized punctuation such as `green park。`
+    and `，green park，` now match typed answers such as `green park`,
   - typed answers with accidental trailing punctuation such as `green park.`
     also match punctuation-free answer keys,
   - internal punctuation in answers such as `St. John's` stays intact instead
@@ -1956,6 +1958,9 @@
       to match typed answer `green park`.
     - A follow-up run exposed that slash-alias variant expansion was stripping
       the internal period from `St. John's` when no slash alias was present.
+    - A later red run failed because localized imported punctuation such as
+      `green park。` and `，green park，` was not stripped from the surrounding
+      answer text.
     - Passed after trimming only surrounding punctuation during normalization
       and preserving non-alias answer variants without token-by-token rebuilding.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts -t "slash-separated"`
@@ -1964,6 +1969,8 @@
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "surrounding punctuation"`
     - Initially failed because the practice API marked `green park` incorrect
       against imported accepted answer `green park.`.
+    - A later red run failed because the practice API marked `green park`
+      incorrect against imported accepted answer `green park。`.
     - Passed after the shared surrounding-punctuation normalization was used by
       practice answer scoring.
   - `npx pnpm@9.15.4 --filter @ielts/shared test -- src/scoring.test.ts`
