@@ -139,6 +139,11 @@
   - whitespace-only explanation text is treated as missing,
   - the explanation drawer now shows `No explanation recorded yet.` instead of
     blank imported content.
+- Added Mac history review evidence empty-state hardening:
+  - reopened historical reviews now show explicit missing-explanation and
+    missing-synonym-note messages,
+  - whitespace-only imported review evidence no longer renders blank paragraphs
+    or blank synonym list items.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1128,6 +1133,12 @@
     - Initially failed because blank imported explanation text still rendered
       as empty drawer content.
     - Passed after trimming explanations before the fallback decision.
+- Mac history review evidence empty-state hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because reopened history reviews rendered whitespace-only
+      explanations and blank synonym list items.
+    - Passed after trimming historical review evidence before rendering explicit
+      empty-state messages.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

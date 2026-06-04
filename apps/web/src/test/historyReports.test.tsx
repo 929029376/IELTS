@@ -303,4 +303,71 @@ describe("history and reports preview", () => {
     expect(screen.getByText("Sync conflict")).toBeInTheDocument();
     expect(screen.getByText("Remote answer from windows-laptop: central station")).toBeInTheDocument();
   });
+
+  it("shows empty states for missing history review explanations and synonym notes", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/attempt-missing-evidence/review") {
+        return {
+          ok: true,
+          json: async () => ({
+            id: "attempt-missing-evidence",
+            reviewItems: [
+              {
+                acceptedAnswers: ["central station"],
+                answerSentence: "The route ended at central station.",
+                explanation: "   ",
+                isCorrect: false,
+                part: "P2",
+                passageTitle: "Transport",
+                prompt: "Where did the route end?",
+                questionId: "q-missing-evidence",
+                questionNumber: 12,
+                rawAnswer: "city station",
+                synonyms: ["   ", ""]
+              }
+            ]
+          })
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[
+          {
+            durationSeconds: 2400,
+            estimatedBand: 6.5,
+            id: "attempt-missing-evidence",
+            mode: "mock",
+            rawScore: 28,
+            startedAt: "2026-06-04T10:00:00.000Z",
+            subject: "listening",
+            submittedAt: "2026-06-04T10:40:00.000Z"
+          }
+        ]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "Listening 28/40, Band 6.5",
+          predictedListening: "6.0-7.0",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Review listening P2",
+          weakestQuestionType: "short_answer"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Review attempt attempt-missing-evidence" }));
+
+    const reviewRegion = await screen.findByRole("region", { name: "History review details" });
+    expect(reviewRegion).toBeInTheDocument();
+    expect(screen.getByText("No explanation recorded for this question.")).toBeInTheDocument();
+    expect(screen.getByText("No synonym notes recorded for this question.")).toBeInTheDocument();
+    expect(reviewRegion.querySelectorAll(".mock-review-synonyms li")).toHaveLength(0);
+  });
 });

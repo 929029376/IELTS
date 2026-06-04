@@ -72,6 +72,11 @@
   - selecting an attempt calls `GET /api/practice/:attemptId/review`,
   - the reports panel renders saved answer evidence, answer-sentence highlight,
     explanation, accepted answers, synonym notes, and saved sync conflicts.
+- Added Mac history review evidence empty-state hardening:
+  - reopened history reviews now show explicit empty states when explanation or
+    synonym-note evidence is missing,
+  - whitespace-only explanation and synonym values are treated as missing instead
+    of rendering blank review content.
 - Added Mac frequency-accuracy report grouping:
   - backend `byFrequencyClass` analytics are mapped into dedicated report rows,
   - the Mac reports panel shows a separate Frequency accuracy group instead of
@@ -125,6 +130,12 @@
       conflicts returned by the practice review API.
     - Passed after rendering remote conflicting answers with the source device
       inside the history review panel.
+- Mac history review evidence empty-state follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because reopened history reviews rendered whitespace-only
+      explanation paragraphs and blank synonym list items.
+    - Passed after trimming explanation and synonym-note evidence before the
+      empty-state decision.
 - Mac frequency-accuracy grouping follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
     - Initially failed because frequency-class accuracy rows were not rendered

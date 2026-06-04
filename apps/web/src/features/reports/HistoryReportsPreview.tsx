@@ -105,6 +105,30 @@ function renderAnswerSentence(item: HistoryReviewItem) {
   return <mark className="ielts-highlight">{item.answerSentence}</mark>;
 }
 
+function renderExplanation(item: HistoryReviewItem) {
+  const explanation = item.explanation?.trim();
+  if (!explanation) {
+    return <p className="empty-state">No explanation recorded for this question.</p>;
+  }
+
+  return <p>{explanation}</p>;
+}
+
+function renderSynonymNotes(item: HistoryReviewItem) {
+  const synonyms = item.synonyms.map((synonym) => synonym.trim()).filter(Boolean);
+  if (synonyms.length === 0) {
+    return <p className="empty-state">No synonym notes recorded for this question.</p>;
+  }
+
+  return (
+    <ul className="mock-review-synonyms">
+      {synonyms.map((synonym) => (
+        <li key={synonym}>{synonym}</li>
+      ))}
+    </ul>
+  );
+}
+
 function conflictsForQuestion(review: HistoryReview, questionId: string): HistoryReviewConflict[] {
   return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
 }
@@ -281,14 +305,8 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
                   <p>Your answer: {item.rawAnswer || "No answer"}</p>
                   <p>Accepted: {item.acceptedAnswers.join(", ") || "Not configured"}</p>
                   <div className="answer-sentence-preview">{renderAnswerSentence(item)}</div>
-                  {item.explanation ? <p>{item.explanation}</p> : null}
-                  {item.synonyms.length > 0 ? (
-                    <ul className="mock-review-synonyms">
-                      {item.synonyms.map((synonym) => (
-                        <li key={synonym}>{synonym}</li>
-                      ))}
-                    </ul>
-                  ) : null}
+                  {renderExplanation(item)}
+                  {renderSynonymNotes(item)}
                   {conflictsForQuestion(historyReview, item.questionId).length > 0 ? (
                     <div className="sync-conflict-review" aria-label={`Sync conflicts for question ${item.questionId}`}>
                       <strong>Sync conflict</strong>
