@@ -40,6 +40,10 @@ function displayText(value: string, fallback: string) {
   return value.trim() || fallback;
 }
 
+function selectedFileName(file: File, fallback: string) {
+  return file.name.trim() || fallback;
+}
+
 function getLocalFilePath(file: File | null) {
   if (!file) {
     return "";
@@ -196,7 +200,9 @@ export function SyncSettingsPreview({
     }
 
     if (file) {
-      setBackupError(`${file.name} selected, but the local path was not exposed. Paste the full path before importing.`);
+      setBackupError(
+        `${selectedFileName(file, "Unknown backup file")} selected, but the local path was not exposed. Paste the full path before importing.`
+      );
     }
   }
 
@@ -211,7 +217,9 @@ export function SyncSettingsPreview({
     }
 
     if (file) {
-      setSyncError(`${file.name} selected, but the local folder path was not exposed. Paste the full folder path before saving.`);
+      setSyncError(
+        `${selectedFileName(file, "Unknown sync file")} selected, but the local folder path was not exposed. Paste the full folder path before saving.`
+      );
     }
   }
 

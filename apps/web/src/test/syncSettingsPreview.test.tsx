@@ -244,6 +244,33 @@ describe("SyncSettingsPreview", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("shows fallback names when selected sync and backup files expose no local path", () => {
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Choose sync JSONL or devices file"), {
+      target: { files: [new File(["{}"], "   ", { type: "application/json" })] }
+    });
+    expect(
+      screen.getByText(
+        "Unknown sync file selected, but the local folder path was not exposed. Paste the full folder path before saving."
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Choose backup JSON file"), {
+      target: { files: [new File(["{}"], "   ", { type: "application/json" })] }
+    });
+    expect(
+      screen.getByText("Unknown backup file selected, but the local path was not exposed. Paste the full path before importing.")
+    ).toBeInTheDocument();
+  });
+
   it("shows fallback labels for blank sync configuration metadata", () => {
     render(
       <SyncSettingsPreview

@@ -511,6 +511,15 @@
 - Added Mac sync-folder file-picker hardening:
   - selecting an existing sync JSONL or `devices.json` file can fill the sync
     folder path from the desktop-exposed local file path's parent directory.
+- Added Mac sync/backup picker fallback hardening:
+  - selected sync JSONL or `devices.json` files without an exposed local folder
+    path now trim the browser file name before rendering the warning,
+  - blank selected sync file names now show `Unknown sync file` instead of a
+    malformed empty warning,
+  - selected backup JSON files without an exposed local path now trim the browser
+    file name before rendering the warning,
+  - blank selected backup file names now show `Unknown backup file` instead of a
+    malformed empty warning.
 - Added Mac backup reminder refresh hardening:
   - successful backup export/import actions refresh the dashboard data snapshot,
   - the V1 hardening backup reminder updates immediately after a backup is
@@ -618,6 +627,27 @@
       without a browser file name rendered a malformed blank status message.
     - Passed after trimming selected file names and falling back to
       `Unknown <import type>` in the import picker status.
+- Mac sync/backup picker fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx -t "fallback names"`
+    - Initially failed because selected sync and backup files without local
+      paths and without browser file names rendered malformed blank warning
+      messages.
+    - Passed after trimming selected file names and falling back to
+      `Unknown sync file` and `Unknown backup file`.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - 8 tests passed.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Web TypeScript and Vite production build passed.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed on macOS while Windows evidence remains intentionally deferred.
+    - Shared: 4 tests passed.
+    - Server: 73 tests passed.
+    - Web: 124 tests passed.
+    - Playwright Chromium: 2 tests passed.
+    - Production build passed.
+    - `desktop:check` passed, including Rust runtime diagnostics.
+    - Mac DMG packaging passed and generated
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
 - Mac mock-start UI follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the dashboard exam preview had no `Start reading mock`
