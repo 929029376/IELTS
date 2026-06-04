@@ -1,7 +1,7 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { join } from "node:path";
-import type { AttemptAnswerRecord, AttemptRecord } from "../db/attemptRepo";
+import type { AttemptAnswerRecord, AttemptQuestionRecord, AttemptRecord } from "../db/attemptRepo";
 import type { DatabaseHandle } from "../db/database";
 import { applyFrequencyEntryToMatchingPassages, type FrequencyEntryRecord } from "../db/frequencyRepo";
 import type { DictationAttemptRecord, ListeningCueRecord } from "../db/intensiveRepo";
@@ -51,6 +51,10 @@ interface AnswerSentencePayload {
   answerKeyId: string;
   answerSentence: string;
 }
+
+type AttemptSyncPayload = AttemptRecord & {
+  questions?: AttemptQuestionRecord[];
+};
 
 function fileForGroup(group: SyncGroup): SyncJsonlFile {
   return `${group}.jsonl` as SyncJsonlFile;
@@ -235,7 +239,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     appendFileSync(syncPath(fileForGroup(group)), toJsonLine(event));
   }
 
-  function upsertAttempt(payload: AttemptRecord) {
+  function upsertAttempt(payload: AttemptSyncPayload) {
     db.prepare(
       `
       INSERT INTO attempts (id, mode, subject, started_at, submitted_at, raw_score, estimated_band)
@@ -246,6 +250,23 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
         estimated_band = COALESCE(excluded.estimated_band, attempts.estimated_band)
     `
     ).run(payload);
+
+    if (!Array.isArray(payload.questions)) {
+      return;
+    }
+
+    const statement = db.prepare(
+      `
+      INSERT OR IGNORE INTO attempt_questions (id, attempt_id, question_id, question_order)
+      VALUES (@id, @attemptId, @questionId, @questionOrder)
+    `
+    );
+    for (const question of payload.questions) {
+      if (question.attemptId !== payload.id) {
+        continue;
+      }
+      statement.run(question);
+    }
   }
 
   function upsertAnswer(payload: AttemptAnswerRecord, event: SyncEnvelope) {
@@ -556,7 +577,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
 
     let conflict = false;
     if (event.type === "attempt.created" || event.type === "attempt.submitted") {
-      upsertAttempt(event.payload as AttemptRecord);
+      upsertAttempt(event.payload as AttemptSyncPayload);
     } else if (event.type === "answer.saved") {
       conflict = upsertAnswer(event.payload as AttemptAnswerRecord, event).conflict;
     } else if (event.type === "mistake.added") {

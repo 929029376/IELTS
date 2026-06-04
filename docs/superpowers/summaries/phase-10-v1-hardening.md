@@ -464,6 +464,13 @@
   - the local submitted raw score remains unchanged after those remote conflicts,
   - a local empty-answer placeholder preserves the original unanswered state
     while allowing the remote answer to appear in the conflict review data.
+- Added Mac remote attempt-question sync hardening:
+  - remote `attempt.created` and `attempt.submitted` sync payloads can now import
+    their `questions` lists into `attempt_questions`,
+  - synced attempts keep enough question-list context for complete reviews and
+    accuracy analytics on another device,
+  - malformed question-list rows whose `attemptId` does not match the attempt are
+    ignored during import.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -1971,6 +1978,16 @@
     - Passed with all 36 sync and practice route tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test`
     - Passed with all 97 server tests.
+- Mac remote attempt-question sync hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts -t "attempt question lists"`
+    - Initially failed because remote `attempt.created` payloads imported the
+      attempt record but left `questions: []` in `getAttemptWithAnswers`.
+    - Passed after sync imports matching payload `questions` into
+      `attempt_questions`, preserving complete-review context across devices.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncService.test.ts`
+    - Passed with all 7 sync service tests.
+  - `npx pnpm@9.15.4 --filter @ielts/server test`
+    - Passed with all 98 server tests.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

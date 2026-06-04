@@ -179,6 +179,52 @@ describe("sync service", () => {
     expect(createSyncRepo(db).hasSyncEvent("remote-answer-1")).toBe(true);
   });
 
+  it("imports remote attempt question lists for complete review and analytics context", () => {
+    const question = seedQuestion();
+    const service = createSyncService(db, {
+      deviceId: "macbook",
+      deviceName: "MacBook",
+      platform: "darwin",
+      syncFolderPath: syncDir
+    });
+    service.ensureSyncFolder();
+    service.appendExternalEvent("attempts", {
+      createdAt: "2026-06-01T09:00:00.000Z",
+      deviceId: "windows-pc",
+      eventId: "remote-attempt-with-questions",
+      payload: {
+        answers: [],
+        conflicts: [],
+        estimatedBand: null,
+        id: "remote-attempt-with-question-list",
+        mode: "mock",
+        questions: [
+          {
+            attemptId: "remote-attempt-with-question-list",
+            id: "remote-attempt-question-1",
+            questionId: question.id,
+            questionOrder: 1
+          }
+        ],
+        rawScore: null,
+        startedAt: "2026-06-01T09:00:00.000Z",
+        subject: "reading",
+        submittedAt: null
+      },
+      type: "attempt.created"
+    });
+
+    expect(service.importRemoteEvents()).toMatchObject({ imported: 1, skipped: 0 });
+    expect(createAttemptRepo(db).getAttemptWithAnswers("remote-attempt-with-question-list")).toMatchObject({
+      questions: [
+        expect.objectContaining({
+          questionId: question.id,
+          questionOrder: 1
+        })
+      ]
+    });
+  });
+
   it("keeps remote answer conflicts for submitted local attempts instead of overwriting", () => {
     const question = seedQuestion();
     const attempts = createAttemptRepo(db);
