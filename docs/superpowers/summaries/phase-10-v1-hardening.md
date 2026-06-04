@@ -594,6 +594,12 @@
       intensive passage data.
     - Passed after removing sample fallback rendering and showing local empty
       states for missing listening and reading passages.
+- Mac close-reading case-insensitive highlight hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because stored answer evidence such as `answer sentence`
+      did not highlight imported passage text such as `Answer Sentence`.
+    - Passed after the close-reading highlighter started matching answer
+      sentence and keyword targets without requiring identical casing.
 
 ## Remaining V1 Gaps
 

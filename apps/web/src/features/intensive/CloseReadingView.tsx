@@ -20,13 +20,15 @@ interface HighlightToken {
 
 function buildHighlightTokens(text: string, highlights: Array<{ className: string; target: string }>) {
   const tokens: HighlightToken[] = [];
+  const lowerText = text.toLowerCase();
 
   for (const highlight of highlights) {
     if (!highlight.target) {
       continue;
     }
 
-    let start = text.indexOf(highlight.target);
+    const lowerTarget = highlight.target.toLowerCase();
+    let start = lowerText.indexOf(lowerTarget);
 
     while (start !== -1) {
       const end = start + highlight.target.length;
@@ -34,7 +36,7 @@ function buildHighlightTokens(text: string, highlights: Array<{ className: strin
       if (!overlapsExistingToken) {
         tokens.push({ className: highlight.className, end, start });
       }
-      start = text.indexOf(highlight.target, end);
+      start = lowerText.indexOf(lowerTarget, end);
     }
   }
 

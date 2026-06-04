@@ -163,6 +163,12 @@
       listening and reading content when local passages were unavailable.
     - Passed after replacing sample material with local empty states for missing
       listening and reading data.
+- Mac close-reading case-insensitive highlight follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because answer-sentence and keyword highlights required
+      exact casing between imported passage text and stored evidence strings.
+    - Passed after matching highlight targets case-insensitively while rendering
+      the original passage text.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

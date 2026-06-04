@@ -294,4 +294,23 @@ describe("intensive study components", () => {
     expect(onSelectAnswerSentence).toHaveBeenCalled();
     expect(onMistakeLabel).toHaveBeenCalledWith("定位失败");
   });
+
+  it("highlights answer evidence and keywords when imported passage casing differs", () => {
+    render(
+      <CloseReadingView
+        passageText="The Answer Sentence identifies Trade Routes as the key evidence."
+        answerSentence="answer sentence"
+        keywords={["trade routes"]}
+        synonyms={[]}
+        explanation="The sentence directly supports the answer."
+        question={<p>Question 1</p>}
+        isWrongAnswer={false}
+        onSelectAnswerSentence={() => undefined}
+        onMistakeLabel={() => undefined}
+      />
+    );
+
+    expect(screen.getByText("Answer Sentence")).toHaveClass("ielts-highlight");
+    expect(screen.getByText("Trade Routes")).toHaveClass("keyword-highlight");
+  });
 });
