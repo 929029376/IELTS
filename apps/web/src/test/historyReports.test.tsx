@@ -83,4 +83,75 @@ describe("history and reports preview", () => {
     expect(screen.getByText("/Users/musheng/Desktop/IELTS/data/exports/mistakes-2026-06-04.csv")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith("/api/reports/export", expect.objectContaining({ method: "POST" }));
   });
+
+  it("reopens a completed attempt from history and renders detailed review evidence", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/attempt-1/review") {
+        return {
+          ok: true,
+          json: async () => ({
+            id: "attempt-1",
+            reviewItems: [
+              {
+                acceptedAnswers: ["trade routes"],
+                answerSentence: "the answer sentence",
+                explanation: "The passage says the answer directly in this sentence.",
+                isCorrect: false,
+                part: "P1",
+                passageTitle: "Tea History",
+                prompt: "Tea moved through early trade ____.",
+                questionId: "q-1",
+                questionNumber: 1,
+                rawAnswer: "roads",
+                synonyms: ["routes = roads in context only when configured"]
+              }
+            ]
+          })
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <HistoryReportsPreview
+        history={[
+          {
+            durationSeconds: 3600,
+            estimatedBand: 7,
+            id: "attempt-1",
+            mode: "mock",
+            rawScore: 31,
+            startedAt: "2026-05-30T10:00:00.000Z",
+            subject: "reading",
+            submittedAt: "2026-05-30T11:00:00.000Z"
+          }
+        ]}
+        analytics={{ mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "Reading 31/40, Band 7",
+          predictedListening: "Need history",
+          predictedReading: "6.5-7.5",
+          recommendedNextPractice: "Review fill blank questions",
+          weakestQuestionType: "fill_blank"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Review attempt attempt-1" }));
+
+    const reviewRegion = await screen.findByRole("region", { name: "History review details" });
+    expect(reviewRegion).toBeInTheDocument();
+    expect(reviewRegion).toHaveTextContent("Tea moved through early trade ____.");
+    expect(screen.getByText("Your answer: roads")).toBeInTheDocument();
+    expect(screen.getByText("Accepted: trade routes")).toBeInTheDocument();
+    expect(screen.getByText("the answer sentence")).toHaveClass("ielts-highlight");
+    expect(screen.getByText("The passage says the answer directly in this sentence.")).toBeInTheDocument();
+    expect(screen.getByText("routes = roads in context only when configured")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith("/api/practice/attempt-1/review", expect.objectContaining({ method: "GET" }));
+  });
 });

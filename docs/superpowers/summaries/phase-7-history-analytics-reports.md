@@ -39,6 +39,7 @@
   - weakest question type,
   - recommended next practice,
   - history table,
+  - history-row review reopening,
   - accuracy rows,
   - mistake-label chips,
   - report export actions.
@@ -60,6 +61,11 @@
   - mock score reports state that IELTS band scores are estimates,
   - history/prediction cards state that predicted bands are estimates and
     official raw-score cutoffs can vary.
+- Added Mac history review reopening:
+  - completed attempts in the history table expose a Review action,
+  - selecting an attempt calls `GET /api/practice/:attemptId/review`,
+  - the reports panel renders saved answer evidence, answer-sentence highlight,
+    explanation, accepted answers, and synonym notes.
 
 ## Verification Evidence
 
@@ -83,6 +89,16 @@
       reports export API or render exported file paths.
     - Passed after wiring the report buttons to the local export API and showing
       generated JSON/CSV paths in the reports panel.
+- Mac history review-reopen follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because the history table rendered submitted attempts but
+      did not provide a way to reopen the detailed review.
+    - Passed after adding per-attempt Review actions and a history review panel
+      backed by the existing local practice review API.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the history review-reopen follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - Mac post-mock dashboard refresh follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because submitting a local mock did not refetch dashboard

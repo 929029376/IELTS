@@ -131,6 +131,11 @@
   - `GET /api/practice/:attemptId/review` now returns detailed answer evidence,
   - the Mac dashboard renders correctness, user answer, accepted answer, answer
     sentence highlight, explanation, and synonym notes after submission.
+- Added Mac history review reopening hardening:
+  - completed attempts in the report history table can reopen the saved detailed
+    review through `GET /api/practice/:attemptId/review`,
+  - the Mac reports panel renders answer sentence highlights, explanations,
+    accepted answers, and synonym notes for the selected historical attempt.
 - Added local mock resource hardening:
   - `POST /api/practice/start` now returns imported passage text, source asset
     paths, and listening audio metadata with started mock questions,
@@ -521,6 +526,16 @@
     - Initially failed because submitting a local mock did not show a detailed
       review region.
     - Passed after rendering the submitted-mock review panel.
+- Mac history review-reopen follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because submitted attempts in history had no action for
+      reopening saved detailed review evidence.
+    - Passed after adding per-attempt Review actions and a history review panel
+      backed by `GET /api/practice/:attemptId/review`.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the history review-reopen follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - Mac local mock resource follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Initially failed because started mock questions did not include imported

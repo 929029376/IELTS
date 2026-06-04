@@ -22,6 +22,9 @@
 - Expanded practice review responses with `reviewItems` so submitted attempts
   include prompt, passage title, accepted answers, answer sentence, explanation,
   synonyms, correctness, and the user's raw answer.
+- Added Mac history review reopening so a completed attempt from the history
+  table can call `GET /api/practice/:attemptId/review` and display the saved
+  detailed answer evidence again.
 - Added basic reusable web question components:
   - `AnswerInput`
   - `QuestionNavigator`
@@ -76,6 +79,13 @@
       include detailed review items.
     - Passed after adding prompt, answer key, answer sentence, explanation, and
       correctness details to the review response.
+- Mac history review-reopen follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because completed history attempts had no Review action
+      for reopening detailed answer evidence.
+    - Passed after adding a history Review button that loads the existing
+      practice review API and renders answer sentence highlights, explanations,
+      accepted answers, and synonym notes.
 - Mac free-practice UI follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the dashboard had mock-start buttons but no

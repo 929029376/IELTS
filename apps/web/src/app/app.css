@@ -652,6 +652,20 @@ h1 {
   text-align: left;
 }
 
+.history-table button {
+  padding: 6px 10px;
+  border: 1px solid #b9c7d9;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #26364d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.history-table button:disabled {
+  opacity: 0.55;
+}
+
 .accuracy-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;

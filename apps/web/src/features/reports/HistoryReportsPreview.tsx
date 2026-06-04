@@ -32,6 +32,25 @@ export interface DashboardReportView {
   weakestQuestionType: string;
 }
 
+interface HistoryReviewItem {
+  acceptedAnswers: string[];
+  answerSentence: string | null;
+  explanation: string | null;
+  isCorrect: boolean;
+  part: string | null;
+  passageTitle: string | null;
+  prompt: string | null;
+  questionId: string;
+  questionNumber: number | null;
+  rawAnswer: string;
+  synonyms: string[];
+}
+
+interface HistoryReview {
+  id: string;
+  reviewItems: HistoryReviewItem[];
+}
+
 export interface HistoryReportsPreviewProps {
   analytics: ReportsAnalyticsView;
   dashboard: DashboardReportView;
@@ -57,10 +76,21 @@ function formatDuration(seconds: number | null) {
   return `${minutes} min`;
 }
 
+function renderAnswerSentence(item: HistoryReviewItem) {
+  if (!item.answerSentence) {
+    return <p className="empty-state">No answer sentence recorded for this question.</p>;
+  }
+
+  return <mark className="ielts-highlight">{item.answerSentence}</mark>;
+}
+
 export function HistoryReportsPreview({ analytics, dashboard, history }: HistoryReportsPreviewProps) {
   const [exportedFiles, setExportedFiles] = useState<ExportedReportFiles | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [historyReview, setHistoryReview] = useState<HistoryReview | null>(null);
+  const [historyReviewError, setHistoryReviewError] = useState<string | null>(null);
+  const [loadingReviewAttemptId, setLoadingReviewAttemptId] = useState<string | null>(null);
 
   async function exportReports() {
     setIsExporting(true);
@@ -75,6 +105,22 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
       setExportError("Could not export local reports.");
     } finally {
       setIsExporting(false);
+    }
+  }
+
+  async function openHistoryReview(attemptId: string) {
+    setLoadingReviewAttemptId(attemptId);
+    setHistoryReviewError(null);
+    try {
+      const response = await fetch(`/api/practice/${attemptId}/review`, { method: "GET" });
+      if (!response.ok) {
+        throw new Error("Could not load review");
+      }
+      setHistoryReview((await response.json()) as HistoryReview);
+    } catch {
+      setHistoryReviewError("Could not load this attempt review.");
+    } finally {
+      setLoadingReviewAttemptId(null);
     }
   }
 
@@ -127,6 +173,42 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
       <p className="score-estimate-note">
         Predicted bands are estimates from local history; official IELTS raw-score cutoffs can vary by test.
       </p>
+      {historyReviewError ? <p className="mock-start-error">{historyReviewError}</p> : null}
+      {historyReview ? (
+        <section className="mock-review-panel" aria-label="History review details">
+          <div>
+            <p className="eyebrow">History review</p>
+            <h3>Answer evidence and explanations</h3>
+          </div>
+          {historyReview.reviewItems.length > 0 ? (
+            <ol className="mock-review-list">
+              {historyReview.reviewItems.map((item) => (
+                <li key={item.questionId}>
+                  <div className="mock-review-heading">
+                    <span>{item.isCorrect ? "Correct" : "Incorrect"}</span>
+                    <strong>
+                      {item.questionNumber ?? "Question"} {item.prompt ?? "Review question"}
+                    </strong>
+                  </div>
+                  <p>Your answer: {item.rawAnswer || "No answer"}</p>
+                  <p>Accepted: {item.acceptedAnswers.join(", ") || "Not configured"}</p>
+                  <div className="answer-sentence-preview">{renderAnswerSentence(item)}</div>
+                  {item.explanation ? <p>{item.explanation}</p> : null}
+                  {item.synonyms.length > 0 ? (
+                    <ul className="mock-review-synonyms">
+                      {item.synonyms.map((synonym) => (
+                        <li key={synonym}>{synonym}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p className="empty-state">No detailed review items were saved for this attempt</p>
+          )}
+        </section>
+      ) : null}
 
       <div className="reports-grid">
         <section className="history-table-wrap" aria-label="Attempt history">
@@ -140,6 +222,7 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
                 <th>Score</th>
                 <th>Band</th>
                 <th>Time</th>
+                <th>Review</th>
               </tr>
             </thead>
             <tbody>
@@ -152,11 +235,21 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
                     <td>{attempt.rawScore ?? "-"}</td>
                     <td>{attempt.estimatedBand ?? "-"}</td>
                     <td>{formatDuration(attempt.durationSeconds)}</td>
+                    <td>
+                      <button
+                        aria-label={`Review attempt ${attempt.id}`}
+                        disabled={loadingReviewAttemptId === attempt.id}
+                        onClick={() => void openHistoryReview(attempt.id)}
+                        type="button"
+                      >
+                        Review
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6}>
+                  <td colSpan={7}>
                     <p className="empty-state">No completed attempts yet</p>
                   </td>
                 </tr>
