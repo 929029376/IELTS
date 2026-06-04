@@ -172,6 +172,10 @@
     `Untitled passage`,
   - readiness checks no longer show blank rows when importer metadata is
     incomplete.
+- Added Mac hardening-center completeness metadata hardening:
+  - question-bank completeness rows now show question count and frequency class,
+  - readiness checks make it easier to distinguish empty imported passages from
+    high/medium/low/unknown frequency passages that need answer evidence.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1219,6 +1223,13 @@
       counts from the API but rendered only the unresolved total and table rows.
     - Passed after rendering `failed` and `needs_review` status-count summaries
       above the source table.
+- Mac hardening-center completeness metadata:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/hardeningCenter.test.tsx`
+    - Initially failed because question-bank completeness rows received
+      `questionCount` and `frequencyClass` from the API but rendered only
+      subject, part, and source status.
+    - Passed after rendering question count and frequency class in each
+      incomplete-passage row.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

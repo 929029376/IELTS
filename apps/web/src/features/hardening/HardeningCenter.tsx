@@ -156,7 +156,9 @@ export function HardeningCenter({ status }: HardeningCenterProps) {
                   <div>
                     <strong>{passageTitleLabel(passage.title)}</strong>
                     <span>
-                      {passage.subject} {passage.part} · {passage.sourceStatus}
+                      {passage.subject} {passage.part} · {passage.questionCount} question
+                      {passage.questionCount === 1 ? "" : "s"} · {passage.frequencyClass} frequency ·{" "}
+                      {passage.sourceStatus}
                     </span>
                   </div>
                   <p>{passage.issueLabels.join(", ")}</p>
