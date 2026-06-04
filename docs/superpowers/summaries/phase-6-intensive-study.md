@@ -85,6 +85,11 @@
     that answer,
   - clicking a close-reading mistake-label button in the Mac dashboard shows a
     saved status instead of being a no-op.
+- Added Mac close-reading mistake-label visibility hardening:
+  - mistake-label buttons are shown only when a wrong local reading answer is
+    loaded,
+  - close-reading evidence review without an `attemptAnswerId` no longer exposes
+    labels that cannot be saved.
 - Added Mac manual answer-sentence persistence for close reading:
   - `/api/study/intensive` now returns the reading `answerKeyId`,
   - `POST /api/study/answer-sentence` updates `answer_keys.answer_sentence`,
@@ -277,6 +282,12 @@
     - Initially failed because `Submit dictation` stayed enabled for empty text.
     - Passed after the button requires non-blank dictation text and the submit
       handler ignores whitespace-only input.
+- Mac close-reading mistake-label visibility follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the close-reading preview showed mistake-label
+      buttons even when no wrong local answer id was loaded.
+    - Passed after `IntensivePracticePreview` renders mistake labels only when
+      `attemptAnswerId` is available.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

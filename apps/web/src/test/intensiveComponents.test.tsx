@@ -454,6 +454,29 @@ describe("intensive study components", () => {
     );
   });
 
+  it("hides close-reading mistake labels when no wrong local answer is loaded", () => {
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: null,
+          reading: {
+            answerSentence: "answer sentence",
+            attemptAnswerId: null,
+            explanation: "The sentence directly supports the answer.",
+            keywords: ["trade routes"],
+            passageText: "Tea travelled along trade routes. The answer sentence identifies the key evidence.",
+            passageTitle: "Reading intensive review",
+            questionPrompt: "Question 1: Choose the best evidence.",
+            synonyms: ["evidence", "proof"]
+          }
+        }}
+      />
+    );
+
+    expect(screen.getByText("answer sentence")).toHaveClass("ielts-highlight");
+    expect(screen.queryByRole("button", { name: "定位失败" })).not.toBeInTheDocument();
+  });
+
   it("saves a selected close-reading answer sentence through the local study API", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,

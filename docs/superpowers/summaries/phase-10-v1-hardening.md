@@ -112,6 +112,11 @@
   - mistake-label buttons persist through `POST /api/study/mistake-labels`,
   - saved labels can be appended to Baidu Cloud `mistakes.jsonl` when sync is
     configured.
+- Added Mac close-reading mistake-label visibility hardening:
+  - mistake-label buttons render only when a wrong local reading answer id is
+    available,
+  - evidence-only close-reading previews no longer show unusable wrong-answer
+    label actions.
 - Added Mac close-reading answer-evidence hardening:
   - intensive reading preview now exposes the local reading `answerKeyId`,
   - selected passage text persists through `POST /api/study/answer-sentence`,
@@ -1078,6 +1083,12 @@
     - Initially failed because blank dictation text could still submit.
     - Passed after the submit control requires trimmed text and the handler
       ignores whitespace-only attempts.
+- Mac close-reading mistake-label visibility hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because close-reading previews without `attemptAnswerId`
+      still rendered mistake-label buttons.
+    - Passed after `isWrongAnswer` is derived from the live reading
+      `attemptAnswerId`.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown
