@@ -147,6 +147,7 @@ function renderPredictionCard(prediction: PredictionCardData) {
 }
 
 export function HistoryReportsPreview({ analytics, dashboard, history }: HistoryReportsPreviewProps) {
+  const [copyStatus, setCopyStatus] = useState<string | null>(null);
   const [exportedFiles, setExportedFiles] = useState<ExportedReportFiles | null>(null);
   const [exportError, setExportError] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -156,6 +157,7 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
 
   async function exportReports() {
     setIsExporting(true);
+    setCopyStatus(null);
     setExportError(null);
     try {
       const response = await fetch("/api/reports/export", { method: "POST" });
@@ -167,6 +169,24 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
       setExportError("Could not export local reports.");
     } finally {
       setIsExporting(false);
+    }
+  }
+
+  async function copyReportPaths() {
+    if (!exportedFiles) {
+      return;
+    }
+
+    setCopyStatus(null);
+    setExportError(null);
+    try {
+      if (!navigator.clipboard) {
+        throw new Error("Clipboard unavailable");
+      }
+      await navigator.clipboard.writeText([exportedFiles.mockJson, exportedFiles.mockCsv, exportedFiles.mistakesCsv].join("\n"));
+      setCopyStatus("Report paths copied.");
+    } catch {
+      setExportError("Could not copy report paths.");
     }
   }
 
@@ -210,6 +230,12 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
             <li>{exportedFiles.mockCsv}</li>
             <li>{exportedFiles.mistakesCsv}</li>
           </ul>
+          <div className="report-export-actions">
+            <button onClick={() => void copyReportPaths()} type="button">
+              Copy report paths
+            </button>
+            {copyStatus ? <span>{copyStatus}</span> : null}
+          </div>
         </section>
       ) : null}
       {exportError ? <p className="mock-start-error">{exportError}</p> : null}

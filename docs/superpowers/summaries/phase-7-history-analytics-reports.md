@@ -46,6 +46,11 @@
   - report export actions.
 - Connected the report export actions to `POST /api/reports/export` in the Mac
   dashboard and display the generated local JSON/CSV file paths after export.
+- Added Mac report path clipboard follow-up:
+  - exported mock JSON, mock CSV, and mistakes CSV paths can be copied together
+    from the reports panel after local export,
+  - the UI confirms the copied state so exported files are easier to locate in
+    Finder, terminal, or a synced folder.
 - Added a Mac follow-up that wires the dashboard/report UI to the live local API
   instead of static sample data:
   - `GET /api/reports/history`,
@@ -99,6 +104,11 @@
       reports export API or render exported file paths.
     - Passed after wiring the report buttons to the local export API and showing
       generated JSON/CSV paths in the reports panel.
+- Mac report-path copy follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because exported report paths were visible but no
+      `Copy report paths` action existed.
+    - Passed after adding the clipboard action and copied-state confirmation.
 - Mac history review-reopen follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
     - Initially failed because the history table rendered submitted attempts but
@@ -174,6 +184,8 @@
 - Prediction is deliberately labeled as an estimate and exposes a range rather than a single official claim.
 - Report export writes to the configured export directory; production defaults to
   `data/exports`, and the Mac dashboard now shows the exact generated paths.
+- Exported report paths can be copied from the Mac dashboard after export, which
+  makes local file lookup and manual sharing easier.
 - Dashboard report data is available from the API and represented in the current local dashboard preview.
 
 ## Next Phase

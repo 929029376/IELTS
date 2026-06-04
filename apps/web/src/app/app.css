@@ -580,6 +580,27 @@ h1 {
   overflow-wrap: anywhere;
 }
 
+.report-export-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.report-export-actions button {
+  min-height: 34px;
+  border: 1px solid #bcc9d9;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #20314a;
+}
+
+.report-export-actions span {
+  color: #1f6f60;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .report-metrics {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

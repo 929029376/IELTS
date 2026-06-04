@@ -184,6 +184,10 @@
 - Added report-export UI hardening:
   - dashboard report buttons now call `POST /api/reports/export`,
   - generated mock JSON, mock CSV, and mistakes CSV paths are shown in the Mac UI.
+- Added Mac report path clipboard hardening:
+  - exported mock JSON, mock CSV, and mistakes CSV paths can be copied together
+    from the reports panel after local export,
+  - copied-state feedback appears in the report export panel.
 - Added score-estimate UI hardening:
   - mock score reports explicitly label IELTS band scores as estimates,
   - prediction cards explain that local predicted bands are estimates and
@@ -1055,6 +1059,12 @@
       seeded single row, making OCR/image frequency-table updates cumbersome.
     - Passed after the correction table can append additional editable frequency
       rows for batch updates.
+- Mac report path clipboard hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
+    - Initially failed because exported report paths could be viewed but not
+      copied as a ready-to-use local path list.
+    - Passed after adding the `Copy report paths` action and clipboard write
+      coverage.
 
 ## Remaining V1 Gaps
 

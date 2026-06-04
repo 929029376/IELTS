@@ -117,6 +117,46 @@ describe("history and reports preview", () => {
     expect(fetchMock).toHaveBeenCalledWith("/api/reports/export", expect.objectContaining({ method: "POST" }));
   });
 
+  it("copies exported report paths to the clipboard for local file lookup", async () => {
+    const exportedFiles = {
+      mistakesCsv: "/Users/musheng/Desktop/IELTS/data/exports/mistakes-2026-06-04.csv",
+      mockCsv: "/Users/musheng/Desktop/IELTS/data/exports/mock-report-2026-06-04.csv",
+      mockJson: "/Users/musheng/Desktop/IELTS/data/exports/mock-report-2026-06-04.json"
+    };
+    const fetchMock = vi.fn(async () => ({
+      ok: true,
+      json: async () => exportedFiles
+    }));
+    const writeTextMock = vi.fn(async () => undefined);
+    vi.stubGlobal("fetch", fetchMock);
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: writeTextMock }
+    });
+
+    render(
+      <HistoryReportsPreview
+        history={[]}
+        analytics={{ frequencyRows: [], mistakeLabels: [], partRows: [], questionTypeRows: [] }}
+        dashboard={{
+          latestMockScore: "No mock submitted",
+          predictedListening: "Need history",
+          predictedReading: "Need history",
+          recommendedNextPractice: "Import a set to begin",
+          weakestQuestionType: "No data"
+        }}
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export mock report" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Reports exported");
+
+    fireEvent.click(screen.getByRole("button", { name: "Copy report paths" }));
+
+    expect(writeTextMock).toHaveBeenCalledWith([exportedFiles.mockJson, exportedFiles.mockCsv, exportedFiles.mistakesCsv].join("\n"));
+    expect(await screen.findByText("Report paths copied.")).toBeInTheDocument();
+  });
+
   it("reopens a completed attempt from history and renders detailed review evidence", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/practice/attempt-1/review") {
