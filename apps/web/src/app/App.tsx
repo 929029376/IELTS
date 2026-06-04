@@ -403,6 +403,7 @@ export function App() {
           deviceName="Mac local device"
           lastSyncAt={null}
           onBackupChanged={() => setDataRefreshVersion((version) => version + 1)}
+          onSyncComplete={() => setDataRefreshVersion((version) => version + 1)}
           runtimeStatus={desktopRuntimeStatus}
           syncFiles={[
             "attempts.jsonl",

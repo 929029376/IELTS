@@ -107,6 +107,9 @@
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
+- Added Mac manual sync dashboard refresh hardening:
+  - successful manual sync import refreshes report history, score prediction
+    cards, hardening status, and local study overview.
 - Added manual backup hardening for intensive listening:
   - backup export/import now includes `dictation_attempts`,
   - restore order keeps `dictation_attempts` after `listening_cues` so cue
@@ -396,6 +399,15 @@
       show a completion status.
     - Passed after wiring it to `POST /api/sync/import` and rendering imported,
       skipped, and conflict counts.
+- Mac manual sync dashboard-refresh follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Initially failed because manual sync completion left the dashboard on stale
+      report data.
+    - Passed after manual sync success triggers a dashboard data refresh.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the manual sync dashboard-refresh follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac manual backup intensive-listening follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/backupService.test.ts`
     - Initially failed because manual backup JSON did not include

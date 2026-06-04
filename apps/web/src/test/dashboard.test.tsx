@@ -567,4 +567,149 @@ describe("dashboard shell", () => {
     expect(screen.getByText("latest backup: 2026-06-04")).toBeInTheDocument();
     expect(screen.getByText("Backup status is acceptable for the current history size.")).toBeInTheDocument();
   });
+
+  it("refreshes dashboard history and predictions after manual sync imports remote records", async () => {
+    let dashboardCalls = 0;
+    let syncImported = false;
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url === "/api/reports/history") {
+        return {
+          ok: true,
+          json: async () =>
+            syncImported
+              ? [
+                  {
+                    durationSeconds: 2400,
+                    estimatedBand: 6.5,
+                    id: "attempt-remote-sync-1",
+                    mode: "mock",
+                    rawScore: 28,
+                    startedAt: "2026-06-04T07:00:00.000Z",
+                    subject: "listening",
+                    submittedAt: "2026-06-04T07:40:00.000Z"
+                  }
+                ]
+              : []
+        };
+      }
+      if (url === "/api/reports/analytics") {
+        return {
+          ok: true,
+          json: async () => ({ byPart: {}, byQuestionType: {}, mistakeLabels: [] })
+        };
+      }
+      if (url === "/api/reports/dashboard") {
+        dashboardCalls += 1;
+        return {
+          ok: true,
+          json: async () => ({
+            latestMockScore: syncImported
+              ? {
+                  durationSeconds: 2400,
+                  estimatedBand: 6.5,
+                  id: "attempt-remote-sync-1",
+                  mode: "mock",
+                  rawScore: 28,
+                  startedAt: "2026-06-04T07:00:00.000Z",
+                  subject: "listening",
+                  submittedAt: "2026-06-04T07:40:00.000Z"
+                }
+              : null,
+            predictedListening: syncImported
+              ? {
+                  basisAttempts: 1,
+                  confidence: "low",
+                  predictedBand: 6.5,
+                  range: { max: 7, min: 6 },
+                  subject: "listening"
+                }
+              : "Need history",
+            predictedReading: "Need history",
+            recommendedNextPractice: syncImported ? "Review listening P3" : "Import a set to begin",
+            weakestQuestionType: syncImported ? "map label" : null
+          })
+        };
+      }
+      if (url === "/api/hardening/status") {
+        return {
+          ok: true,
+          json: async () => ({
+            backupReminder: { latestBackupAt: null, reason: null, shouldRemind: false, submittedAttemptCount: 0 },
+            importFailures: { byStatus: {}, sources: [], totalUnresolved: 0 },
+            questionBankCompleteness: {
+              issueCounts: {
+                missingAnswerKey: 0,
+                missingAnswerSentence: 0,
+                missingAudio: 0,
+                missingExplanation: 0,
+                missingFrequencyEntry: 0,
+                missingListeningCues: 0,
+                missingTranscript: 0
+              },
+              passages: [],
+              totalPassages: 0
+            }
+          })
+        };
+      }
+      if (url === "/api/study/overview") {
+        return {
+          ok: true,
+          json: async () => ({
+            readiness: { listeningFullMockReady: false, readingFullMockReady: false },
+            recommendedMockSets: { listening: null, reading: null },
+            subjects: {
+              listening: {
+                cueCount: 0,
+                frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: 0,
+                questionCount: 0
+              },
+              reading: {
+                cueCount: 0,
+                frequency: { high: 0, low: 0, medium: 0, unknown: 0 },
+                passageCount: 0,
+                questionCount: 0
+              }
+            }
+          })
+        };
+      }
+      if (url === "/api/study/intensive") {
+        return {
+          ok: true,
+          json: async () => ({})
+        };
+      }
+      if (url === "/api/sync/import") {
+        syncImported = true;
+        return {
+          ok: true,
+          json: async () => ({
+            conflicts: 0,
+            imported: 3,
+            skipped: 0
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<App />);
+
+    expect(await screen.findByText("No mock submitted")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Manual sync" }));
+
+    expect(await screen.findByText("Manual sync complete")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(dashboardCalls).toBe(2);
+    });
+    expect(screen.getByText("Listening 28/40, Band 6.5")).toBeInTheDocument();
+    expect(screen.getByText("Review listening P3")).toBeInTheDocument();
+  });
 });

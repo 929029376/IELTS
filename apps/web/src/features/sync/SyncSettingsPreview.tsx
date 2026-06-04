@@ -7,6 +7,7 @@ export interface SyncSettingsPreviewProps {
   deviceName: string;
   lastSyncAt: string | null;
   onBackupChanged?: () => void;
+  onSyncComplete?: () => void;
   runtimeStatus?: DesktopRuntimeStatus | null;
   syncFiles: string[];
   syncPath: string;
@@ -32,6 +33,7 @@ export function SyncSettingsPreview({
   deviceName,
   lastSyncAt,
   onBackupChanged,
+  onSyncComplete,
   runtimeStatus = null,
   syncFiles,
   syncPath
@@ -53,7 +55,9 @@ export function SyncSettingsPreview({
       if (!response.ok) {
         throw new Error("Could not import sync events");
       }
-      setSyncResult((await response.json()) as ManualSyncResult);
+      const result = (await response.json()) as ManualSyncResult;
+      setSyncResult(result);
+      onSyncComplete?.();
     } catch {
       setSyncError("Could not complete manual sync.");
     } finally {
