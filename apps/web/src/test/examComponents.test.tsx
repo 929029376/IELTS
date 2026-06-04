@@ -443,6 +443,54 @@ describe("exam simulation components", () => {
     expect(screen.getByText("Duration: 05:20")).toBeInTheDocument();
   });
 
+  it("enables free playback controls for local listening practice", async () => {
+    vi.useRealTimers();
+    const audioPath = "/Users/musheng/Desktop/IELTS/listening/practice-p1.mp3";
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-listening-practice-1",
+            questions: [
+              {
+                answerRules: {},
+                assetPaths: [],
+                audioDurationSeconds: 180,
+                audioPath,
+                id: "listening-practice-q1",
+                part: "P1",
+                passageId: "listening-practice-p1",
+                passageText: null,
+                passageTitle: "Free Listening Practice",
+                prompt: "Which number is repeated?",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { container } = render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start listening practice" }));
+
+    expect(await screen.findByText("Loaded local listening practice")).toBeInTheDocument();
+    const audio = container.querySelector("audio");
+    expect(audio).toHaveAttribute("controls");
+    expect(audio).toHaveAttribute("src", `/api/assets/local?path=${encodeURIComponent(audioPath)}`);
+    expect(screen.getByRole("button", { name: "Pause" })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "Seek" })).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "Speed" })).not.toBeDisabled();
+  });
+
   it("keeps local listening mock sections separated with their own audio metadata", async () => {
     vi.useRealTimers();
     const fetchMock = vi.fn(async (input: string | URL | Request) => {

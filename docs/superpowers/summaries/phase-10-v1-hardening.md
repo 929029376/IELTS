@@ -94,6 +94,9 @@
 - Added frontend free-practice controls in the Mock Exam Center so the dashboard
   can start reading or listening practice attempts through the same local
   practice API without entering mock mode.
+- Added Mac listening practice playback hardening so listening practice passes
+  the active practice mode into the player, keeping Pause, Seek, Speed, and the
+  native local audio controls available for self-paced work.
 - Added Mac practice-filter hardening:
   - practice starts can filter by part, frequency class, question type, and
     historical mistake label,
@@ -764,6 +767,17 @@
       then because it used the raw filesystem path as `src`.
     - Passed after the Mac listening mock player rendered an audio element whose
       source uses the local asset API.
+- Mac listening practice playback-controls follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because `Start listening practice` loaded local audio but
+      still used mock-mode playback restrictions.
+    - Passed after `ExamPreview` forwards the active attempt mode to
+      `ListeningExamView`, enabling native audio controls plus Pause, Seek, and
+      Speed in practice mode.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the listening practice playback-controls follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - Mac reading PDF viewing hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because the active reading mock pane ignored returned PDF

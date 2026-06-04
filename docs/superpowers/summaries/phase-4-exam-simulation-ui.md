@@ -41,6 +41,8 @@
 - Added practice-mode starters beside the mock starters:
   - reading practice calls `POST /api/practice/start` with `mode: "practice"`,
   - listening practice calls `POST /api/practice/start` with `mode: "practice"`,
+  - listening practice keeps free playback controls and the native local audio
+    control bar instead of using mock-mode strict playback restrictions,
   - the loaded-attempt panel and exam shell title identify practice attempts
     separately from mock tests.
 - Connected the loaded local mock attempt to the exam UI:
@@ -237,6 +239,17 @@
       extracted passage text did not render a PDF preview.
     - Passed after wiring PDF asset paths into the reading exam view and using
       the local asset API as the embedded PDF source.
+- Mac listening practice playback-controls follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because listening practice still rendered the local audio
+      player in mock mode, hiding native controls and disabling Pause, Seek, and
+      Speed.
+    - Passed after passing the active attempt mode through to `ListeningExamView`
+      so practice attempts keep free playback controls.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the listening practice playback-controls follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
 - `npx pnpm@9.15.4 build`
   - Shared TypeScript build passed.
   - Server TypeScript build passed.

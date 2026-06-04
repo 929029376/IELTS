@@ -514,7 +514,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
             </>
           ) : (
             <ListeningExamView
-              mode="mock"
+              mode={activeMock.mode}
               activeSectionId={activeGroup?.id}
               audioDurationSeconds={activeGroupQuestions[0]?.audioDurationSeconds}
               audioPath={activeGroupQuestions[0]?.audioPath}
