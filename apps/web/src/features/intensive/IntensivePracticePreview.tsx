@@ -242,6 +242,7 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
             explanation={reading.explanation ?? "No explanation recorded yet."}
             question={<p>{reading.questionPrompt}</p>}
             isWrongAnswer={Boolean(reading.attemptAnswerId)}
+            canSelectAnswerSentence={Boolean(reading.answerKeyId)}
             onSelectAnswerSentence={() => {
               void saveSelectedAnswerSentence();
             }}

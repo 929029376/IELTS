@@ -96,6 +96,11 @@
   - selecting passage text and clicking `Use selected sentence as answer
     evidence` saves the evidence sentence, shows saved status, and immediately
     updates the close-reading highlight.
+- Added Mac answer-evidence availability hardening:
+  - the close-reading answer-evidence save action is disabled when no local
+    `answerKeyId` is loaded,
+  - evidence-only reading previews no longer expose a save action that cannot
+    persist.
 - Added Mac close-reading keyword evidence wiring:
   - `/api/study/intensive` now reads string keywords from
     `questions.answer_rules_json.keywords`,
@@ -288,6 +293,12 @@
       buttons even when no wrong local answer id was loaded.
     - Passed after `IntensivePracticePreview` renders mistake labels only when
       `attemptAnswerId` is available.
+- Mac answer-evidence availability follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the close-reading answer-evidence save button was
+      enabled even when no `answerKeyId` was loaded.
+    - Passed after `CloseReadingView` accepts a disabled state and
+      `IntensivePracticePreview` disables the action without a local answer key.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

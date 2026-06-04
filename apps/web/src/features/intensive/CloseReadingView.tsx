@@ -8,6 +8,7 @@ export interface CloseReadingViewProps {
   explanation: string;
   question: ReactNode;
   isWrongAnswer: boolean;
+  canSelectAnswerSentence?: boolean;
   onSelectAnswerSentence: () => void;
   onMistakeLabel: (label: string) => void;
 }
@@ -91,6 +92,7 @@ export function CloseReadingView({
   explanation,
   question,
   isWrongAnswer,
+  canSelectAnswerSentence = true,
   onSelectAnswerSentence,
   onMistakeLabel
 }: CloseReadingViewProps) {
@@ -109,7 +111,7 @@ export function CloseReadingView({
       </article>
       <aside className="close-reading-tools">
         <div>{question}</div>
-        <button type="button" onClick={onSelectAnswerSentence}>
+        <button type="button" disabled={!canSelectAnswerSentence} onClick={onSelectAnswerSentence}>
           Use selected sentence as answer evidence
         </button>
         <section aria-label="Synonym notes">

@@ -477,6 +477,29 @@ describe("intensive study components", () => {
     expect(screen.queryByRole("button", { name: "定位失败" })).not.toBeInTheDocument();
   });
 
+  it("disables close-reading answer evidence save when no answer key is loaded", () => {
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: null,
+          reading: {
+            answerKeyId: null,
+            answerSentence: null,
+            attemptAnswerId: null,
+            explanation: "Select the sentence that proves the answer.",
+            keywords: [],
+            passageText: "The first sentence is a distractor. The selected sentence proves the answer.",
+            passageTitle: "Reading intensive review",
+            questionPrompt: "Question 1: Select the evidence.",
+            synonyms: []
+          }
+        }}
+      />
+    );
+
+    expect(screen.getByRole("button", { name: "Use selected sentence as answer evidence" })).toBeDisabled();
+  });
+
   it("saves a selected close-reading answer sentence through the local study API", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,

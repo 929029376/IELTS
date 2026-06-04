@@ -122,6 +122,11 @@
   - selected passage text persists through `POST /api/study/answer-sentence`,
   - saved evidence immediately becomes the highlighted answer sentence in the
     Mac close-reading panel.
+- Added Mac answer-evidence availability hardening:
+  - the close-reading answer-evidence save button is disabled until a local
+    `answerKeyId` is available,
+  - evidence-only reading previews avoid an action that cannot persist selected
+    text.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1089,6 +1094,12 @@
       still rendered mistake-label buttons.
     - Passed after `isWrongAnswer` is derived from the live reading
       `attemptAnswerId`.
+- Mac answer-evidence availability hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because the answer-evidence save button stayed enabled
+      without a local `answerKeyId`.
+    - Passed after the preview passes answer-key availability into
+      `CloseReadingView` and the button disables when saving is unavailable.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown
