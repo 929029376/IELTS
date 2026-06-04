@@ -1105,12 +1105,14 @@ h1 {
 }
 
 .backup-path-control,
+.backup-file-picker,
 .sync-path-control {
   display: grid;
   gap: 6px;
 }
 
 .backup-path-control span,
+.backup-file-picker span,
 .sync-path-control span {
   color: #66768c;
   font-size: 12px;
@@ -1125,6 +1127,18 @@ h1 {
   padding: 8px 10px;
   border: 1px solid #cbd5e1;
   border-radius: 6px;
+  color: #20314a;
+}
+
+.backup-file-picker {
+  padding: 10px;
+  border: 1px dashed #cbd6e3;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.backup-file-picker input {
+  width: 100%;
   color: #20314a;
 }
 

@@ -111,6 +111,8 @@
   - export backup through `POST /api/backups/export`,
   - display the generated backup JSON path and key row counts,
   - import a pasted backup JSON path through `POST /api/backups/import`,
+  - select a backup JSON file in packaged Mac use to fill the import path when
+    the desktop WebView exposes a local `File.path`,
   - display imported table and row counts after restore.
 - Added backup status refresh after manual backup changes:
   - exporting or importing a backup from the Mac dashboard refreshes the
@@ -242,6 +244,13 @@
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the manual backup UI follow-up, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Mac backup file-picker follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because backup restore still required manually pasting a
+      full JSON path in the Sync settings panel.
+    - Passed after adding a packaged JSON file selector that fills the backup
+      import path from desktop-exposed local file paths while preserving manual
+      path entry as a fallback.
 - Mac backup reminder refresh follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because exporting a backup did not refresh the dashboard

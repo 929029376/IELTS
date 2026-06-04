@@ -296,6 +296,8 @@
   - the Sync settings panel can export a local backup JSON,
   - the generated backup path and key row counts are shown in the UI,
   - a pasted backup path can be imported through the local backup API,
+  - selecting a backup JSON file can fill the import path from the
+    desktop-exposed local file path,
   - restore feedback shows imported tables and row counts.
 - Added Mac backup reminder refresh hardening:
   - successful backup export/import actions refresh the dashboard data snapshot,
@@ -696,6 +698,12 @@
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the manual backup UI follow-up, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Mac backup file-picker follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because backup restore required manually pasting a full
+      local backup JSON path.
+    - Passed after adding a backup JSON file selector that reads
+      desktop-exposed local `File.path` values into the import field.
 - Mac backup reminder refresh follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because exporting a backup left the V1 hardening backup

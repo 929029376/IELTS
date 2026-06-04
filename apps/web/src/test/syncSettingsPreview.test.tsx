@@ -113,6 +113,34 @@ describe("SyncSettingsPreview", () => {
     );
   });
 
+  it("fills the backup import path from a packaged JSON file picker selection", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    const backupFile = new File(["{}"], "ielts-backup-2026-06-04.json", { type: "application/json" });
+    Object.defineProperty(backupFile, "path", {
+      value: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-2026-06-04.json"
+    });
+
+    fireEvent.change(screen.getByLabelText("Choose backup JSON file"), {
+      target: { files: [backupFile] }
+    });
+
+    expect(screen.getByLabelText("Backup file path")).toHaveValue(
+      "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-2026-06-04.json"
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("saves an edited Baidu sync folder path", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       if (String(input) === "/api/sync/config") {

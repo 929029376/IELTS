@@ -36,6 +36,15 @@ function backupCount(result: BackupResult | null, key: string) {
   return result?.rowCounts[key] ?? 0;
 }
 
+function getLocalFilePath(file: File | null) {
+  if (!file) {
+    return "";
+  }
+
+  const fileWithLocalPath = file as File & { path?: string; webkitRelativePath?: string };
+  return fileWithLocalPath.path?.trim() || fileWithLocalPath.webkitRelativePath?.trim() || "";
+}
+
 export function SyncSettingsPreview({
   deviceName,
   lastSyncAt,
@@ -167,6 +176,19 @@ export function SyncSettingsPreview({
     }
   }
 
+  function fillBackupPathFromSelectedFile(file: File | null) {
+    const localPath = getLocalFilePath(file);
+    if (localPath.length > 0) {
+      setBackupFilePath(localPath);
+      setBackupError(null);
+      return;
+    }
+
+    if (file) {
+      setBackupError(`${file.name} selected, but the local path was not exposed. Paste the full path before importing.`);
+    }
+  }
+
   return (
     <section className="sync-settings-band" aria-label="Sync settings">
       <div className="reports-header">
@@ -255,6 +277,15 @@ export function SyncSettingsPreview({
             onChange={(event) => setBackupFilePath(event.target.value)}
             placeholder="/Users/musheng/Desktop/IELTS/data/backups/ielts-backup.json"
             value={backupFilePath}
+          />
+        </label>
+        <label className="backup-file-picker">
+          <span>Choose backup JSON file</span>
+          <input
+            accept="application/json,.json"
+            aria-label="Choose backup JSON file"
+            type="file"
+            onChange={(event) => fillBackupPathFromSelectedFile(event.currentTarget.files?.[0] ?? null)}
           />
         </label>
         <button
