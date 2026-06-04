@@ -114,6 +114,10 @@
   - whitespace-only synonym entries are ignored before rendering,
   - imported reading previews with only blank synonym strings now use the same
     empty-state message.
+- Added Mac close-reading explanation empty-state hardening:
+  - whitespace-only imported explanation text is treated as missing,
+  - the explanation drawer now shows `No explanation recorded yet.` instead of
+    blank imported content.
 - Added Mac close-reading multiple-keyword highlight support:
   - `CloseReadingView` now renders every supplied keyword highlight,
   - answer-sentence highlights remain first priority when highlight spans overlap.
@@ -318,6 +322,12 @@
     - Initially failed because whitespace-only synonym notes rendered blank list
       items instead of the empty state.
     - Passed after trimming and filtering synonym notes before rendering.
+- Mac close-reading explanation empty-state follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because whitespace-only imported explanations rendered
+      as blank drawer content.
+    - Passed after trimming explanation text before falling back to
+      `No explanation recorded yet.`
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
   - Initially failed because the dashboard still rendered static intensive sample
     content instead of live local intensive data.

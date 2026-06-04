@@ -135,6 +135,10 @@
   - whitespace-only synonym notes are filtered before rendering,
   - synonym sections with only blank imported values now show the empty-state
     message.
+- Added Mac close-reading explanation empty-state hardening:
+  - whitespace-only explanation text is treated as missing,
+  - the explanation drawer now shows `No explanation recorded yet.` instead of
+    blank imported content.
 - Hardened mock start behavior so local mock attempts now use the frequency-weighted
   full-set builder instead of sequential question loading.
 - Added frontend mock-start controls in the Mock Exam Center so the dashboard can
@@ -1119,6 +1123,11 @@
       items.
     - Passed after trimming and filtering synonym values before the empty-state
       decision.
+- Mac close-reading explanation empty-state hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/intensiveComponents.test.tsx`
+    - Initially failed because blank imported explanation text still rendered
+      as empty drawer content.
+    - Passed after trimming explanations before the fallback decision.
 - Mac practice elapsed-timer hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because Mac practice attempts reused the mock countdown

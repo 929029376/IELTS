@@ -88,6 +88,7 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
     : null;
   const reading = preview?.reading ?? null;
   const answerSentence = savedAnswerSentence ?? reading?.answerSentence ?? "";
+  const readingExplanation = reading?.explanation?.trim() || "No explanation recorded yet.";
 
   async function saveCue(cue: CueDraft) {
     if (!listening?.passageId) {
@@ -239,7 +240,7 @@ export function IntensivePracticePreview({ preview }: { preview?: IntensiveStudy
             answerSentence={answerSentence}
             keywords={reading.keywords}
             synonyms={reading.synonyms}
-            explanation={reading.explanation ?? "No explanation recorded yet."}
+            explanation={readingExplanation}
             question={<p>{reading.questionPrompt}</p>}
             isWrongAnswer={Boolean(reading.attemptAnswerId)}
             canSelectAnswerSentence={Boolean(reading.answerKeyId)}

@@ -500,6 +500,29 @@ describe("intensive study components", () => {
     expect(screen.getByRole("button", { name: "Use selected sentence as answer evidence" })).toBeDisabled();
   });
 
+  it("shows the close-reading explanation empty state for blank imported explanations", () => {
+    render(
+      <IntensivePracticePreview
+        preview={{
+          listening: null,
+          reading: {
+            answerKeyId: "answer-key-1",
+            answerSentence: "answer sentence",
+            attemptAnswerId: null,
+            explanation: "   ",
+            keywords: [],
+            passageText: "The answer sentence identifies the key evidence.",
+            passageTitle: "Reading intensive review",
+            questionPrompt: "Question 1: Select the evidence.",
+            synonyms: []
+          }
+        }}
+      />
+    );
+
+    expect(screen.getByText("No explanation recorded yet.")).toBeInTheDocument();
+  });
+
   it("saves a selected close-reading answer sentence through the local study API", async () => {
     const fetchMock = vi.fn().mockResolvedValueOnce({
       ok: true,
