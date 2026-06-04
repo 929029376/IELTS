@@ -141,13 +141,14 @@ export function getDefaultSyncFolderPath(platform: NodeJS.Platform | string, sel
 
 export function createSyncService(db: DatabaseHandle, options: SyncServiceOptions) {
   const syncRepo = createSyncRepo(db);
+  let currentOptions: SyncServiceOptions = { ...options };
 
   function syncPath(fileName: string) {
-    return join(options.syncFolderPath, fileName);
+    return join(currentOptions.syncFolderPath, fileName);
   }
 
   function ensureSyncFolder() {
-    mkdirSync(options.syncFolderPath, { recursive: true });
+    mkdirSync(currentOptions.syncFolderPath, { recursive: true });
 
     for (const fileName of syncJsonlFiles) {
       if (!existsSync(syncPath(fileName))) {
@@ -158,13 +159,13 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     const devicesPath = syncPath("devices.json");
     const device: SyncDeviceRecord = {
       firstSeenAt: new Date().toISOString(),
-      id: options.deviceId,
-      name: options.deviceName,
-      platform: options.platform
+      id: currentOptions.deviceId,
+      name: currentOptions.deviceName,
+      platform: currentOptions.platform
     };
     const devices = readDevicesFile(devicesPath);
     const nextDevices = [
-      ...(devices.devices ?? []).filter((existingDevice) => existingDevice.id !== options.deviceId),
+      ...(devices.devices ?? []).filter((existingDevice) => existingDevice.id !== currentOptions.deviceId),
       device
     ];
     writeFileSync(devicesPath, `${JSON.stringify({ devices: nextDevices }, null, 2)}\n`);
@@ -181,7 +182,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     ensureSyncFolder();
     const event: SyncEnvelope<TPayload> = {
       createdAt,
-      deviceId: options.deviceId,
+      deviceId: currentOptions.deviceId,
       eventId: randomUUID(),
       payload,
       type
@@ -189,7 +190,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     appendFileSync(syncPath(fileForGroup(groupForEventType(type))), toJsonLine(event));
     syncRepo.recordSyncEvent({
       createdAt,
-      deviceId: options.deviceId,
+      deviceId: currentOptions.deviceId,
       eventId: event.eventId,
       eventType: type,
       payloadJson: JSON.stringify(payload)
@@ -587,7 +588,13 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     appendListeningCueUpdateEvent,
     appendMistakeEvent,
     ensureSyncFolder,
-    importRemoteEvents
+    getOptions: () => ({ ...currentOptions }),
+    importRemoteEvents,
+    updateOptions: (nextOptions: Partial<SyncServiceOptions>) => {
+      currentOptions = { ...currentOptions, ...nextOptions };
+      ensureSyncFolder();
+      return { ...currentOptions };
+    }
   };
 }
 

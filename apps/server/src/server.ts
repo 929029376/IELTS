@@ -22,6 +22,7 @@ export interface BuildServerOptions {
   exportDir?: string;
   now?: string;
   sync?: SyncServiceOptions;
+  syncConfigPath?: string;
   testBuilderRandom?: () => number;
 }
 
@@ -71,8 +72,10 @@ export function buildServer(options: BuildServerOptions = {}): FastifyInstance {
     backupReminderAttemptThreshold: options.backupReminderAttemptThreshold,
     now: options.now
   });
-  if (sync && options.sync) {
-    registerSyncRoutes(server, sync, options.sync);
+  if (sync) {
+    registerSyncRoutes(server, sync, {
+      syncConfigPath: options.syncConfigPath
+    });
   }
 
   return server;

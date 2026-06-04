@@ -112,4 +112,50 @@ describe("SyncSettingsPreview", () => {
       })
     );
   });
+
+  it("saves an edited Baidu sync folder path", async () => {
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/sync/config") {
+        return {
+          ok: true,
+          json: async () => ({
+            deviceId: "macbook",
+            deviceName: "MacBook",
+            platform: "darwin",
+            syncFolderPath: "/Users/musheng/Desktop/同步空间"
+          })
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Sync folder path"), {
+      target: { value: "/Users/musheng/Desktop/同步空间" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save sync folder" }));
+
+    expect(await screen.findByText("Sync folder saved")).toBeInTheDocument();
+    expect(screen.getByText("/Users/musheng/Desktop/同步空间")).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/sync/config",
+      expect.objectContaining({
+        body: JSON.stringify({ syncFolderPath: "/Users/musheng/Desktop/同步空间" }),
+        method: "PUT"
+      })
+    );
+  });
 });

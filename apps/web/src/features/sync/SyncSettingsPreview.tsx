@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Download, FolderSync, RefreshCw, Upload } from "lucide-react";
+import { Download, FolderSync, RefreshCw, Save, Upload } from "lucide-react";
 import { DesktopAssetVerifier } from "../desktop/DesktopAssetVerifier";
 import { DesktopRuntimeDiagnostics, type DesktopRuntimeStatus } from "../desktop/DesktopRuntimeDiagnostics";
 
@@ -25,6 +25,13 @@ interface BackupResult {
   rowCounts: Record<string, number>;
 }
 
+interface SyncConfigResult {
+  deviceId: string;
+  deviceName: string;
+  platform: string;
+  syncFolderPath: string;
+}
+
 function backupCount(result: BackupResult | null, key: string) {
   return result?.rowCounts[key] ?? 0;
 }
@@ -42,6 +49,10 @@ export function SyncSettingsPreview({
   const [syncError, setSyncError] = useState<string | null>(null);
   const [syncResult, setSyncResult] = useState<ManualSyncResult | null>(null);
   const [displayedLastSyncAt, setDisplayedLastSyncAt] = useState(lastSyncAt);
+  const [displayedSyncPath, setDisplayedSyncPath] = useState(syncPath);
+  const [editableSyncPath, setEditableSyncPath] = useState(syncPath);
+  const [syncConfigSaved, setSyncConfigSaved] = useState(false);
+  const [isSavingSyncConfig, setIsSavingSyncConfig] = useState(false);
   const [backupError, setBackupError] = useState<string | null>(null);
   const [backupFilePath, setBackupFilePath] = useState("");
   const [backupImportResult, setBackupImportResult] = useState<BackupResult | null>(null);
@@ -51,6 +62,44 @@ export function SyncSettingsPreview({
   useEffect(() => {
     setDisplayedLastSyncAt(lastSyncAt);
   }, [lastSyncAt]);
+
+  useEffect(() => {
+    setDisplayedSyncPath(syncPath);
+    setEditableSyncPath(syncPath);
+  }, [syncPath]);
+
+  async function saveSyncFolder() {
+    const nextPath = editableSyncPath.trim();
+    if (!nextPath) {
+      setSyncError("Enter a sync folder path before saving.");
+      return;
+    }
+
+    setIsSavingSyncConfig(true);
+    setSyncError(null);
+    setSyncConfigSaved(false);
+    try {
+      const response = await fetch("/api/sync/config", {
+        body: JSON.stringify({ syncFolderPath: nextPath }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        method: "PUT"
+      });
+      if (!response.ok) {
+        throw new Error("Could not save sync config");
+      }
+      const result = (await response.json()) as SyncConfigResult;
+      setDisplayedSyncPath(result.syncFolderPath);
+      setEditableSyncPath(result.syncFolderPath);
+      setSyncConfigSaved(true);
+      onSyncComplete?.();
+    } catch {
+      setSyncError("Could not save sync folder.");
+    } finally {
+      setIsSavingSyncConfig(false);
+    }
+  }
 
   async function runManualSync() {
     setIsSyncing(true);
@@ -137,7 +186,25 @@ export function SyncSettingsPreview({
             <FolderSync size={18} aria-hidden="true" />
             <h3>Sync folder</h3>
           </div>
-          <p>{syncPath}</p>
+          <p>{displayedSyncPath}</p>
+          <label className="sync-path-control">
+            <span>Sync folder path</span>
+            <input
+              aria-label="Sync folder path"
+              onChange={(event) => setEditableSyncPath(event.target.value)}
+              value={editableSyncPath}
+            />
+          </label>
+          <button
+            className="icon-command"
+            disabled={isSavingSyncConfig || !editableSyncPath.trim()}
+            onClick={() => void saveSyncFolder()}
+            type="button"
+          >
+            <Save size={16} aria-hidden="true" />
+            Save sync folder
+          </button>
+          {syncConfigSaved ? <p className="backup-ok">Sync folder saved</p> : null}
           <dl>
             <div>
               <dt>Device</dt>

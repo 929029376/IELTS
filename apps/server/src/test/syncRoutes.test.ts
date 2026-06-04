@@ -112,6 +112,46 @@ function seedReadingAnswerKey(databasePath: string) {
 }
 
 describe("sync routes", () => {
+  it("updates the sync folder config and creates JSONL files in the selected folder", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-config-"));
+    const initialSyncFolderPath = join(tempDir, "Initial-Sync");
+    const selectedSyncFolderPath = join(tempDir, "Selected-Baidu-Sync");
+    const syncConfigPath = join(tempDir, "sync-config.json");
+    const server = buildServer({
+      databasePath: join(tempDir, "ielts.db"),
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath: initialSyncFolderPath
+      },
+      syncConfigPath
+    });
+
+    try {
+      const update = await server.inject({
+        method: "PUT",
+        payload: { syncFolderPath: selectedSyncFolderPath },
+        url: "/api/sync/config"
+      });
+
+      expect(update.statusCode).toBe(200);
+      expect(update.json()).toMatchObject({ syncFolderPath: selectedSyncFolderPath });
+      expect(existsSync(join(selectedSyncFolderPath, "attempts.jsonl"))).toBe(true);
+      expect(existsSync(join(selectedSyncFolderPath, "devices.json"))).toBe(true);
+      expect(JSON.parse(readFileSync(syncConfigPath, "utf8"))).toMatchObject({
+        syncFolderPath: selectedSyncFolderPath
+      });
+
+      const config = await server.inject({ method: "GET", url: "/api/sync/config" });
+      expect(config.statusCode).toBe(200);
+      expect(config.json()).toMatchObject({ syncFolderPath: selectedSyncFolderPath });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
   it("appends practice writes to sync JSONL files and imports remote events manually", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-routes-"));
     const databasePath = join(tempDir, "ielts.db");

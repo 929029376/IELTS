@@ -79,7 +79,20 @@
   - the conflict message includes the remote device id and remote raw answer.
 - Added sync API:
   - `GET /api/sync/config`,
+  - `PUT /api/sync/config`,
   - `POST /api/sync/import`.
+- Added real-runtime sync configuration hardening:
+  - the real Mac server entrypoint now starts with a persistent local database
+    path instead of an in-memory database,
+  - the real server registers default Baidu Cloud JSONL sync routes on startup,
+  - the default sync path can be overridden with `IELTS_SYNC_FOLDER_PATH`.
+- Added editable Mac sync folder settings:
+  - the Sync settings panel can save a new Baidu Cloud folder path through
+    `PUT /api/sync/config`,
+  - saved sync folder paths are written to local runtime config JSON and loaded
+    again when the real server starts,
+  - saving a path initializes JSONL sync files and updates the displayed sync
+    folder immediately.
 - Connected the Mac dashboard Manual sync action to `POST /api/sync/import`
   and added local UI feedback for imported, skipped, and conflict counts.
 - Added manual sync dashboard refresh behavior:
@@ -259,6 +272,23 @@
     - Passed after the manual sync timestamp follow-up, including unit/component
       tests, Playwright, production build, desktop diagnostics, and Mac DMG
       packaging.
+- Mac runtime sync-config follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/runtimeServerOptions.test.ts`
+    - Initially failed because the real runtime server option builder did not
+      exist, leaving `main.ts` without a tested persistent database and default
+      sync configuration path.
+    - Passed after adding real-runtime server options for persistent local
+      database, Baidu Cloud sync defaults, and saved sync-folder config loading.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because `PUT /api/sync/config` returned `404`.
+    - Passed after adding sync config updates that switch the active sync folder
+      initialize JSONL files in the selected folder, and persist the selected
+      path to local runtime config JSON.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
+    - Initially failed because the Sync settings panel had no editable sync
+      folder path control.
+    - Passed after adding Mac UI controls to save and display an updated Baidu
+      Cloud sync folder path.
 - Mac review conflict visibility follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
     - Initially failed because review responses with `conflicts` did not render

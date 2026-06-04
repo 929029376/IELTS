@@ -196,6 +196,15 @@
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
+- Added Mac runtime sync configuration hardening:
+  - the real server entrypoint now uses a persistent local database path instead
+    of an in-memory database,
+  - default Baidu Cloud sync routes are registered for real Mac runtime startup,
+  - `IELTS_SYNC_FOLDER_PATH` can override the default sync folder,
+  - the Sync settings panel can save an edited Baidu Cloud folder path through
+    `PUT /api/sync/config`,
+  - saved sync folder paths are written to local runtime config JSON and loaded
+    again when the real server starts.
 - Added Mac review conflict hardening:
   - submitted mock review now renders saved sync conflicts per question,
   - remote conflicting answers show the originating device id and raw answer.

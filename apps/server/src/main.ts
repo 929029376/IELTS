@@ -1,9 +1,10 @@
 import { buildServer } from "./server";
+import { createRuntimeServerOptions } from "./config/runtimeServerOptions";
 
 const port = Number(process.env.PORT ?? 5174);
 const host = process.env.HOST ?? "127.0.0.1";
 
-const server = buildServer();
+const server = buildServer(createRuntimeServerOptions());
 
 try {
   await server.listen({ host, port });
