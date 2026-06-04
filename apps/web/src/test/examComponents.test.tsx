@@ -542,6 +542,48 @@ describe("exam simulation components", () => {
     expect(screen.queryByRole("button", { name: "Submit local mock" })).not.toBeInTheDocument();
   });
 
+  it("shows fallback labels for blank local exam passage titles and prompts", async () => {
+    vi.useRealTimers();
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      if (String(input) === "/api/practice/start") {
+        return {
+          ok: true,
+          json: async () => ({
+            attemptId: "attempt-blank-labels",
+            questions: [
+              {
+                answerRules: {},
+                id: "question-blank-labels-1",
+                part: "P1",
+                passageId: "passage-blank-labels-1",
+                passageText: "Imported passage body remains usable.",
+                passageTitle: "   ",
+                prompt: " ",
+                questionNumber: 1,
+                questionType: "fill_blank"
+              }
+            ]
+          })
+        };
+      }
+
+      return {
+        ok: false,
+        json: async () => ({})
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<ExamPreview />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
+
+    expect(await screen.findByText("Loaded local reading mock")).toBeInTheDocument();
+    expect(screen.getAllByText("Untitled passage").length).toBeGreaterThan(0);
+    expect(screen.getByText("1. Question text unavailable")).toBeInTheDocument();
+    expect(screen.getByText("Imported passage body remains usable.")).toBeInTheDocument();
+  });
+
   it("renders a local reading PDF asset when structured passage text is unavailable", async () => {
     vi.useRealTimers();
     const pdfPath = "/Users/musheng/Desktop/IELTS/reading/ReadingPractice/PDF/P1-history-of-tea.pdf";

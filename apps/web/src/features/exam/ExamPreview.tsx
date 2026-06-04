@@ -146,6 +146,14 @@ function subjectLabel(subject: "listening" | "reading") {
   return subject === "listening" ? "listening" : "reading";
 }
 
+function passageTitleLabel(value?: string | null) {
+  return value?.trim() || "Untitled passage";
+}
+
+function questionPromptLabel(question: Pick<StartedMockQuestion, "prompt">) {
+  return question.prompt.trim() || "Question text unavailable";
+}
+
 function formatReviewUserAnswer(rawAnswer: string) {
   return rawAnswer.trim() || "No answer";
 }
@@ -208,7 +216,7 @@ function groupQuestionsByPassage(questions: StartedMockQuestion[]): MockQuestion
       id: question.passageId,
       part: question.part,
       questions: [question],
-      title: question.passageTitle
+      title: passageTitleLabel(question.passageTitle)
     });
     return groups;
   }, []);
@@ -363,7 +371,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
         <div className="local-mock-question-card" key={question.id}>
           <span>{question.part}</span>
           <strong>
-            {question.questionNumber}. {question.prompt}
+            {question.questionNumber}. {questionPromptLabel(question)}
           </strong>
           <AnswerInput
             questionId={question.id}
@@ -507,8 +515,8 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
             {activeMock.questions.map((question) => (
               <li key={question.id}>
                 <span>{question.part}</span>
-                <strong>{question.passageTitle}</strong>
-                <p>{question.prompt}</p>
+                <strong>{passageTitleLabel(question.passageTitle)}</strong>
+                <p>{questionPromptLabel(question)}</p>
               </li>
             ))}
           </ol>
@@ -550,7 +558,7 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                 </div>
               ) : null}
               <ReadingExamView
-                passageTitle={activeReadingQuestion?.passageTitle ?? "Reading passage"}
+                passageTitle={passageTitleLabel(activeReadingQuestion?.passageTitle)}
                 passageText={
                   activeReadingQuestion?.passageText ??
                   "Use the imported local passage asset for close reading. Structured passage text will appear here when the source provides it."
@@ -566,11 +574,11 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
               activeSectionId={activeGroup?.id}
               audioDurationSeconds={activeGroupQuestions[0]?.audioDurationSeconds}
               audioPath={activeGroupQuestions[0]?.audioPath}
-              audioTitle={activeGroupQuestions[0]?.passageTitle ?? "Listening section audio"}
+              audioTitle={passageTitleLabel(activeGroupQuestions[0]?.passageTitle)}
               sections={questionGroups.map((group) => ({
                 audioDurationSeconds: group.questions[0]?.audioDurationSeconds,
                 audioPath: group.questions[0]?.audioPath,
-                audioTitle: group.questions[0]?.passageTitle,
+                audioTitle: passageTitleLabel(group.questions[0]?.passageTitle),
                 id: group.id,
                 questions: renderMockQuestionList(group.questions),
                 title: groupLabel(group)

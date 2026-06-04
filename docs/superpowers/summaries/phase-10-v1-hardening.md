@@ -233,6 +233,11 @@
     treated as start failures,
   - the Mac mock/practice UI no longer shows a submit-ready empty attempt when
     the local question bank or selected filters produce no matching questions.
+- Added Mac local exam metadata fallback hardening:
+  - blank imported passage titles now render as `Untitled passage` in loaded
+    mock/practice lists, reading passage headers, and listening section labels,
+  - blank imported question prompts now render as `Question text unavailable`
+    instead of leaving question cards visually empty.
 - Added Mac exam submit-warning navigation hardening:
   - submit confirmation now lists unanswered question numbers,
   - submit confirmation now lists marked-for-review question numbers,
@@ -1399,6 +1404,12 @@
       rendered a loaded local mock set with a submit button.
     - Passed after treating zero-question starts as local question-bank start
       failures.
+- Mac local exam metadata fallback hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "fallback labels"`
+    - Initially failed because whitespace-only local passage titles and question
+      prompts rendered as blank exam content.
+    - Passed after adding local exam fallback labels for imported title and
+      prompt metadata.
 - Mac submitted-mock review empty-state hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx -t "blank submitted mock review"`
     - Initially failed because whitespace-only submitted review answers rendered
