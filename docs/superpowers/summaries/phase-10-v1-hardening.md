@@ -418,6 +418,11 @@
     versa,
   - no answer row or Baidu Cloud answer sync event is written for a cross-subject
     mismatch.
+- Added Mac submitted-attempt answer-lock hardening:
+  - answer-save requests are rejected after an attempt has been submitted,
+  - submitted review answers can no longer be overwritten after the raw score is
+    finalized,
+  - no post-submit answer row update or Baidu Cloud answer sync event is written.
 - Added Mac submit-attempt integrity hardening:
   - submit requests for missing attempt ids now return `404`,
   - invalid submit requests no longer surface as server errors,
@@ -1850,6 +1855,14 @@
       `409` before inserting an answer.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 26 practice route tests.
+- Mac submitted-attempt answer-lock hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "after an attempt has been submitted"`
+    - Initially failed because answer-save requests could overwrite an answer
+      after the attempt was already submitted.
+    - Passed after submitted attempts reject later answer saves with `409`,
+      preserving the original submitted review answer.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 27 practice route tests.
 - Mac submit-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "submitting a missing attempt"`
     - Initially failed because submitting a missing attempt id returned `500`.

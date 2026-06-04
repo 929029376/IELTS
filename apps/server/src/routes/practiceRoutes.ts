@@ -6,6 +6,7 @@ import type { DatabaseHandle } from "../db/database";
 import {
   createPracticeService,
   EmptyPracticeStartError,
+  PracticeAttemptAlreadySubmittedError,
   PracticeAttemptNotFoundError,
   PracticeQuestionNotFoundError,
   PracticeQuestionSubjectMismatchError
@@ -71,6 +72,9 @@ export function registerPracticeRoutes(
     } catch (error) {
       if (error instanceof PracticeAttemptNotFoundError) {
         return reply.code(404).send({ error: error.message });
+      }
+      if (error instanceof PracticeAttemptAlreadySubmittedError) {
+        return reply.code(409).send({ error: error.message });
       }
       if (error instanceof PracticeQuestionNotFoundError) {
         return reply.code(404).send({ error: error.message });

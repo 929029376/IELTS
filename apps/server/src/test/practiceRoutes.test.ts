@@ -1144,6 +1144,80 @@ describe("practice routes", () => {
     }
   });
 
+  it("rejects answer changes after an attempt has been submitted", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-answer-after-submit-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+        questions: Array<{ id: string }>;
+      }>();
+      const questionId = started.questions[0].id;
+
+      const firstAnswer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId,
+          rawAnswer: "answer 1",
+          timeSpentSeconds: 9
+        }
+      });
+      expect(firstAnswer.statusCode).toBe(200);
+
+      const submit = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/submit`
+      });
+      expect(submit.statusCode).toBe(200);
+
+      const lateAnswer = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/answer`,
+        payload: {
+          markedForReview: false,
+          questionId,
+          rawAnswer: "wrong after submit",
+          timeSpentSeconds: 12
+        }
+      });
+
+      expect(lateAnswer.statusCode).toBe(409);
+      expect(lateAnswer.json()).toMatchObject({
+        error: "Attempt has already been submitted."
+      });
+      expect(countAttemptAnswers(databasePath)).toBe(1);
+
+      const review = await server.inject({
+        method: "GET",
+        url: `/api/practice/${started.attemptId}/review`
+      });
+      expect(review.statusCode).toBe(200);
+      expect(review.json()).toMatchObject({
+        answers: [
+          expect.objectContaining({
+            questionId,
+            rawAnswer: "answer 1"
+          })
+        ]
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("returns not found when submitting a missing attempt", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-submit-missing-attempt-"));
     const databasePath = join(tempDir, "ielts.db");

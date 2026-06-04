@@ -43,6 +43,13 @@ export class PracticeAttemptNotFoundError extends Error {
   }
 }
 
+export class PracticeAttemptAlreadySubmittedError extends Error {
+  constructor() {
+    super("Attempt has already been submitted.");
+    this.name = "PracticeAttemptAlreadySubmittedError";
+  }
+}
+
 export class PracticeQuestionNotFoundError extends Error {
   constructor() {
     super("Question not found.");
@@ -219,6 +226,9 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
       const attempt = attempts.getAttemptWithAnswers(input.attemptId);
       if (!attempt) {
         throw new PracticeAttemptNotFoundError();
+      }
+      if (attempt.submittedAt) {
+        throw new PracticeAttemptAlreadySubmittedError();
       }
 
       const question = questions.getQuestionWithAnswerKeys(input.questionId);
