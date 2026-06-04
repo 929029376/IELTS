@@ -75,12 +75,22 @@ function toJsonLine(event: SyncEnvelope) {
   return `${JSON.stringify(event)}\n`;
 }
 
-function parseJsonl(text: string): SyncEnvelope[] {
+function parseJsonl(text: string): { events: SyncEnvelope[]; malformedCount: number } {
   return text
     .split(/\n/)
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => JSON.parse(line) as SyncEnvelope);
+    .reduce(
+      (parsed, line) => {
+        try {
+          parsed.events.push(JSON.parse(line) as SyncEnvelope);
+        } catch {
+          parsed.malformedCount += 1;
+        }
+        return parsed;
+      },
+      { events: [], malformedCount: 0 } as { events: SyncEnvelope[]; malformedCount: number }
+    );
 }
 
 export function getDefaultSyncFolderPath(platform: NodeJS.Platform | string, selectedWindowsPath?: string): string {
@@ -472,7 +482,9 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     let skipped = 0;
 
     for (const fileName of syncJsonlFiles) {
-      const events = parseJsonl(readFileSync(syncPath(fileName), "utf8"));
+      const parsed = parseJsonl(readFileSync(syncPath(fileName), "utf8"));
+      skipped += parsed.malformedCount;
+      const events = parsed.events;
       for (const event of events) {
         const result = applyEvent(event);
         if (result.inserted) {

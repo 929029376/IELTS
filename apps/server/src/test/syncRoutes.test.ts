@@ -561,4 +561,59 @@ describe("sync routes", () => {
       rmSync(tempDir, { force: true, recursive: true });
     }
   });
+
+  it("skips malformed JSONL sync lines without blocking valid events", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-malformed-jsonl-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    mkdirSync(syncFolderPath, { recursive: true });
+    writeFileSync(
+      join(syncFolderPath, "attempts.jsonl"),
+      [
+        "{ this is not valid json",
+        JSON.stringify({
+          createdAt: "2026-06-04T08:00:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "valid-attempt-after-malformed-line",
+          payload: {
+            estimatedBand: null,
+            id: "valid-attempt-after-malformed-line",
+            mode: "practice",
+            rawScore: null,
+            startedAt: "2026-06-04T08:00:00.000Z",
+            subject: "reading",
+            submittedAt: null
+          },
+          type: "attempt.created"
+        }),
+        ""
+      ].join("\n")
+    );
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const review = await server.inject({
+        method: "GET",
+        url: "/api/practice/valid-attempt-after-malformed-line/review"
+      });
+      expect(review.statusCode).toBe(200);
+      expect(review.json()).toMatchObject({ id: "valid-attempt-after-malformed-line" });
+
+      const sync = await server.inject({ method: "POST", url: "/api/sync/import" });
+      expect(sync.statusCode).toBe(200);
+      expect(sync.json()).toMatchObject({ imported: 0, skipped: 2 });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
 });

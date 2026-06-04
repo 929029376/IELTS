@@ -134,6 +134,10 @@
     `sync_events` row,
   - future app versions can still process those events after new handlers are
     added.
+- Added malformed JSONL sync hardening:
+  - malformed Baidu Cloud JSONL lines are skipped instead of crashing startup or
+    manual sync,
+  - valid events in the same sync file still import.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -380,6 +384,15 @@
     - Passed after leaving unknown events unrecorded and counted as skipped.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the sync forward-compatibility hardening follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Malformed JSONL sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because malformed JSONL caused startup import to throw.
+    - Passed after malformed lines were counted as skipped while valid lines
+      continued to import.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the malformed JSONL sync hardening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - Mac readiness follow-up:

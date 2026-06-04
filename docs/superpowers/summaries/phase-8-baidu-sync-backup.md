@@ -50,6 +50,11 @@
   - unknown future event types are skipped without recording them in
     `sync_events`,
   - later app versions can still process those events once support is added.
+- Added malformed JSONL tolerance for Baidu Cloud sync logs:
+  - malformed JSONL lines are counted as skipped,
+  - valid events in the same file still import,
+  - a partially written or conflict-corrupted sync line no longer prevents local
+    startup.
 - Added event dedupe through `sync_events.event_id`.
 - Added merge behavior for attempts and answers.
 - Added conflict preservation for submitted local attempts:
@@ -125,6 +130,16 @@
     - Passed after the sync forward-compatibility follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Malformed JSONL sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because one malformed JSONL line threw during startup
+      import and prevented a valid event in the same file from importing.
+    - Passed after parsing JSONL line-by-line, counting malformed lines as
+      skipped, and continuing with valid events.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the malformed JSONL sync follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`
   - Initially failed because the Manual sync button did not call the sync API or
     render a completion status.
