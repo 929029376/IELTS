@@ -44,6 +44,12 @@
   - dictation events wait until the referenced cue exists locally,
   - manual sync skips those events instead of crashing when another device has
     not imported the same question-bank rows yet.
+- Added same-batch retry for newly resolvable sync events:
+  - if a dependent event appears before its prerequisite in the same JSONL file,
+    the importer retries unresolved events after any successful import in that
+    batch,
+  - out-of-order intensive cue updates can now apply during the same startup or
+    manual sync import once the cue create event is imported.
 - Added remote JSONL import:
   - on server startup when sync is configured,
   - through `POST /api/sync/import`.
@@ -138,6 +144,17 @@
     - Passed after the intensive listening cue-update sync follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Same-batch sync retry follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because an `intensive.listening_cue.updated` event that
+      appeared before its matching create event in the same `stats.jsonl` import
+      stayed unapplied until a later sync.
+    - Passed after the importer retries unresolved events within the same JSONL
+      batch whenever another event is successfully imported.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the same-batch sync retry follow-up, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - Mac close-reading answer-sentence sync follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
     - Initially failed because saving answer-sentence evidence left

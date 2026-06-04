@@ -547,18 +547,30 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     for (const fileName of syncJsonlFiles) {
       const parsed = parseJsonl(readFileSync(syncPath(fileName), "utf8"));
       skipped += parsed.malformedCount;
-      const events = parsed.events;
-      for (const event of events) {
-        const result = applyEvent(event);
-        if (result.inserted) {
-          imported += 1;
-        } else {
-          skipped += 1;
+      let pendingEvents = parsed.events;
+      let madeProgress = true;
+
+      while (pendingEvents.length > 0 && madeProgress) {
+        madeProgress = false;
+        const unresolvedEvents: SyncEnvelope[] = [];
+
+        for (const event of pendingEvents) {
+          const result = applyEvent(event);
+          if (result.inserted) {
+            imported += 1;
+            madeProgress = true;
+          } else {
+            unresolvedEvents.push(event);
+          }
+          if (result.conflict) {
+            conflicts += 1;
+          }
         }
-        if (result.conflict) {
-          conflicts += 1;
-        }
+
+        pendingEvents = unresolvedEvents;
       }
+
+      skipped += pendingEvents.length;
     }
 
     return { conflicts, imported, skipped };

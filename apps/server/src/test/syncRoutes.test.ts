@@ -274,7 +274,7 @@ describe("sync routes", () => {
     }
   });
 
-  it("imports remote intensive listening cue updates after the local cue exists", async () => {
+  it("imports remote intensive listening cue updates that arrive before the create event in the same batch", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-intensive-cue-update-"));
     const databasePath = join(tempDir, "ielts.db");
     const syncFolderPath = join(tempDir, "IELTS-Sync");
@@ -284,23 +284,9 @@ describe("sync routes", () => {
       join(syncFolderPath, "stats.jsonl"),
       [
         JSON.stringify({
-          createdAt: "2026-06-04T08:00:00.000Z",
-          deviceId: "windows-pc",
-          eventId: "remote-cue-create-before-update",
-          payload: {
-            endSeconds: 4.2,
-            id: "remote-cue-update-1",
-            label: "Sentence 1",
-            passageId,
-            startSeconds: 1.2,
-            transcript: "Green Park"
-          },
-          type: "intensive.listening_cue.created"
-        }),
-        JSON.stringify({
           createdAt: "2026-06-04T08:02:00.000Z",
           deviceId: "windows-pc",
-          eventId: "remote-cue-update-after-create",
+          eventId: "remote-cue-update-before-create",
           payload: {
             endSeconds: 5.6,
             id: "remote-cue-update-1",
@@ -310,6 +296,20 @@ describe("sync routes", () => {
             transcript: "Green Park corrected"
           },
           type: "intensive.listening_cue.updated"
+        }),
+        JSON.stringify({
+          createdAt: "2026-06-04T08:00:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "remote-cue-create-after-update",
+          payload: {
+            endSeconds: 4.2,
+            id: "remote-cue-update-1",
+            label: "Sentence 1",
+            passageId,
+            startSeconds: 1.2,
+            transcript: "Green Park"
+          },
+          type: "intensive.listening_cue.created"
         }),
         ""
       ].join("\n")

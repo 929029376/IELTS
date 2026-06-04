@@ -214,7 +214,9 @@
   - both event types are written to Baidu Cloud `stats.jsonl` for cross-device
     practice-record continuity,
   - unresolved remote intensive events are skipped instead of crashing manual
-    sync when the current device has not imported matching question-bank rows.
+    sync when the current device has not imported matching question-bank rows,
+  - newly resolvable out-of-order events in the same JSONL file are retried
+    within the same startup or manual sync import.
 - Added Mac close-reading answer-sentence sync hardening:
   - manual answer-sentence updates now append
     `answer_key.answer_sentence.updated` events,
@@ -685,6 +687,16 @@
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the cue-update sync hardening, including unit/component tests,
       Playwright, production build, desktop diagnostics, and Mac DMG packaging.
+- Same-batch sync retry hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because a cue update arriving before its cue create event
+      in the same sync file was skipped for that startup/import pass.
+    - Passed after retrying unresolved events in the same JSONL batch whenever a
+      later event makes progress.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the same-batch sync retry hardening, including unit/component
+      tests, Playwright, production build, desktop diagnostics, and Mac DMG
+      packaging.
 - Mac close-reading answer-sentence sync follow-up:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
     - Initially failed because answer-sentence updates were saved locally but did
