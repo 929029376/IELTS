@@ -133,6 +133,9 @@
 - Added manual sync UI hardening:
   - the dashboard Manual sync action now calls `POST /api/sync/import`,
   - imported, skipped, and conflict counts are rendered after the sync completes.
+- Added Mac review conflict hardening:
+  - submitted mock review now renders saved sync conflicts per question,
+  - remote conflicting answers show the originating device id and raw answer.
 - Added Mac manual sync dashboard refresh hardening:
   - successful manual sync import refreshes report history, score prediction
     cards, hardening status, and local study overview.
@@ -671,6 +674,12 @@
       asset paths when no extracted passage text existed.
     - Passed after the Mac reading exam view embedded the PDF through
       `GET /api/assets/local`.
+- Mac review conflict hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because a review response containing `conflicts` did not
+      show any sync conflict in the Mac mock review panel.
+    - Passed after rendering remote conflicting answers with their source device
+      beside the affected question.
 
 ## Remaining V1 Gaps
 

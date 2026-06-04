@@ -456,6 +456,24 @@ h1 {
   font-size: 13px;
 }
 
+.sync-conflict-review {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #e4b363;
+  border-radius: 6px;
+  background: #fff8e7;
+  color: #5e461b;
+  font-size: 13px;
+}
+
+.sync-conflict-review ul {
+  display: grid;
+  gap: 4px;
+  padding-left: 18px;
+  margin: 0;
+}
+
 .question-bank-import-band {
   margin-top: 28px;
 }

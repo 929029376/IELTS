@@ -49,7 +49,18 @@ interface MockReviewItem {
   synonyms: string[];
 }
 
+interface MockReviewConflict {
+  id: string;
+  questionId: string;
+  remoteCreatedAt: string;
+  remoteDeviceId: string;
+  remoteIsCorrect: boolean;
+  remoteRawAnswer: string;
+  status: "conflict" | "resolved";
+}
+
 interface MockReview {
+  conflicts?: MockReviewConflict[];
   id: string;
   reviewItems: MockReviewItem[];
 }
@@ -134,6 +145,10 @@ function renderReviewEvidence(item: MockReviewItem) {
 
 function findPdfAssetPath(question?: StartedMockQuestion): string | null {
   return question?.assetPaths?.find((path) => path.toLowerCase().endsWith(".pdf")) ?? null;
+}
+
+function conflictsForQuestion(review: MockReview, questionId: string): MockReviewConflict[] {
+  return review.conflicts?.filter((conflict) => conflict.questionId === questionId && conflict.status === "conflict") ?? [];
 }
 
 export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
@@ -439,6 +454,18 @@ export function ExamPreview({ onMockSubmitted }: ExamPreviewProps) {
                       <li key={synonym}>{synonym}</li>
                     ))}
                   </ul>
+                ) : null}
+                {conflictsForQuestion(mockReview, item.questionId).length > 0 ? (
+                  <div className="sync-conflict-review" aria-label={`Sync conflicts for question ${item.questionId}`}>
+                    <strong>Sync conflict</strong>
+                    <ul>
+                      {conflictsForQuestion(mockReview, item.questionId).map((conflict) => (
+                        <li key={conflict.id}>
+                          Remote answer from {conflict.remoteDeviceId}: {conflict.remoteRawAnswer}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
               </li>
             ))}

@@ -64,6 +64,10 @@
   - remote conflicting answers are stored in `attempt_answer_conflicts`,
   - local submitted answers are not overwritten,
   - conflicts are returned in practice review.
+- Added Mac review visibility for sync conflicts:
+  - detailed mock review renders remote conflicting answers beside the affected
+    question,
+  - the conflict message includes the remote device id and remote raw answer.
 - Added sync API:
   - `GET /api/sync/config`,
   - `POST /api/sync/import`.
@@ -210,6 +214,11 @@
     - Passed after the manual sync dashboard-refresh follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac review conflict visibility follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/examComponents.test.tsx`
+    - Initially failed because review responses with `conflicts` did not render
+      any sync-conflict warning in the mock review panel.
+    - Passed after rendering remote conflicting answers per affected question.
 - Final verification:
   - `npx pnpm@9.15.4 test`
     - Shared: 3 tests passed.

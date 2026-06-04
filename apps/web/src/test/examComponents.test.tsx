@@ -536,6 +536,17 @@ describe("exam simulation components", () => {
         return {
           ok: true,
           json: async () => ({
+            conflicts: [
+              {
+                id: "conflict-1",
+                questionId: "question-review-1",
+                remoteCreatedAt: "2026-06-04T10:02:00.000Z",
+                remoteDeviceId: "windows-pc",
+                remoteIsCorrect: true,
+                remoteRawAnswer: "trade routes",
+                status: "conflict"
+              }
+            ],
             id: "attempt-reading-review-1",
             reviewItems: [
               {
@@ -579,6 +590,8 @@ describe("exam simulation components", () => {
     expect(screen.getByText("Tea moved through early trade routes.")).toHaveClass("ielts-highlight");
     expect(screen.getByText("The evidence sentence names the route directly.")).toBeInTheDocument();
     expect(screen.getByText("moved through = travelled via")).toBeInTheDocument();
+    expect(screen.getByText("Sync conflict")).toBeInTheDocument();
+    expect(screen.getByText("Remote answer from windows-pc: trade routes")).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/practice/attempt-reading-review-1/review",
       expect.objectContaining({ method: "GET" })
