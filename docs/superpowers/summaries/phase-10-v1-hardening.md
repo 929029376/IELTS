@@ -1,6 +1,6 @@
 # Phase 10 V1 Hardening
 
-**Date:** 2026-06-01 to 2026-06-04
+**Date:** 2026-06-01 to 2026-06-05
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -517,7 +517,9 @@
   - saved snapshot ids are trimmed before display and fall back to
     `Snapshot id unavailable`,
   - saved snapshot dates are trimmed before display and fall back to
-    `Snapshot date unavailable`.
+    `Snapshot date unavailable`,
+  - null snapshot ids and dates use the same unavailable-state copy instead of
+    crashing the reports panel.
 - Added Mac blank-answer review-status hardening:
   - whitespace-only saved answers now return `isAnswered: false` in submitted
     reviews,
@@ -2145,16 +2147,26 @@
       status paragraphs.
     - Passed after snapshot metadata is trimmed and replaced with explicit
       unavailable-state copy.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "metadata is null"`
+    - Initially failed because null snapshot metadata was passed to `.trim()`
+      and crashed the reports panel.
+    - Passed after snapshot metadata formatters became null-safe.
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx`
-    - Passed with all 16 history/report component tests.
+    - Passed with all 17 history/report component tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test`
     - Passed with all 103 server tests.
   - `npx pnpm@9.15.4 --filter @ielts/server build`
     - Passed TypeScript server build.
   - `npx pnpm@9.15.4 --filter @ielts/web test`
-    - Passed with all 140 web tests.
+    - Passed with all 141 web tests.
   - `npx pnpm@9.15.4 --filter @ielts/web build`
     - Passed TypeScript and Vite production build.
+  - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac`
+    - Passed after using the Rust toolchain path required by the local shell.
+    - Generated the current Mac DMG at
+      `apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg`.
+  - `hdiutil verify "apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg"`
+    - Passed with a valid DMG checksum.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

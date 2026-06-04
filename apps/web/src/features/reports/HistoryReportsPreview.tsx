@@ -87,8 +87,8 @@ interface ExportedReportFiles {
 }
 
 interface SavedAnalyticsSnapshot {
-  createdAt: string;
-  id: string;
+  createdAt: string | null;
+  id: string | null;
   payloadJson: string;
   snapshotType: string;
 }
@@ -200,12 +200,12 @@ function formatExportedReportFiles(files: ExportedReportFiles): ExportedReportFi
   };
 }
 
-function formatSnapshotId(id: string) {
-  return id.trim() || "Snapshot id unavailable";
+function formatSnapshotId(id: string | null | undefined) {
+  return id?.trim() || "Snapshot id unavailable";
 }
 
-function formatSnapshotDate(createdAt: string) {
-  return createdAt.trim().slice(0, 10) || "Snapshot date unavailable";
+function formatSnapshotDate(createdAt: string | null | undefined) {
+  return createdAt?.trim().slice(0, 10) || "Snapshot date unavailable";
 }
 
 function conflictsForQuestion(review: HistoryReview, questionId: string): HistoryReviewConflict[] {
