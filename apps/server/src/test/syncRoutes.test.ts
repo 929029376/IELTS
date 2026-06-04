@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { openDatabase } from "../db/database";
+import { openDatabase, type DatabaseHandle } from "../db/database";
 import { migrate } from "../db/migrate";
 import { createQuestionRepo } from "../db/questionRepo";
 import { buildServer } from "../server";
@@ -65,6 +65,45 @@ function seedListeningPassage(databasePath: string) {
       sourceId: source.id,
       subject: "listening",
       title: "Sync Listening Intensive"
+    }).id;
+  } finally {
+    db.close();
+  }
+}
+
+function seedReadingAnswerKey(databasePath: string) {
+  const db = openDatabase(databasePath);
+  migrate(db);
+  const questions = createQuestionRepo(db);
+
+  try {
+    const source = questions.createSource({
+      checksum: `sync-routes-reading-answer-key-${databasePath}`,
+      importStatus: "imported",
+      originalPath: "seed/sync-routes-reading-answer-key.json",
+      sourceType: "seed",
+      version: 1
+    });
+    const passage = questions.createPassage({
+      frequencyClass: "high",
+      part: "P1",
+      sourceId: source.id,
+      subject: "reading",
+      title: "Sync Reading Answer Sentence"
+    });
+    const question = questions.createQuestion({
+      answerRules: {},
+      passageId: passage.id,
+      prompt: "Select the answer evidence.",
+      questionNumber: 1,
+      questionType: "matching"
+    });
+    return questions.createAnswerKey({
+      acceptedAnswers: ["selected sentence"],
+      answerSentence: null,
+      explanation: "Select the sentence.",
+      questionId: question.id,
+      synonyms: []
     }).id;
   } finally {
     db.close();
@@ -271,6 +310,105 @@ describe("sync routes", () => {
     });
 
     try {
+      const sync = await server.inject({ method: "POST", url: "/api/sync/import" });
+      expect(sync.statusCode).toBe(200);
+      expect(sync.json()).toMatchObject({ imported: 0, skipped: 2 });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
+  it("appends close-reading answer sentence updates to sync JSONL files", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-answer-sentence-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    const answerKeyId = seedReadingAnswerKey(databasePath);
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const update = await server.inject({
+        method: "POST",
+        payload: {
+          answerKeyId,
+          answerSentence: "The selected sentence proves the answer."
+        },
+        url: "/api/study/answer-sentence"
+      });
+      expect(update.statusCode).toBe(200);
+
+      const importsJsonl = readFileSync(join(syncFolderPath, "imports.jsonl"), "utf8");
+      expect(importsJsonl).toContain("answer_key.answer_sentence.updated");
+      expect(importsJsonl).toContain(answerKeyId);
+      expect(importsJsonl).toContain("The selected sentence proves the answer.");
+    } finally {
+      await server.close();
+      rmSync(tempDir, { force: true, recursive: true });
+    }
+  });
+
+  it("imports remote answer sentence updates and skips missing answer keys", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-sync-remote-answer-sentence-"));
+    const databasePath = join(tempDir, "ielts.db");
+    const syncFolderPath = join(tempDir, "IELTS-Sync");
+    const answerKeyId = seedReadingAnswerKey(databasePath);
+    mkdirSync(syncFolderPath, { recursive: true });
+    writeFileSync(
+      join(syncFolderPath, "imports.jsonl"),
+      [
+        JSON.stringify({
+          createdAt: "2026-06-04T08:00:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "remote-answer-sentence-update",
+          payload: {
+            answerKeyId,
+            answerSentence: "Remote selected sentence proves the answer."
+          },
+          type: "answer_key.answer_sentence.updated"
+        }),
+        JSON.stringify({
+          createdAt: "2026-06-04T08:01:00.000Z",
+          deviceId: "windows-pc",
+          eventId: "remote-answer-sentence-missing-key",
+          payload: {
+            answerKeyId: "missing-answer-key",
+            answerSentence: "This unresolved answer sentence should wait."
+          },
+          type: "answer_key.answer_sentence.updated"
+        }),
+        ""
+      ].join("\n")
+    );
+
+    const server = buildServer({
+      databasePath,
+      sync: {
+        deviceId: "macbook",
+        deviceName: "MacBook",
+        platform: "darwin",
+        syncFolderPath
+      }
+    });
+
+    try {
+      const db = (server as typeof server & { db: DatabaseHandle }).db;
+      expect(
+        (
+          db
+            .prepare("SELECT answer_sentence AS answerSentence FROM answer_keys WHERE id = ?")
+            .get(answerKeyId) as { answerSentence: string | null }
+        ).answerSentence
+      ).toBe("Remote selected sentence proves the answer.");
+
       const sync = await server.inject({ method: "POST", url: "/api/sync/import" });
       expect(sync.statusCode).toBe(200);
       expect(sync.json()).toMatchObject({ imported: 0, skipped: 2 });

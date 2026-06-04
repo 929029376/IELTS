@@ -26,6 +26,13 @@
 - Added append-only JSONL sync events for Mac intensive listening writes:
   - sentence cue creation,
   - dictation attempt saving.
+- Added append-only JSONL sync events for Mac close-reading evidence writes:
+  - manual answer-sentence updates are written as
+    `answer_key.answer_sentence.updated` events in `imports.jsonl`.
+- Added defensive import handling for remote close-reading evidence sync events:
+  - answer-sentence events wait until the referenced answer key exists locally,
+  - manual sync skips unresolved answer-key events instead of crashing when
+    another device has not imported the same question-bank rows yet.
 - Added defensive import handling for remote intensive listening sync events:
   - cue events wait until the referenced passage exists locally,
   - dictation events wait until the referenced cue exists locally,
@@ -77,6 +84,17 @@
       referenced local question-bank rows exist.
   - `node scripts/mac-readiness-check.mjs`
     - Passed after the intensive listening sync follow-up, including
+      unit/component tests, Playwright, production build, desktop diagnostics,
+      and Mac DMG packaging.
+- Mac close-reading answer-sentence sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because saving answer-sentence evidence left
+      `imports.jsonl` empty and remote answer-sentence events were ignored.
+    - Passed after appending `answer_key.answer_sentence.updated` events and
+      applying resolvable remote answer-key updates during manual sync/startup
+      import.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the close-reading answer-sentence sync follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
 - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/syncSettingsPreview.test.tsx`

@@ -39,6 +39,11 @@ interface MistakeLabelPayload {
   label: string;
 }
 
+interface AnswerSentencePayload {
+  answerKeyId: string;
+  answerSentence: string;
+}
+
 function fileForGroup(group: SyncGroup): SyncJsonlFile {
   return `${group}.jsonl` as SyncJsonlFile;
 }
@@ -163,6 +168,10 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
 
   function appendDictationAttemptEvent(attempt: DictationAttemptRecord, createdAt: string) {
     return appendEvent("intensive.dictation_attempt.saved", attempt, createdAt);
+  }
+
+  function appendAnswerSentenceEvent(update: AnswerSentencePayload, createdAt: string) {
+    return appendEvent("answer_key.answer_sentence.updated", update, createdAt);
   }
 
   function appendExternalEvent(group: SyncGroup, event: SyncEnvelope) {
@@ -363,6 +372,19 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
     return true;
   }
 
+  function updateAnswerSentence(payload: AnswerSentencePayload) {
+    const result = db
+      .prepare(
+        `
+        UPDATE answer_keys
+        SET answer_sentence = @answerSentence
+        WHERE id = @answerKeyId
+      `
+      )
+      .run(payload);
+    return result.changes > 0;
+  }
+
   function applyEvent(event: SyncEnvelope) {
     if (syncRepo.hasSyncEvent(event.eventId)) {
       return { conflict: false, inserted: false };
@@ -381,6 +403,10 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
       }
     } else if (event.type === "intensive.dictation_attempt.saved") {
       if (!addDictationAttempt(event.payload as DictationAttemptRecord, event.createdAt)) {
+        return { conflict: false, inserted: false };
+      }
+    } else if (event.type === "answer_key.answer_sentence.updated") {
+      if (!updateAnswerSentence(event.payload as AnswerSentencePayload)) {
         return { conflict: false, inserted: false };
       }
     }
@@ -422,6 +448,7 @@ export function createSyncService(db: DatabaseHandle, options: SyncServiceOption
 
   return {
     appendAnswerEvent,
+    appendAnswerSentenceEvent,
     appendAttemptEvent,
     appendDictationAttemptEvent,
     appendExternalEvent,

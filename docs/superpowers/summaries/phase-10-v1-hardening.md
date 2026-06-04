@@ -116,6 +116,13 @@
     practice-record continuity,
   - unresolved remote intensive events are skipped instead of crashing manual
     sync when the current device has not imported matching question-bank rows.
+- Added Mac close-reading answer-sentence sync hardening:
+  - manual answer-sentence updates now append
+    `answer_key.answer_sentence.updated` events,
+  - the events are written to Baidu Cloud `imports.jsonl` as question-bank
+    evidence metadata,
+  - unresolved remote answer-key updates are skipped instead of crashing manual
+    sync.
 - Stabilized the question-bank import panel regression so sequential import
   actions wait for the shared import lock to release before submitting the next
   local import request.
@@ -336,6 +343,16 @@
     - Passed after the intensive listening sync hardening follow-up, including
       unit/component tests, Playwright, production build, desktop diagnostics,
       and Mac DMG packaging.
+- Mac close-reading answer-sentence sync follow-up:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/syncRoutes.test.ts`
+    - Initially failed because answer-sentence updates were saved locally but did
+      not append or apply Baidu Cloud sync events.
+    - Passed after adding `answer_key.answer_sentence.updated` event append and
+      import handling with unresolved answer-key skips.
+  - `node scripts/mac-readiness-check.mjs`
+    - Passed after the close-reading answer-sentence sync hardening follow-up,
+      including unit/component tests, Playwright, production build, desktop
+      diagnostics, and Mac DMG packaging.
 - Mac readiness follow-up:
   - `node scripts/mac-readiness-check.mjs`
     - Initially failed because the question-bank import panel regression clicked

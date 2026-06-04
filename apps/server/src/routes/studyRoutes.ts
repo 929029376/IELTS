@@ -67,6 +67,8 @@ export function registerStudyRoutes(server: FastifyInstance, db: DatabaseHandle,
   });
   server.post("/api/study/answer-sentence", async (request, reply) => {
     const body = updateAnswerSentenceBody.parse(request.body);
-    return reply.send(questions.updateAnswerSentence(body));
+    const update = questions.updateAnswerSentence(body);
+    sync?.appendAnswerSentenceEvent(update, new Date().toISOString());
+    return reply.send(update);
   });
 }
