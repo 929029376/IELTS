@@ -151,6 +151,7 @@ export function SyncSettingsPreview({
   async function exportBackup() {
     setIsBackingUp(true);
     setBackupError(null);
+    setBackupExportResult(null);
     try {
       const response = await fetch("/api/backups/export", { method: "POST" });
       if (!response.ok) {

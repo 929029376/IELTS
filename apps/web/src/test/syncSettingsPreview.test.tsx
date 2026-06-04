@@ -196,6 +196,48 @@ describe("SyncSettingsPreview", () => {
     expect(screen.getByLabelText("Backup file path")).toHaveValue("");
   });
 
+  it("clears stale backup export results when a later export fails", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          filePath: "/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-old.json",
+          rowCounts: {
+            attempt_answers: 40,
+            attempts: 1,
+            dictation_attempts: 2,
+            listening_cues: 3
+          }
+        })
+      })
+      .mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({})
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <SyncSettingsPreview
+        deviceName="MacBook"
+        lastSyncAt={null}
+        syncFiles={["attempts.jsonl", "answers.jsonl"]}
+        syncPath="/Users/musheng/Desktop/同步空间/IELTS-Sync"
+      />
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Export backup" }));
+
+    expect(await screen.findByText("Backup exported")).toBeInTheDocument();
+    expect(screen.getByText("/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-old.json")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Export backup" }));
+
+    expect(await screen.findByText("Could not export local backup.")).toBeInTheDocument();
+    expect(screen.queryByText("Backup exported")).not.toBeInTheDocument();
+    expect(screen.queryByText("/Users/musheng/Desktop/IELTS/data/backups/ielts-backup-old.json")).not.toBeInTheDocument();
+  });
+
   it("clears stale backup import results when a later import fails", async () => {
     const fetchMock = vi
       .fn()
