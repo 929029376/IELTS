@@ -226,6 +226,7 @@ export function HistoryReportsPreview({ analytics, dashboard, history }: History
 
   async function openHistoryReview(attemptId: string) {
     setLoadingReviewAttemptId(attemptId);
+    setHistoryReview(null);
     setHistoryReviewError(null);
     try {
       const response = await fetch(`/api/practice/${attemptId}/review`, { method: "GET" });

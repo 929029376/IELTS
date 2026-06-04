@@ -245,6 +245,10 @@
   - the Mac reports panel renders answer sentence highlights, explanations,
     accepted answers, synonym notes, and saved sync conflicts for the selected
     historical attempt.
+- Added Mac history review stale-content hardening:
+  - opening another history review clears the previously displayed review first,
+  - a failed review load no longer leaves old answer evidence visible for a
+    different attempt.
 - Added local mock resource hardening:
   - `POST /api/practice/start` now returns imported passage text, source asset
     paths, and listening audio metadata with started mock questions,
@@ -1209,6 +1213,12 @@
     - Initially failed because whitespace-only user answers, accepted answers,
       and answer sentences rendered as blank review content.
     - Passed after trimming answer fields and filtering accepted-answer values.
+- Mac history review stale-content hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/historyReports.test.tsx -t "clears stale"`
+    - Initially failed because a failed second history-review load left the
+      previously opened attempt's answer evidence visible.
+    - Passed after clearing the current history review before loading another
+      attempt.
 - Mac dashboard report fallback hardening:
   - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
     - Initially failed because blank live dashboard report strings rendered empty
