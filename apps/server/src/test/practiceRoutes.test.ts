@@ -1218,6 +1218,45 @@ describe("practice routes", () => {
     }
   });
 
+  it("rejects duplicate submissions for an already submitted attempt", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "ielts-submit-duplicate-attempt-"));
+    const databasePath = join(tempDir, "ielts.db");
+    seedFortyQuestions(databasePath);
+
+    const server = buildServer({ databasePath });
+
+    try {
+      const start = await server.inject({
+        method: "POST",
+        url: "/api/practice/start",
+        payload: { mode: "practice", subject: "reading" }
+      });
+      expect(start.statusCode).toBe(200);
+      const started = start.json<{
+        attemptId: string;
+      }>();
+
+      const firstSubmit = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/submit`
+      });
+      expect(firstSubmit.statusCode).toBe(200);
+
+      const duplicateSubmit = await server.inject({
+        method: "POST",
+        url: `/api/practice/${started.attemptId}/submit`
+      });
+
+      expect(duplicateSubmit.statusCode).toBe(409);
+      expect(duplicateSubmit.json()).toMatchObject({
+        error: "Attempt has already been submitted."
+      });
+    } finally {
+      await server.close();
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
   it("returns not found when submitting a missing attempt", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "ielts-submit-missing-attempt-"));
     const databasePath = join(tempDir, "ielts.db");

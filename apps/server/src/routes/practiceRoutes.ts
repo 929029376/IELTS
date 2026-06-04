@@ -97,6 +97,9 @@ export function registerPracticeRoutes(
       if (error instanceof PracticeAttemptNotFoundError) {
         return reply.code(404).send({ error: error.message });
       }
+      if (error instanceof PracticeAttemptAlreadySubmittedError) {
+        return reply.code(409).send({ error: error.message });
+      }
       throw error;
     }
     const attempt = attempts.getAttemptWithAnswers(params.attemptId);

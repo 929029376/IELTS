@@ -427,6 +427,12 @@
   - submit requests for missing attempt ids now return `404`,
   - invalid submit requests no longer surface as server errors,
   - no submitted-attempt sync event is appended for a missing attempt.
+- Added Mac duplicate-submit integrity hardening:
+  - duplicate submit requests for already submitted attempts now return `409`,
+  - submitted attempt timestamps and scores are not refreshed by accidental
+    repeated submit clicks,
+  - no duplicate submitted-attempt sync event is appended for an already
+    submitted attempt.
 - Added Mac review-attempt integrity hardening:
   - review requests for missing attempt ids now return `404`,
   - invalid history/review links no longer surface as server errors,
@@ -1870,6 +1876,14 @@
       practice route maps it to `404`.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 23 practice route tests.
+- Mac duplicate-submit integrity hardening:
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "duplicate submissions"`
+    - Initially failed because a second submit request for the same attempt still
+      returned `200`.
+    - Passed after already submitted attempts reject later submit requests with
+      `409`, preventing duplicate submitted-attempt sync events.
+  - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
+    - Passed with all 28 practice route tests.
 - Mac review-attempt integrity hardening:
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts -t "reviewing a missing attempt"`
     - Initially failed because reviewing a missing attempt id returned `500`.

@@ -280,6 +280,9 @@ export function createPracticeService(db: DatabaseHandle, options: TestBuilderOp
       if (!attempt) {
         throw new PracticeAttemptNotFoundError();
       }
+      if (attempt.submittedAt) {
+        throw new PracticeAttemptAlreadySubmittedError();
+      }
 
       const rawScore = attempt.answers.filter((answer) => answer.isCorrect).length;
       const table = attempt.subject === "listening" ? listeningBandTable : academicReadingBandTable;
