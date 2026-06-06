@@ -410,37 +410,14 @@ export function App() {
 
   return (
     <main className="app-shell">
-      <aside className="sidebar" aria-label="Primary navigation">
-        <div className="brand-mark">
-          <BookOpenCheck size={24} aria-hidden="true" />
-          <span>IELTS</span>
-        </div>
-        <nav className="nav-list">
-          <a className="nav-item active" href="#dashboard">
-            Dashboard
-          </a>
-          <a className="nav-item" href="#mock">
-            Mock Exams
-          </a>
-          <a className="nav-item" href="#practice">
-            Practice
-          </a>
-          <a className="nav-item" href="#bank">
-            Question Bank
-          </a>
-          <a className="nav-item" href="#reports">
-            Reports
-          </a>
-          <a className="nav-item" href="#sync">
-            Sync
-          </a>
-        </nav>
-      </aside>
-
-      <section id="dashboard" className="dashboard">
-        <header className="dashboard-header">
-          <div>
-            <p className="eyebrow">Local-first IELTS preparation</p>
+      <section id="dashboard" className="dashboard study-desk" aria-label="IELTS local study desk">
+        <header className="study-desk-header">
+          <div className="study-title-block">
+            <p className="breadcrumb">首页 &gt; IELTS 本地刷题</p>
+            <div className="brand-line">
+              <BookOpenCheck size={22} aria-hidden="true" />
+              <span>Mac local-first IELTS preparation</span>
+            </div>
             <h1>IELTS Local Practice</h1>
           </div>
           <div className="status-pill">
@@ -449,45 +426,153 @@ export function App() {
           </div>
         </header>
 
-        <section className="summary-grid" aria-label="Preparation modules">
-          {cards.map(({ title, description, Icon }) => (
-            <article className="module-card" key={title}>
-              <div className="module-icon">
-                <Icon size={22} aria-hidden="true" />
-              </div>
-              <h2>{title}</h2>
-              <p>{description}</p>
-            </article>
-          ))}
+        <section className="practice-filter-card" aria-label="Practice filters">
+          <div className="filter-row">
+            <strong>Part</strong>
+            <button type="button" className="filter-chip active">
+              全部
+            </button>
+            <button type="button" className="filter-chip">
+              Part 1
+            </button>
+            <button type="button" className="filter-chip">
+              Part 2
+            </button>
+            <button type="button" className="filter-chip">
+              Part 3
+            </button>
+            <button type="button" className="filter-chip">
+              Part 4
+            </button>
+          </div>
+          <div className="filter-row">
+            <strong>题型</strong>
+            <button type="button" className="filter-chip active">
+              全部
+            </button>
+            <button type="button" className="filter-chip">
+              填空
+            </button>
+            <button type="button" className="filter-chip">
+              判断
+            </button>
+            <button type="button" className="filter-chip">
+              单选
+            </button>
+            <button type="button" className="filter-chip">
+              配对
+            </button>
+            <button type="button" className="filter-chip">
+              小标题
+            </button>
+            <button type="button" className="filter-chip">
+              多选
+            </button>
+          </div>
+          <div className="filter-row">
+            <strong>场景</strong>
+            <button type="button" className="filter-chip active">
+              全部
+            </button>
+            <button type="button" className="filter-chip">
+              高频
+            </button>
+            <button type="button" className="filter-chip">
+              中频
+            </button>
+            <button type="button" className="filter-chip">
+              低频
+            </button>
+            <button type="button" className="filter-chip">
+              错题
+            </button>
+            <button type="button" className="filter-chip">
+              待补证据
+            </button>
+          </div>
         </section>
 
-        <StudyOverviewPanel overview={studyOverview} />
-        <ExamPreview onMockSubmitted={() => setDataRefreshVersion((version) => version + 1)} />
-        <QuestionBankImportPanel onImportComplete={() => setDataRefreshVersion((version) => version + 1)} />
-        <IntensivePracticePreview preview={intensiveStudyPreview} />
-        <HistoryReportsPreview
-          analytics={dashboardData.analytics}
-          dashboard={dashboardData.dashboard}
-          history={dashboardData.history}
-        />
-        <HardeningCenter status={dashboardData.hardening} />
-        <SyncSettingsPreview
-          deviceName={syncConfig.deviceName}
-          lastSyncAt={null}
-          onBackupChanged={() => setDataRefreshVersion((version) => version + 1)}
-          onSyncComplete={() => setDataRefreshVersion((version) => version + 1)}
-          runtimeStatus={desktopRuntimeStatus}
-          syncFiles={[
-            "attempts.jsonl",
-            "answers.jsonl",
-            "mistakes.jsonl",
-            "stats.jsonl",
-            "frequency.jsonl",
-            "imports.jsonl",
-            "devices.json"
-          ]}
-          syncPath={syncConfig.syncFolderPath}
-        />
+        <section className="study-toolbar" aria-label="Study toolbar">
+          <select aria-label="Sort practice sets" defaultValue="frequency">
+            <option value="frequency">按命中次数从高到低</option>
+            <option value="recent">按最近练习时间</option>
+            <option value="accuracy">按正确率从低到高</option>
+          </select>
+          <label className="high-frequency-toggle">
+            <input type="checkbox" />
+            <span>只看高频待补强</span>
+          </label>
+          <a className="primary-study-action" href="#mock">
+            套题模考
+          </a>
+          <a className="primary-study-action secondary" href="#practice">
+            考场练习
+          </a>
+          <input aria-label="Search practice sets" placeholder="输入试题名称" type="search" />
+        </section>
+
+        <div className="study-desk-grid">
+          <section className="study-workspace" aria-label="Study workspace">
+            <section className="practice-card-grid" aria-label="Preparation modules">
+              {cards.map(({ title, description, Icon }) => (
+                <article className="module-card" key={title}>
+                  <div className="module-card-topline">
+                    <span className="status-badge">未开始</span>
+                    <span className="must-do-badge">自学营必修</span>
+                  </div>
+                  <div className="module-icon">
+                    <Icon size={22} aria-hidden="true" />
+                  </div>
+                  <h2>{title}</h2>
+                  <p>{description}</p>
+                </article>
+              ))}
+            </section>
+
+            <StudyOverviewPanel overview={studyOverview} />
+            <ExamPreview onMockSubmitted={() => setDataRefreshVersion((version) => version + 1)} />
+            <IntensivePracticePreview preview={intensiveStudyPreview} />
+            <QuestionBankImportPanel onImportComplete={() => setDataRefreshVersion((version) => version + 1)} />
+            <HistoryReportsPreview
+              analytics={dashboardData.analytics}
+              dashboard={dashboardData.dashboard}
+              history={dashboardData.history}
+            />
+          </section>
+
+          <aside className="prep-support" aria-label="Local prep support">
+            <section className="prep-support-panel">
+              <h2>新手小贴士</h2>
+              <a href="#bank">先导入题库和频率表</a>
+              <a href="#mock">用套题模考确认当前分数</a>
+              <a href="#practice">用精听精读修正错题原因</a>
+            </section>
+            <section className="prep-support-panel">
+              <h2>常见问题</h2>
+              <a href="#sync">百度云同步文件夹是否正常？</a>
+              <a href="#reports">怎么看真实成绩预测？</a>
+              <a href="#bank">频率表更新后怎么生效？</a>
+            </section>
+            <HardeningCenter status={dashboardData.hardening} />
+            <SyncSettingsPreview
+              deviceName={syncConfig.deviceName}
+              lastSyncAt={null}
+              onBackupChanged={() => setDataRefreshVersion((version) => version + 1)}
+              onSyncComplete={() => setDataRefreshVersion((version) => version + 1)}
+              runtimeStatus={desktopRuntimeStatus}
+              syncFiles={[
+                "attempts.jsonl",
+                "answers.jsonl",
+                "mistakes.jsonl",
+                "stats.jsonl",
+                "frequency.jsonl",
+                "imports.jsonl",
+                "devices.json"
+              ]}
+              syncPath={syncConfig.syncFolderPath}
+            />
+          </aside>
+        </div>
       </section>
     </main>
   );

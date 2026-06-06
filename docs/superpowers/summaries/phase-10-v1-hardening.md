@@ -1,6 +1,6 @@
 # Phase 10 V1 Hardening
 
-**Date:** 2026-06-01 to 2026-06-05
+**Date:** 2026-06-01 to 2026-06-06
 
 **Plan Reference:** `docs/superpowers/plans/2026-05-31-ielts-v1-local-app.md`
 
@@ -28,6 +28,15 @@
   - question-bank completeness page,
   - backup reminder,
   - Baidu Cloud JSONL sync settings preview.
+- Redesigned the Mac home page to follow a cleaner reference-style study desk:
+  - a top filter panel for part, question type, and frequency/error focus,
+  - a compact toolbar for sorting, high-frequency focus, mock, practice, and search,
+  - a main study workspace for cards, study queue, mock/practice, intensive study,
+    imports, history, and reports,
+  - a right-side local prep support column for tips, common questions, readiness,
+    sync, backup, runtime, and asset checks,
+  - right-rail nested tool panels collapse to single-column layouts so long paths no
+    longer create horizontal page overflow.
 - Added UI empty states for:
   - no import issues,
   - no question-bank data,
@@ -2611,6 +2620,24 @@
     - Passed with all 15 shared scoring tests.
   - `npx pnpm@9.15.4 --filter @ielts/server test -- src/test/practiceRoutes.test.ts`
     - Passed with all 17 practice route tests.
+- Mac reference-style home redesign:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx -t "reference-style local study desk"`
+    - Initially failed because the dashboard still used the old sidebar-plus-stacked
+      module layout and did not expose the new study desk, filter, workspace, and
+      support regions.
+    - Passed after reorganizing the Mac home page into a reference-style filter
+      panel, study workspace, and right prep-support column.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Passed with all 11 dashboard tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 142 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
+  - Safari visual inspection at `http://127.0.0.1:5173/`
+    - Confirmed the first viewport shows the reference-style breadcrumb, filter
+      card, toolbar, study cards, and right support column.
+    - Confirmed the right support column no longer creates horizontal page
+      overflow after nested tool panels were constrained to single-column layouts.
 
 ## Remaining V1 Gaps
 

@@ -18,6 +18,19 @@ describe("dashboard shell", () => {
     expect(screen.getByRole("region", { name: "Intensive practice preview" })).toBeInTheDocument();
   });
 
+  it("organizes the Mac home page as a reference-style local study desk", () => {
+    render(<App />);
+
+    expect(screen.getByRole("region", { name: "IELTS local study desk" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Practice filters" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Study workspace" })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Local prep support" })).toBeInTheDocument();
+    expect(screen.getByText("首页 > IELTS 本地刷题")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "只看高频待补强" })).toBeInTheDocument();
+    expect(screen.getByText("套题模考")).toBeInTheDocument();
+    expect(screen.getByText("考场练习")).toBeInTheDocument();
+  });
+
   it("loads reports and hardening status from the local API instead of sample dashboard data", async () => {
     const fetchMock = vi.fn(async (input: string | URL | Request) => {
       const url = String(input);
