@@ -2638,6 +2638,10 @@
       card, toolbar, study cards, and right support column.
     - Confirmed the right support column no longer creates horizontal page
       overflow after nested tool panels were constrained to single-column layouts.
+  - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac`
+    - Passed and regenerated the Mac DMG with the redesigned home page.
+  - `hdiutil verify "apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg"`
+    - Passed with a valid checksum for the regenerated 2026-06-06 Mac DMG.
 
 ## Remaining V1 Gaps
 
