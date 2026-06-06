@@ -13,22 +13,48 @@ describe("dashboard shell", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "IELTS Local Practice" })).toBeInTheDocument();
-    expect(screen.getByText("Mock Exam Center")).toBeInTheDocument();
-    expect(screen.getByText("Intensive Practice Center")).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Intensive practice preview" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "学习记录仪表盘" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "练习刷题" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "题目管理" })).toBeInTheDocument();
+    expect(screen.getByRole("tabpanel", { name: "学习记录仪表盘" })).toBeInTheDocument();
   });
 
-  it("organizes the Mac home page as a reference-style local study desk", () => {
+  it("separates the Mac home page into dashboard, practice, and question management tabs", () => {
     render(<App />);
 
     expect(screen.getByRole("region", { name: "IELTS local study desk" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Practice filters" })).toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Study workspace" })).toBeInTheDocument();
-    expect(screen.getByRole("complementary", { name: "Local prep support" })).toBeInTheDocument();
     expect(screen.getByText("首页 > IELTS 本地刷题")).toBeInTheDocument();
-    expect(screen.getByRole("checkbox", { name: "只看高频待补强" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Practice filters" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "练习刷题" }));
+    expect(screen.getByRole("tabpanel", { name: "练习刷题" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Practice filters" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Intensive practice preview" })).toBeInTheDocument();
     expect(screen.getByText("套题模考")).toBeInTheDocument();
     expect(screen.getByText("考场练习")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
+    expect(screen.getByRole("tabpanel", { name: "题目管理" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Question bank import" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开同步与备份设置" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "打开系统检查" })).toBeInTheDocument();
+  });
+
+  it("opens sync and readiness tools in dialogs instead of stacking them on the page", () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开同步与备份设置" }));
+
+    expect(screen.getByRole("dialog", { name: "同步与备份设置" })).toBeInTheDocument();
+    expect(screen.getByText("Baidu Cloud JSONL sync")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "关闭同步与备份设置" }));
+    expect(screen.queryByRole("dialog", { name: "同步与备份设置" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "打开系统检查" }));
+    expect(screen.getByRole("dialog", { name: "系统检查" })).toBeInTheDocument();
+    expect(screen.getByText("Readiness Checks")).toBeInTheDocument();
   });
 
   it("loads reports and hardening status from the local API instead of sample dashboard data", async () => {
@@ -169,6 +195,9 @@ describe("dashboard shell", () => {
     expect(screen.getByText("Review summary completion")).toBeInTheDocument();
     expect(screen.getByText("Frequency accuracy")).toBeInTheDocument();
     expect(screen.getByText("High frequency")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开系统检查" }));
     expect(screen.getByText("live/import.zip")).toBeInTheDocument();
     expect(screen.getByText("Live Airport Enquiry")).toBeInTheDocument();
     expect(screen.queryByText("reading/broken.pdf")).not.toBeInTheDocument();
@@ -237,11 +266,14 @@ describe("dashboard shell", () => {
 
     render(<App />);
 
-    expect(await screen.findByText("blank-dashboard-source.zip")).toBeInTheDocument();
-    expect(screen.getByText("No mock submitted")).toBeInTheDocument();
+    expect(await screen.findByText("No mock submitted")).toBeInTheDocument();
     expect(screen.getAllByText("Need history")).toHaveLength(2);
     expect(screen.getByText("Import a set to begin")).toBeInTheDocument();
     expect(screen.getByText("No data")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开系统检查" }));
+    expect(await screen.findByText("blank-dashboard-source.zip")).toBeInTheDocument();
   });
 
   it("loads local study overview and recommended mock sets from the local API", async () => {
@@ -326,6 +358,8 @@ describe("dashboard shell", () => {
 
     render(<App />);
 
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开同步与备份设置" }));
     expect(await screen.findByText("/Users/musheng/Desktop/同步空间/IELTS-Live-Sync")).toBeInTheDocument();
     expect(screen.getByText("MacBook IELTS Live")).toBeInTheDocument();
     expect(screen.queryByText("Mac local device")).not.toBeInTheDocument();
@@ -371,6 +405,7 @@ describe("dashboard shell", () => {
 
     render(<App />);
 
+    fireEvent.click(screen.getByRole("tab", { name: "练习刷题" }));
     expect(await screen.findByText("Live Listening Intensive")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Repeat Sentence 2" })).toBeInTheDocument();
     expect(screen.getByText("The appointment is at nine thirty.")).toBeInTheDocument();
@@ -501,7 +536,9 @@ describe("dashboard shell", () => {
 
     render(<App />);
 
+    fireEvent.click(screen.getByRole("tab", { name: "练习刷题" }));
     expect(await screen.findByText("No local reading passage")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
     fireEvent.click(screen.getByRole("button", { name: "Import reading directory" }));
 
     expect(await screen.findByText("Imported 1 item into the local question bank.")).toBeInTheDocument();
@@ -509,6 +546,7 @@ describe("dashboard shell", () => {
       expect(overviewCalls).toBe(2);
       expect(intensiveCalls).toBe(2);
     });
+    fireEvent.click(screen.getByRole("tab", { name: "练习刷题" }));
     expect(screen.getByText("Imported Reading Refresh")).toBeInTheDocument();
     expect(screen.getByText("Find the imported evidence.")).toBeInTheDocument();
     expect(screen.getByText("Imported Evidence Sentence")).toHaveClass("ielts-highlight");
@@ -684,6 +722,7 @@ describe("dashboard shell", () => {
     render(<App />);
 
     expect(await screen.findByText("No mock submitted")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "练习刷题" }));
     fireEvent.click(screen.getByRole("button", { name: "Start reading mock" }));
     const answer = await screen.findByRole("textbox", { name: "Answer for question question-refresh-1" });
     fireEvent.change(answer, { target: { value: "routes" } });
@@ -692,6 +731,7 @@ describe("dashboard shell", () => {
     await waitFor(() => {
       expect(dashboardCalls).toBe(2);
     });
+    fireEvent.click(screen.getByRole("tab", { name: "学习记录仪表盘" }));
     expect(screen.getByText("Reading 1/40, Band 4")).toBeInTheDocument();
     expect(screen.getByText("Review fill blank")).toBeInTheDocument();
     expect(screen.getByText("2026-06-04")).toBeInTheDocument();
@@ -808,12 +848,18 @@ describe("dashboard shell", () => {
 
     render(<App />);
 
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开系统检查" }));
     expect(await screen.findByText("You have 12 submitted attempts and no recent backup.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "关闭系统检查" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开同步与备份设置" }));
     fireEvent.click(screen.getByRole("button", { name: "Export backup" }));
 
     await waitFor(() => {
       expect(hardeningCalls).toBe(2);
     });
+    fireEvent.click(screen.getByRole("button", { name: "关闭同步与备份设置" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开系统检查" }));
     expect(screen.getByText("latest backup: 2026-06-04")).toBeInTheDocument();
     expect(screen.getByText("Backup status is acceptable for the current history size.")).toBeInTheDocument();
   });
@@ -953,12 +999,16 @@ describe("dashboard shell", () => {
     render(<App />);
 
     expect(await screen.findByText("No mock submitted")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("tab", { name: "题目管理" }));
+    fireEvent.click(screen.getByRole("button", { name: "打开同步与备份设置" }));
     fireEvent.click(screen.getByRole("button", { name: "Manual sync" }));
 
     expect(await screen.findByText("Manual sync complete")).toBeInTheDocument();
     await waitFor(() => {
       expect(dashboardCalls).toBe(2);
     });
+    fireEvent.click(screen.getByRole("button", { name: "关闭同步与备份设置" }));
+    fireEvent.click(screen.getByRole("tab", { name: "学习记录仪表盘" }));
     expect(screen.getByText("Listening 28/40, Band 6.5")).toBeInTheDocument();
     expect(screen.getByText("Review listening P3")).toBeInTheDocument();
   });

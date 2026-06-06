@@ -37,6 +37,15 @@
     sync, backup, runtime, and asset checks,
   - right-rail nested tool panels collapse to single-column layouts so long paths no
     longer create horizontal page overflow.
+- Reworked the Mac home page again after packaged-app visual review so the UI no
+  longer stacks every V1 tool on one screen:
+  - `学习记录仪表盘` now owns study readiness, history, accuracy, and prediction,
+  - `练习刷题` now owns filters, mock/practice start controls, and intensive
+    listening/reading previews,
+  - `题目管理` now owns question-bank and frequency-table imports,
+  - sync/backup tools and V1 readiness/runtime checks now open as focused modal
+    dialogs instead of permanently occupying the main page,
+  - management dialog actions use icon buttons for clearer local-tool affordance.
 - Added UI empty states for:
   - no import issues,
   - no question-bank data,
@@ -2642,6 +2651,23 @@
     - Passed and regenerated the Mac DMG with the redesigned home page.
   - `hdiutil verify "apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg"`
     - Passed with a valid checksum for the regenerated 2026-06-06 Mac DMG.
+- Mac three-tab workspace redesign:
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx -t "tabs|dialogs"`
+    - Initially failed because the old all-in-one dashboard still exposed
+      practice filters on the default page and had no tabbed management dialogs.
+    - Passed after splitting the Mac app into `学习记录仪表盘`, `练习刷题`, and
+      `题目管理` tabs and moving sync/readiness tools into dialogs.
+  - `npx pnpm@9.15.4 --filter @ielts/web test -- src/test/dashboard.test.tsx`
+    - Passed with all 12 dashboard tests after updating live-data flows to open
+      the correct tab or dialog.
+  - `npx pnpm@9.15.4 --filter @ielts/web test`
+    - Passed with all 143 web tests.
+  - `npx pnpm@9.15.4 --filter @ielts/web build`
+    - Passed TypeScript and Vite production build.
+  - `PATH="$HOME/.cargo/bin:$PATH" npx pnpm@9.15.4 desktop:build:mac`
+    - Passed and regenerated the Mac DMG with the three-tab interface.
+  - `hdiutil verify "apps/web/src-tauri/target/release/bundle/dmg/IELTS Local Practice_0.0.0_aarch64.dmg"`
+    - Passed with a valid checksum for the regenerated Mac DMG.
 
 ## Remaining V1 Gaps
 

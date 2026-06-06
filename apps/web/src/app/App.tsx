@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Activity, BookOpenCheck, Database, Headphones, LineChart, Timer } from "lucide-react";
+import { Activity, BookOpenCheck, Database, Headphones, LineChart, RefreshCw, ShieldCheck, Timer, X } from "lucide-react";
 import { ExamPreview } from "../features/exam/ExamPreview";
 import { HardeningCenter, type HardeningStatusView } from "../features/hardening/HardeningCenter";
 import { QuestionBankImportPanel } from "../features/import/QuestionBankImportPanel";
@@ -402,11 +402,32 @@ function useIntensiveStudyPreview(refreshVersion: number): IntensiveStudyPreview
 
 export function App() {
   const [dataRefreshVersion, setDataRefreshVersion] = useState(0);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "management" | "practice">("dashboard");
+  const [openDialog, setOpenDialog] = useState<"hardening" | "sync" | null>(null);
   const dashboardData = useDashboardData(dataRefreshVersion);
   const intensiveStudyPreview = useIntensiveStudyPreview(dataRefreshVersion);
   const studyOverview = useStudyOverview(dataRefreshVersion);
   const syncConfig = useSyncConfig(dataRefreshVersion);
   const desktopRuntimeStatus = useDesktopRuntimeStatus();
+  const syncSettingsPanel = (
+    <SyncSettingsPreview
+      deviceName={syncConfig.deviceName}
+      lastSyncAt={null}
+      onBackupChanged={() => setDataRefreshVersion((version) => version + 1)}
+      onSyncComplete={() => setDataRefreshVersion((version) => version + 1)}
+      runtimeStatus={desktopRuntimeStatus}
+      syncFiles={[
+        "attempts.jsonl",
+        "answers.jsonl",
+        "mistakes.jsonl",
+        "stats.jsonl",
+        "frequency.jsonl",
+        "imports.jsonl",
+        "devices.json"
+      ]}
+      syncPath={syncConfig.syncFolderPath}
+    />
+  );
 
   return (
     <main className="app-shell">
@@ -426,153 +447,232 @@ export function App() {
           </div>
         </header>
 
-        <section className="practice-filter-card" aria-label="Practice filters">
-          <div className="filter-row">
-            <strong>Part</strong>
-            <button type="button" className="filter-chip active">
-              全部
-            </button>
-            <button type="button" className="filter-chip">
-              Part 1
-            </button>
-            <button type="button" className="filter-chip">
-              Part 2
-            </button>
-            <button type="button" className="filter-chip">
-              Part 3
-            </button>
-            <button type="button" className="filter-chip">
-              Part 4
-            </button>
-          </div>
-          <div className="filter-row">
-            <strong>题型</strong>
-            <button type="button" className="filter-chip active">
-              全部
-            </button>
-            <button type="button" className="filter-chip">
-              填空
-            </button>
-            <button type="button" className="filter-chip">
-              判断
-            </button>
-            <button type="button" className="filter-chip">
-              单选
-            </button>
-            <button type="button" className="filter-chip">
-              配对
-            </button>
-            <button type="button" className="filter-chip">
-              小标题
-            </button>
-            <button type="button" className="filter-chip">
-              多选
-            </button>
-          </div>
-          <div className="filter-row">
-            <strong>场景</strong>
-            <button type="button" className="filter-chip active">
-              全部
-            </button>
-            <button type="button" className="filter-chip">
-              高频
-            </button>
-            <button type="button" className="filter-chip">
-              中频
-            </button>
-            <button type="button" className="filter-chip">
-              低频
-            </button>
-            <button type="button" className="filter-chip">
-              错题
-            </button>
-            <button type="button" className="filter-chip">
-              待补证据
-            </button>
-          </div>
+        <nav className="study-tabs" role="tablist" aria-label="IELTS workspace tabs">
+          <button
+            aria-controls="dashboard-tab"
+            aria-selected={activeTab === "dashboard"}
+            className="study-tab"
+            id="dashboard-tab-button"
+            onClick={() => setActiveTab("dashboard")}
+            role="tab"
+            type="button"
+          >
+            学习记录仪表盘
+          </button>
+          <button
+            aria-controls="practice-tab"
+            aria-selected={activeTab === "practice"}
+            className="study-tab"
+            id="practice-tab-button"
+            onClick={() => setActiveTab("practice")}
+            role="tab"
+            type="button"
+          >
+            练习刷题
+          </button>
+          <button
+            aria-controls="management-tab"
+            aria-selected={activeTab === "management"}
+            className="study-tab"
+            id="management-tab-button"
+            onClick={() => setActiveTab("management")}
+            role="tab"
+            type="button"
+          >
+            题目管理
+          </button>
+        </nav>
+
+        <section
+          aria-labelledby="dashboard-tab-button"
+          className="study-tab-panel dashboard-panel"
+          hidden={activeTab !== "dashboard"}
+          id="dashboard-tab"
+          role="tabpanel"
+        >
+          <section className="dashboard-summary-grid" aria-label="Dashboard shortcuts">
+            <article className="dashboard-shortcut">
+              <h2>今日学习概览</h2>
+              <p>先看题库 readiness、历史成绩、预测分，再决定刷题方向。</p>
+            </article>
+            <article className="dashboard-shortcut">
+              <h2>下一步建议</h2>
+              <p>查看报告卡片里的下一步建议，优先处理低正确率和高频题。</p>
+            </article>
+          </section>
+          <StudyOverviewPanel overview={studyOverview} />
+          <HistoryReportsPreview
+            analytics={dashboardData.analytics}
+            dashboard={dashboardData.dashboard}
+            history={dashboardData.history}
+          />
         </section>
 
-        <section className="study-toolbar" aria-label="Study toolbar">
-          <select aria-label="Sort practice sets" defaultValue="frequency">
-            <option value="frequency">按命中次数从高到低</option>
-            <option value="recent">按最近练习时间</option>
-            <option value="accuracy">按正确率从低到高</option>
-          </select>
-          <label className="high-frequency-toggle">
-            <input type="checkbox" />
-            <span>只看高频待补强</span>
-          </label>
-          <a className="primary-study-action" href="#mock">
-            套题模考
-          </a>
-          <a className="primary-study-action secondary" href="#practice">
-            考场练习
-          </a>
-          <input aria-label="Search practice sets" placeholder="输入试题名称" type="search" />
-        </section>
-
-        <div className="study-desk-grid">
-          <section className="study-workspace" aria-label="Study workspace">
-            <section className="practice-card-grid" aria-label="Preparation modules">
-              {cards.map(({ title, description, Icon }) => (
-                <article className="module-card" key={title}>
-                  <div className="module-card-topline">
-                    <span className="status-badge">未开始</span>
-                    <span className="must-do-badge">自学营必修</span>
-                  </div>
-                  <div className="module-icon">
-                    <Icon size={22} aria-hidden="true" />
-                  </div>
-                  <h2>{title}</h2>
-                  <p>{description}</p>
-                </article>
-              ))}
-            </section>
-
-            <StudyOverviewPanel overview={studyOverview} />
-            <ExamPreview onMockSubmitted={() => setDataRefreshVersion((version) => version + 1)} />
-            <IntensivePracticePreview preview={intensiveStudyPreview} />
-            <QuestionBankImportPanel onImportComplete={() => setDataRefreshVersion((version) => version + 1)} />
-            <HistoryReportsPreview
-              analytics={dashboardData.analytics}
-              dashboard={dashboardData.dashboard}
-              history={dashboardData.history}
-            />
+        <section
+          aria-labelledby="practice-tab-button"
+          className="study-tab-panel"
+          hidden={activeTab !== "practice"}
+          id="practice-tab"
+          role="tabpanel"
+        >
+          <section className="practice-filter-card" aria-label="Practice filters">
+            <div className="filter-row">
+              <strong>Part</strong>
+              <button type="button" className="filter-chip active">
+                全部
+              </button>
+              <button type="button" className="filter-chip">
+                Part 1
+              </button>
+              <button type="button" className="filter-chip">
+                Part 2
+              </button>
+              <button type="button" className="filter-chip">
+                Part 3
+              </button>
+              <button type="button" className="filter-chip">
+                Part 4
+              </button>
+            </div>
+            <div className="filter-row">
+              <strong>题型</strong>
+              <button type="button" className="filter-chip active">
+                全部
+              </button>
+              <button type="button" className="filter-chip">
+                填空
+              </button>
+              <button type="button" className="filter-chip">
+                判断
+              </button>
+              <button type="button" className="filter-chip">
+                单选
+              </button>
+              <button type="button" className="filter-chip">
+                配对
+              </button>
+              <button type="button" className="filter-chip">
+                小标题
+              </button>
+              <button type="button" className="filter-chip">
+                多选
+              </button>
+            </div>
+            <div className="filter-row">
+              <strong>场景</strong>
+              <button type="button" className="filter-chip active">
+                全部
+              </button>
+              <button type="button" className="filter-chip">
+                高频
+              </button>
+              <button type="button" className="filter-chip">
+                中频
+              </button>
+              <button type="button" className="filter-chip">
+                低频
+              </button>
+              <button type="button" className="filter-chip">
+                错题
+              </button>
+              <button type="button" className="filter-chip">
+                待补证据
+              </button>
+            </div>
           </section>
 
-          <aside className="prep-support" aria-label="Local prep support">
-            <section className="prep-support-panel">
-              <h2>新手小贴士</h2>
-              <a href="#bank">先导入题库和频率表</a>
-              <a href="#mock">用套题模考确认当前分数</a>
-              <a href="#practice">用精听精读修正错题原因</a>
+          <section className="study-toolbar" aria-label="Study toolbar">
+            <select aria-label="Sort practice sets" defaultValue="frequency">
+              <option value="frequency">按命中次数从高到低</option>
+              <option value="recent">按最近练习时间</option>
+              <option value="accuracy">按正确率从低到高</option>
+            </select>
+            <label className="high-frequency-toggle">
+              <input type="checkbox" />
+              <span>只看高频待补强</span>
+            </label>
+            <a className="primary-study-action" href="#mock">
+              套题模考
+            </a>
+            <a className="primary-study-action secondary" href="#practice">
+              考场练习
+            </a>
+            <input aria-label="Search practice sets" placeholder="输入试题名称" type="search" />
+          </section>
+
+          <section className="practice-card-grid" aria-label="Preparation modules">
+            {cards.map(({ title, description, Icon }) => (
+              <article className="module-card" key={title}>
+                <div className="module-card-topline">
+                  <span className="status-badge">未开始</span>
+                  <span className="must-do-badge">自学营必修</span>
+                </div>
+                <div className="module-icon">
+                  <Icon size={22} aria-hidden="true" />
+                </div>
+                <h2>{title}</h2>
+                <p>{description}</p>
+              </article>
+            ))}
+          </section>
+
+          <ExamPreview onMockSubmitted={() => setDataRefreshVersion((version) => version + 1)} />
+          <IntensivePracticePreview preview={intensiveStudyPreview} />
+        </section>
+
+        <section
+          aria-labelledby="management-tab-button"
+          className="study-tab-panel"
+          hidden={activeTab !== "management"}
+          id="management-tab"
+          role="tabpanel"
+        >
+          <section className="management-actions" aria-label="Question management tools">
+            <article>
+              <h2>题库与频率表</h2>
+              <p>导入听力 ZIP、阅读 PDF、频率表，并修正题目元数据。</p>
+            </article>
+            <button type="button" onClick={() => setOpenDialog("sync")}>
+              <RefreshCw size={16} aria-hidden="true" />
+              打开同步与备份设置
+            </button>
+            <button type="button" onClick={() => setOpenDialog("hardening")}>
+              <ShieldCheck size={16} aria-hidden="true" />
+              打开系统检查
+            </button>
+          </section>
+          <QuestionBankImportPanel onImportComplete={() => setDataRefreshVersion((version) => version + 1)} />
+        </section>
+
+        {openDialog === "sync" ? (
+          <div className="dialog-backdrop">
+            <section aria-label="同步与备份设置" aria-modal="true" className="app-dialog" role="dialog">
+              <div className="dialog-header">
+                <h2>同步与备份设置</h2>
+                <button type="button" onClick={() => setOpenDialog(null)}>
+                  <X size={16} aria-hidden="true" />
+                  关闭同步与备份设置
+                </button>
+              </div>
+              {syncSettingsPanel}
             </section>
-            <section className="prep-support-panel">
-              <h2>常见问题</h2>
-              <a href="#sync">百度云同步文件夹是否正常？</a>
-              <a href="#reports">怎么看真实成绩预测？</a>
-              <a href="#bank">频率表更新后怎么生效？</a>
+          </div>
+        ) : null}
+
+        {openDialog === "hardening" ? (
+          <div className="dialog-backdrop">
+            <section aria-label="系统检查" aria-modal="true" className="app-dialog" role="dialog">
+              <div className="dialog-header">
+                <h2>系统检查</h2>
+                <button type="button" onClick={() => setOpenDialog(null)}>
+                  <X size={16} aria-hidden="true" />
+                  关闭系统检查
+                </button>
+              </div>
+              <HardeningCenter status={dashboardData.hardening} />
             </section>
-            <HardeningCenter status={dashboardData.hardening} />
-            <SyncSettingsPreview
-              deviceName={syncConfig.deviceName}
-              lastSyncAt={null}
-              onBackupChanged={() => setDataRefreshVersion((version) => version + 1)}
-              onSyncComplete={() => setDataRefreshVersion((version) => version + 1)}
-              runtimeStatus={desktopRuntimeStatus}
-              syncFiles={[
-                "attempts.jsonl",
-                "answers.jsonl",
-                "mistakes.jsonl",
-                "stats.jsonl",
-                "frequency.jsonl",
-                "imports.jsonl",
-                "devices.json"
-              ]}
-              syncPath={syncConfig.syncFolderPath}
-            />
-          </aside>
-        </div>
+          </div>
+        ) : null}
       </section>
     </main>
   );
